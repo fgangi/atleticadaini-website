@@ -1,24 +1,54 @@
 ---
-import { img } from '../lib/sanity';
+import { img, urlFor } from '../lib/sanity';
 
 /**
- * Apertura della home. Due versioni, decise dall'interruttore "Iscrizioni
- * aperte" del pannello:
+ * Apertura della home. Il testo ha due versioni, decise dall'interruttore
+ * "Iscrizioni aperte" del pannello:
  *  - aperte: la campagna iscrizioni (titolo, testo, "Iscriviti");
  *  - chiuse: presentazione della società, con l'invito a scoprire i corsi.
  * In sviluppo esistono entrambe e la barra "Anteprima stati" sceglie quale vedere.
+ *
+ * Dietro al testo scorrono le foto scelte nel pannello (Impostazioni sito →
+ * Home). Senza foto resta la foto della campagna iscrizioni o, in mancanza,
+ * lo sfondo verde del sito.
+ * Accessibilità: pulsante pausa sempre visibile; con "Riduci movimento" le
+ * foto restano ferme sulla prima; lo scorrimento si ferma anche col mouse
+ * sopra o con la tastiera sui comandi (WCAG 2.2.2).
  */
-interface Props { iscrizioni: any; nome: string; anno?: number | null; }
-const { iscrizioni: i, nome, anno } = Astro.props;
+interface Props { iscrizioni: any; nome: string; anno?: number | null; foto?: any[] | null; }
+const { iscrizioni: i, nome, anno, foto = [] } = Astro.props;
 const aperte = i?.aperte === true;
-const sfondo = img(i?.immagine, 2000);
-const sfondoPiccolo = img(i?.immagine, 1000);
 const annoFondazione = anno ?? 1945;
-const stile = sfondo ? `--foto:url('${sfondo}');--foto-piccola:url('${sfondoPiccolo}')` : undefined;
 const mostraAperte = aperte || import.meta.env.DEV;
 const mostraChiuse = !aperte || import.meta.env.DEV;
+
+// Il punto focale scelto nel pannello tiene il soggetto in vista a ogni formato
+const fuoco = (f: any) => f?.hotspot ? `${Math.round(f.hotspot.x * 100)}% ${Math.round(f.hotspot.y * 100)}%` : '50% 50%';
+const slide = (foto ?? []).filter((f) => f?.asset).map((f) => ({
+  src: img(f, 1600),
+  srcset: [800, 1200, 1600, 2400].map((w) => `${urlFor(f).width(w).auto('format').fit('max').url()} ${w}w`).join(', '),
+  alt: f.alt ?? '',
+  didascalia: f.didascalia ?? '',
+  pos: fuoco(f),
+}));
+// Senza foto a scorrimento: la foto della campagna, come prima
+const sfondo = slide.length ? null : img(i?.immagine, 2000);
+const sfondoPiccolo = slide.length ? null : img(i?.immagine, 1000);
+const stile = sfondo ? `--foto:url('${sfondo}');--foto-piccola:url('${sfondoPiccolo}')` : undefined;
 ---
-<section class:list={['apertura', 'sfondo-scuro', { 'con-foto': !!sfondo }]} style={stile}>
+<section class:list={['apertura', 'sfondo-scuro', { 'con-foto': !!sfondo, 'con-slider': slide.length > 0 }]} style={stile}
+  data-slider={slide.length > 1 ? '' : undefined} aria-roledescription={slide.length > 1 ? 'carosello' : undefined} aria-label="Apertura">
+  {slide.length > 0 && (
+    <div class="slides" aria-hidden={slide.every((s) => !s.alt) ? 'true' : undefined}>
+      {slide.map((s, n) => (
+        <img class="slide" data-attiva={n === 0 ? 'true' : 'false'} src={s.src} srcset={s.srcset} sizes="100vw"
+          alt={s.alt} style={`object-position:${s.pos}`} loading={n === 0 ? 'eager' : 'lazy'}
+          fetchpriority={n === 0 ? 'high' : undefined} data-didascalia={s.didascalia} />
+      ))}
+      <div class="velo"></div>
+    </div>
+  )}
+
   {mostraAperte && (
     <div class="container ap-testo" data-sim-iscrizioni="aperte" hidden={!aperte}>
       <span class="eyebrow">{i?.occhiello || (i?.stagione ? `Iscrizioni ${i.stagione}` : 'Iscrizioni aperte')}</span>
@@ -42,11 +72,29 @@ const mostraChiuse = !aperte || import.meta.env.DEV;
       </div>
     </div>
   )}
+
+  {slide.length > 1 && (
+    <div class="container sl-barra">
+      <div class="sl-comandi">
+        <button type="button" class="sl-pausa" data-sl-pausa aria-pressed="false" aria-label="Metti in pausa le foto">
+          <svg class="ico-pausa" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+          <svg class="ico-play" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>
+        </button>
+        {slide.map((_, n) => (
+          <button type="button" class="sl-punto" data-sl-vai={n} aria-label={`Foto ${n + 1} di ${slide.length}`} aria-current={n === 0 ? 'true' : undefined}><span aria-hidden="true"></span></button>
+        ))}
+      </div>
+      <p class="sl-didascalia" data-sl-didascalia>{slide[0].didascalia}</p>
+    </div>
+  )}
+  {slide.length === 1 && slide[0].didascalia && (
+    <div class="container sl-barra"><p class="sl-didascalia">{slide[0].didascalia}</p></div>
+  )}
 </section>
 
 <style>
   .apertura { position: relative; background: var(--sfondo-apertura); color: #fff;
-    padding: clamp(56px, 11vw, 132px) 0 clamp(52px, 9vw, 112px); overflow: hidden; }
+    padding: clamp(56px, 11vw, 132px) 0 clamp(52px, 9vw, 112px); overflow: hidden; isolation: isolate; }
   /* Con la foto dal pannello: un velo verde a sinistra tiene leggibile il testo */
   .apertura.con-foto { background: linear-gradient(90deg, rgba(18, 58, 40, .94) 0%, rgba(18, 58, 40, .78) 48%, rgba(18, 58, 40, .35) 100%),
     var(--foto) center / cover no-repeat, var(--verde-scuro); }
@@ -54,6 +102,22 @@ const mostraChiuse = !aperte || import.meta.env.DEV;
     .apertura.con-foto { background: linear-gradient(rgba(18, 58, 40, .82), rgba(18, 58, 40, .82)),
       var(--foto-piccola, var(--foto)) center / cover no-repeat, var(--verde-scuro); }
   }
+
+  /* Foto a scorrimento: una sopra l'altra, si vede quella attiva (dissolvenza) */
+  .apertura.con-slider { min-height: clamp(560px, 78vh, 760px); display: flex; flex-direction: column; justify-content: center;
+    padding-bottom: clamp(88px, 10vw, 120px); background: var(--verde-scuro); }
+  .slides { position: absolute; inset: 0; z-index: -1; }
+  .slide { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 1.2s ease; }
+  .slide[data-attiva='true'] { opacity: 1; }
+  /* Velo verde fitto fin oltre la metà, dove arriva il testo: anche con un punto
+     bianco della foto dietro, il testo chiaro resta a 5,9:1 di contrasto (minimo 4,5) */
+  .velo { position: absolute; inset: 0;
+    background: linear-gradient(90deg, rgba(18, 58, 40, .92) 0%, rgba(18, 58, 40, .82) 55%, rgba(18, 58, 40, .25) 100%),
+      linear-gradient(0deg, rgba(18, 58, 40, .75) 0%, rgba(18, 58, 40, 0) 30%); }
+  @media (max-width: 1023px) {
+    .velo { background: linear-gradient(rgba(18, 58, 40, .78), rgba(18, 58, 40, .78)); }
+  }
+
   .ap-testo { display: flex; flex-direction: column; align-items: flex-start; gap: var(--stacco-occhiello); }
   .eyebrow { color: var(--giallo); margin: 0; font-size: clamp(1.05rem, 1.6vw, 1.3rem); letter-spacing: .12em; }
   h1 { color: #fff; font-size: clamp(3rem, 9vw, 6.4rem); line-height: .92; max-width: 14ch; }
@@ -66,4 +130,72 @@ const mostraChiuse = !aperte || import.meta.env.DEV;
     .azioni { width: 100%; }
     .azioni .btn { flex: 1 1 100%; }
   }
+
+  /* Comandi in basso: pausa, un punto per foto, didascalia */
+  .sl-barra { position: absolute; left: 0; right: 0; bottom: clamp(12px, 2vw, 24px); margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between; gap: 8px 20px; flex-wrap: wrap; }
+  .sl-comandi { display: flex; align-items: center; }
+  .sl-pausa, .sl-punto { width: 44px; height: 44px; display: grid; place-items: center; border: 0; background: transparent; color: #fff; cursor: pointer; padding: 0; }
+  .sl-pausa svg { box-sizing: content-box; padding: 7px; border-radius: 50%; background: rgba(0, 0, 0, .35); }
+  .sl-pausa .ico-play { display: none; }
+  .sl-pausa[aria-pressed='true'] .ico-pausa { display: none; }
+  .sl-pausa[aria-pressed='true'] .ico-play { display: block; }
+  .sl-punto span { width: 10px; height: 10px; border-radius: 50%; border: 2px solid #fff; transition: background .2s ease, transform .2s ease; }
+  .sl-punto[aria-current='true'] span { background: var(--giallo); border-color: var(--giallo); transform: scale(1.15); }
+  .sl-punto:hover span { background: rgba(255, 255, 255, .6); }
+  .sl-didascalia { margin: 0; color: #E3EAE1; font-size: .9rem; text-shadow: 0 1px 3px rgba(0, 0, 0, .6); }
+  .apertura:not(.con-slider) .sl-barra { justify-content: flex-end; }
+
+  @media (prefers-reduced-motion: reduce) { .slide { transition: none; } }
 </style>
+
+<script>
+  function initSlider() {
+    const box = document.querySelector<HTMLElement>('[data-slider]');
+    if (!box || box.dataset.bound) return;
+    box.dataset.bound = '1';
+    const foto = [...box.querySelectorAll<HTMLImageElement>('.slide')];
+    const punti = [...box.querySelectorAll<HTMLButtonElement>('[data-sl-vai]')];
+    const pausa = box.querySelector<HTMLButtonElement>('[data-sl-pausa]')!;
+    const didascalia = box.querySelector('[data-sl-didascalia]');
+    const DURATA = 6000;
+    let attiva = 0;
+    let timer: number | undefined;
+    // Pausa scelta da chi guarda (pulsante) o chiesta dal sistema (riduci movimento)
+    let fermoUtente = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let fermoTemporaneo = false;
+
+    const mostra = (n: number) => {
+      attiva = (n + foto.length) % foto.length;
+      foto.forEach((f, i) => f.dataset.attiva = String(i === attiva));
+      punti.forEach((p, i) => { if (i !== attiva) p.removeAttribute('aria-current'); else p.setAttribute('aria-current', 'true'); });
+      if (didascalia) didascalia.textContent = foto[attiva].dataset.didascalia ?? '';
+    };
+    const programma = () => {
+      clearInterval(timer);
+      if (!fermoUtente && !fermoTemporaneo) timer = window.setInterval(() => mostra(attiva + 1), DURATA);
+    };
+    const aggiornaPausa = () => {
+      pausa.setAttribute('aria-pressed', String(fermoUtente));
+      pausa.setAttribute('aria-label', fermoUtente ? 'Fai scorrere le foto' : 'Metti in pausa le foto');
+    };
+
+    pausa.addEventListener('click', () => { fermoUtente = !fermoUtente; aggiornaPausa(); programma(); });
+    punti.forEach((p, i) => p.addEventListener('click', () => { mostra(i); programma(); }));
+    // Ferma lo scorrimento mentre si usano i comandi, col mouse o con la tastiera
+    const comandi = box.querySelector('.sl-comandi')!;
+    comandi.addEventListener('mouseenter', () => { fermoTemporaneo = true; programma(); });
+    comandi.addEventListener('mouseleave', () => { fermoTemporaneo = false; programma(); });
+    comandi.addEventListener('focusin', () => { fermoTemporaneo = true; programma(); });
+    comandi.addEventListener('focusout', () => { fermoTemporaneo = false; programma(); });
+    // Scheda nascosta: niente giri a vuoto
+    document.addEventListener('visibilitychange', () => { if (document.hidden) clearInterval(timer); else programma(); });
+    // Cambiando pagina il timer va fermato
+    document.addEventListener('astro:before-swap', () => clearInterval(timer), { once: true });
+
+    aggiornaPausa();
+    programma();
+  }
+  initSlider();
+  document.addEventListener('astro:page-load', initSlider);
+</script>

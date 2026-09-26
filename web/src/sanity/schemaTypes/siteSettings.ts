@@ -37,7 +37,7 @@ export const siteSettings = defineType({
       title: 'Loghi istituzionali (FIDAL, CONI, Comune…)',
       type: 'array',
       group: 'societa',
-      description: 'Compaiono nel footer a colori, su tessere chiare, tutti alla stessa altezza.',
+      description: 'Compaiono nel footer, sul verde, tutti alla stessa altezza: serve la versione per fondi scuri (scritte bianche), PNG o SVG con sfondo trasparente.',
       of: [{ type: 'object', fields: [
         { name: 'nome', type: 'string', title: 'Nome', validation: (r: any) => r.required() },
         { name: 'logo', type: 'image', title: 'Logo', description: DESCRIZIONE_LOGO, validation: validaLogo },
@@ -83,6 +83,19 @@ export const siteSettings = defineType({
       ], preview: { select: { title: 'nome', subtitle: 'url' } } }],
     }),
 
+    defineField({
+      name: 'slider',
+      title: 'Foto a scorrimento (apertura della home)',
+      type: 'array',
+      group: 'home',
+      description: 'Da 3 a 6 foto orizzontali, larghe almeno 1600px. Scorrono dietro al titolo, una ogni 6 secondi. Il punto focale (icona del cerchio sull\'immagine) tiene il soggetto sempre in vista. Meglio evitare foto riconoscibili di minori senza consenso.',
+      validation: (r) => r.max(8),
+      options: { layout: 'grid' },
+      of: [{ type: 'image', options: { hotspot: true }, fields: [
+        { name: 'didascalia', type: 'string', title: 'Didascalia (facoltativa)', description: 'Es. "Miglio Memorial Gino Riva 2021". Compare piccola in basso.' },
+        { name: 'alt', type: 'string', title: 'Cosa mostra la foto (per chi non vede)' },
+      ] }],
+    }),
     defineField({
       name: 'puntiForza',
       title: 'Perché i Daini (home)',

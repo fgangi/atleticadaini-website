@@ -3,7 +3,7 @@ const groq = String.raw;
 
 export const settingsQuery = groq`*[_id == "siteSettings"][0]{
   nome, denominazione, descrizione, fraseFooter, annoFondazione, logo, logoChiaro, codiceFiscale, partitaIva, codiceFidal,
-  enti, email, telefoni, sede, social, linkUtili, puntiForza, cinquePerMille,
+  enti, email, telefoni, sede, social, linkUtili, puntiForza, cinquePerMille, slider,
   "haPrivacy": count(privacy) > 0, "haSafeguarding": count(safeguarding) > 0
 }`;
 

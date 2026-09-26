@@ -23,7 +23,7 @@ const pid = import.meta.env.PUBLIC_SANITY_PROJECT_ID;
 const ds = import.meta.env.PUBLIC_SANITY_DATASET || 'production';
 const enti = (await Promise.all((s.enti ?? []).map(async (e: any) => {
   const r = await logoRifilato(e.logo, pid, ds, 400);
-  return r ? { ...e, src: r.url, stile: misuraLogo(r.prop, 50) } : null;
+  return r ? { ...e, src: r.url, stile: misuraLogo(r.prop, 80) } : null;
 }))).filter(Boolean);
 
 /**
@@ -147,12 +147,12 @@ const identificativi = [
      tutti alla stessa larghezza, come nel sito di riferimento */
   .foot-brand { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 18px; width: min(100%, 360px); }
   .foot-brand > .enti, .foot-brand > .foot-social { width: 100%; }
-  /* Loghi a colonne uguali, ciascuno centrato su una tessera chiara: sul
-     verde i colori originali (scritta blu FIDAL, cerchi olimpici) non si leggevano */
-  .enti { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 12px; }
-  .enti > * { display: flex; align-items: center; justify-content: center; min-height: 68px; padding: 8px 12px;
-    background: #F7F8F2; border-radius: 10px; transition: transform .12s ease; }
-  .enti a:hover { transform: translateY(-2px); }
+  /* Loghi a colonne uguali, direttamente sul verde, nella versione per fondi
+     scuri caricata nel pannello (scritte bianche, tricolore a colori): senza
+     riquadri possono essere più grandi e leggibili */
+  .enti { margin-top: 10px; display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 16px; align-items: center; }
+  .enti > * { display: flex; align-items: center; justify-content: center; min-height: 44px; transition: opacity .12s ease; }
+  .enti a:hover { opacity: .85; }
   .enti img { height: var(--lh); width: var(--lw); max-width: 100%; object-fit: contain; }
   /* Social sotto una riga sottile, centrati sulla larghezza del blocco */
   .foot-social { display: flex; flex-direction: column; align-items: center; gap: 12px; padding-top: 18px; border-top: 1px solid rgba(255, 255, 255, .2); }
@@ -161,7 +161,10 @@ const identificativi = [
   .brand { display: inline-flex; min-height: 44px; align-items: center; color: #fff; }
   /* Logo grande e centrato: riempie la colonna come i loghi e i social sotto */
   .foot-logo { height: 116px; width: auto; max-width: 100%; object-fit: contain; }
-  .foot-desc { color: #C9D2C8; max-width: 46ch; font-size: 1rem; line-height: 1.5; text-wrap: pretty; }
+  /* La frase sta vicina al logo Daini (ne fa parte) e staccata dai loghi
+     istituzionali sotto. Il file del logo ha ~18px vuoti sotto la scritta:
+     il margine negativo li recupera, e la frase resta a ~10px dalle lettere */
+  .foot-desc { margin-top: -26px; color: #C9D2C8; max-width: 46ch; font-size: 1rem; line-height: 1.5; text-wrap: pretty; }
   .site-footer h4 { font-size: .95rem; letter-spacing: .14em; font-weight: 700; margin: 0 0 12px; color: var(--giallo); }
   .fnav { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
   /* Ogni link del footer è alto 44px: vicini e più bassi, sul telefono si toccava quello accanto */
