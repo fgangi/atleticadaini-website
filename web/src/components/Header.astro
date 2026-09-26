@@ -13,6 +13,7 @@ const { nome, logoUrl, social, presenze: p } = Astro.props;
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 
 const nav: Voce[] = [
+  { href: '/', label: 'Home' },
   {
     href: '/societa/', label: 'Società',
     // Le tendine elencano sezioni e sottopagine che esistono davvero
@@ -112,11 +113,11 @@ const conSocial = Object.values(social ?? {}).some((u) => typeof u === 'string' 
   .site-header.senza-striscia { top: 0; }
   .topbar { height: var(--altezza-striscia); background: var(--verde-scuro); }
   .topbar .container { display: flex; justify-content: flex-end; align-items: center; height: 100%; }
-  /* Icone nude nella striscia: il bersaglio resta 36px, il minimo per una
-     riga di servizio così sottile; nel footer le stesse icone sono da 44px */
-  .topbar :global(.social-icons) { margin: 0; gap: 2px; }
-  .topbar :global(.social-icons a) { width: 36px; height: 36px; border: 0; border-radius: 8px; opacity: .88; }
-  .topbar :global(.social-icons a:hover) { opacity: 1; background: rgba(255, 255, 255, .1); transform: none; }
+  /* Icone nude nella striscia, ma con bersaglio di tocco pieno da 44px */
+  .topbar :global(.social-icons) { margin: 0; gap: 0; }
+  .topbar :global(.social-icons a) { width: 44px; height: 44px; border: 0; border-radius: 8px; opacity: .88; }
+  /* Al passaggio del mouse l'icona si accende e basta: nessun riquadro */
+  .topbar :global(.social-icons a:hover) { opacity: 1; background: transparent; color: #fff; transform: none; }
   .topbar :global(.social-icons svg) { width: 18px; height: 18px; }
 
   .bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: var(--altezza-intestazione); }

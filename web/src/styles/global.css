@@ -50,7 +50,7 @@
 
   /* Altezza della barra che resta attaccata in alto scorrendo (senza la
      striscia dei social, che esce): serve agli ancoraggi del menu */
-  --altezza-striscia: 36px;
+  --altezza-striscia: 44px;
   --altezza-intestazione: 84px;
   --stacco-occhiello: 4px;
 }

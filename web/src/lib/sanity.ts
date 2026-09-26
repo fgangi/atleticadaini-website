@@ -122,8 +122,26 @@ export function formatData(iso?: string | null): string {
   return d.toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric', timeZone: FUSO });
 }
 
-/** Link telefonico: tiene solo cifre e "+". */
-export const telHref = (n: string) => 'tel:' + n.replace(/[^\d+]/g, '');
+/**
+ * Numeri di telefono sempre col prefisso italiano, qualunque sia la forma
+ * scritta nel pannello ("339 3507848", "+39 339…", "0039 339…"): da un
+ * telefono estero o da WhatsApp il numero senza +39 non funzionerebbe.
+ */
+function cifreItaliane(n: string): string {
+  let c = n.replace(/[^\d+]/g, '');
+  if (c.startsWith('00')) c = '+' + c.slice(2);
+  if (!c.startsWith('+')) c = '+39' + c;
+  return c;
+}
+export const telHref = (n: string) => 'tel:' + cifreItaliane(n);
+/** Forma leggibile: "+39 339 350 7848" (cellulari a gruppi 3-3-4). */
+export function formatTel(n: string): string {
+  const c = cifreItaliane(n);
+  if (!c.startsWith('+39')) return c;
+  const resto = c.slice(3);
+  const gruppi = /^3\d{9}$/.test(resto) ? [resto.slice(0, 3), resto.slice(3, 6), resto.slice(6)] : [resto];
+  return ['+39', ...gruppi].join(' ');
+}
 
 /** Testo semplice da un testo ricco (per estratti e descrizioni). */
 export function testoSemplice(blocks: any): string {

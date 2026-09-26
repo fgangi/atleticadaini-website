@@ -21,6 +21,8 @@ export const siteSettings = defineType({
     defineField({ name: 'descrizione', title: 'Descrizione per Google', type: 'text', rows: 2, group: 'societa',
       description: 'Una frase sotto i 160 caratteri: compare nei risultati di ricerca e nelle anteprime dei link.',
       validation: (r) => r.max(160).warning('Oltre i 160 caratteri Google la taglia.') }),
+    defineField({ name: 'fraseFooter', title: 'Frase del footer', type: 'string', group: 'societa',
+      description: 'Una riga sulla società, sotto il logo in fondo a ogni pagina.' }),
     defineField({ name: 'annoFondazione', title: 'Anno di fondazione', type: 'number', group: 'societa', initialValue: 1945 }),
     defineField({ name: 'logo', title: 'Logo (per fondi chiari)', type: 'image', group: 'societa',
       description: DESCRIZIONE_LOGO, validation: validaLogo }),
@@ -35,7 +37,7 @@ export const siteSettings = defineType({
       title: 'Loghi istituzionali (FIDAL, CONI, Comune…)',
       type: 'array',
       group: 'societa',
-      description: 'Compaiono nel footer, tutti alla stessa altezza.',
+      description: 'Compaiono nel footer a colori, su tessere chiare, tutti alla stessa altezza.',
       of: [{ type: 'object', fields: [
         { name: 'nome', type: 'string', title: 'Nome', validation: (r: any) => r.required() },
         { name: 'logo', type: 'image', title: 'Logo', description: DESCRIZIONE_LOGO, validation: validaLogo },
@@ -52,7 +54,7 @@ export const siteSettings = defineType({
       of: [{ type: 'object', fields: [
         { name: 'nome', type: 'string', title: 'Nome del referente', description: 'Es. "Angelo".' },
         { name: 'ruolo', type: 'string', title: 'Per cosa (facoltativo)', description: 'Es. "Settore giovanile", "Segreteria".' },
-        { name: 'numero', type: 'string', title: 'Numero', validation: (r: any) => r.required() },
+        { name: 'numero', type: 'string', title: 'Numero', description: 'Anche senza +39: il sito aggiunge da solo il prefisso italiano.', validation: (r: any) => r.required() },
       ], preview: { select: { title: 'numero', subtitle: 'nome' } } }],
     }),
     defineField({ name: 'sede', title: 'Sede sociale', type: 'text', rows: 2, group: 'contatti',

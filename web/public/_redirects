@@ -1,0 +1,72 @@
+# Indirizzi del vecchio sito WordPress -> pagine nuove (Cloudflare Pages).
+# Servono al lancio: risultati di Google, link nei gruppi WhatsApp e QR code
+# stampati continuano a funzionare invece di finire sulla pagina 404.
+# Ogni pagina è scritta con e senza slash finale: le regole confrontano
+# l'indirizzo esatto.
+
+# Pagine
+/home /  301
+/home/ /  301
+/instagram /  301
+/instagram/ /  301
+/notizie-news /news/  301
+/notizie-news/ /news/  301
+/storia /societa/storia/  301
+/storia/ /societa/storia/  301
+/primati-campioni /record/  301
+/primati-campioni/ /record/  301
+/info-contatti /contatti/  301
+/info-contatti/ /contatti/  301
+/link-utili /contatti/#link-utili  301
+/link-utili/ /contatti/#link-utili  301
+/assoluto /settore-giovanile/#corsi  301
+/assoluto/ /settore-giovanile/#corsi  301
+/area-master /settore-giovanile/#corsi  301
+/area-master/ /settore-giovanile/#corsi  301
+
+# Articoli (gli indirizzi nuovi stanno sotto /news/)
+/nuovo-record-sociale-400m/ /news/nuovo-record-sociale-400m/  301
+/nuovo-record-sociale-200m/ /news/nuovo-record-sociale-200m/  301
+/5x1000-2026/ /news/5x1000-2026/  301
+/memorial-gino-riva-valevole-come-terza-prova-del-club-del-miglio-2021-e-trofeo-memorial-simone-caglio-mt-100/ /news/memorial-gino-riva-2021/  301
+/9-giugno-2019-notte-bianca-a-carate-brianza/ /news/9-giugno-2019-notte-bianca-a-carate-brianza/  301
+/1147-2/ /news/9-giugno-2019-albiate-esordienti-a/  301
+/1143-2/ /news/31-maggio-2019-concorezzo-corri-in-centro/  301
+/1139-2/ /news/26-maggio-2019-villasanta-gara-su-pista/  301
+/19-maggio-2019-happy-mile-gara-su-pista-campo-xxv-aprile-milano/ /news/19-maggio-2019-happy-mile-gara-su-pista-campo-xxv-aprile-milano/  301
+/3-maggio-2019-villasanta-corri-in-centro/ /news/3-maggio-2019-villasanta-corri-in-centro/  301
+
+# Album (vecchio "portfolio")
+/portfolio-articoli/147/ /gallery/anni-40/  301
+/portfolio-articoli/1046/ /gallery/anni-50/  301
+/portfolio-articoli/anni-60/ /gallery/anni-60/  301
+/portfolio-articoli/anni-70/ /gallery/anni-70/  301
+/portfolio-articoli/anni-80/ /gallery/anni-80/  301
+/portfolio-articoli/10-000/ /gallery/10000-di-carate/  301
+/portfolio-articoli/squadre/ /gallery/squadre/  301
+/portfolio-articoli/anno-2021/ /gallery/gare-2021/  301
+/portfolio-articoli/* /gallery/  301
+/portfolio_voci/* /gallery/  301
+
+# Moduli e record in PDF: ora stanno nel pannello, con indirizzi nuovi
+/wp-content/uploads/2026/09/Modulo-Iscrizione-Corsi-2027_V1.pdf /settore-giovanile/#moduli  302
+/wp-content/uploads/2026/09/Liberatoria-per-uscita-2027_V1.pdf /settore-giovanile/#moduli  302
+/wp-content/uploads/2026/09/Tipologia-Iscrizioni-2027.pdf /settore-giovanile/#moduli  302
+/wp-content/uploads/2026/09/vademecum_atletica_daini_v3_exact.pdf /settore-giovanile/#moduli  302
+/wp-content/uploads/2025/09/Informativa-sulla-protezione-dei-dati-personali.pdf /settore-giovanile/#moduli  302
+/wp-content/uploads/2026/07/RecordsSocialiMaschili2026.pdf /record/  301
+/wp-content/uploads/2026/06/CampioniNew.pdf /record/#campione  301
+/wp-content/uploads/2026/06/Le-maglie-azzurreNew.pdf /record/#azzurro  301
+/wp-content/uploads/2019/06/* /record/  301
+
+# Archivi di WordPress senza equivalente: all'elenco delle news
+/eventi/* /news/  301
+/evento/* /news/  301
+/category/* /news/  301
+/tag/* /news/  301
+/author/* /news/  301
+/feed/* /news/  301
+/2019/* /news/  301
+/2020/* /news/  301
+/2021/* /news/  301
+/2026/* /news/  301

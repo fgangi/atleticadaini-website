@@ -24,7 +24,9 @@ const capitoli: any[] = storia?.capitoli ?? [];
         {/* Linea del tempo: una corsia verticale con un capitolo per periodo */}
         <ol class="tempo">
           {capitoli.map((c) => {
-            const foto = img(c.immagine, 720, 480);
+            // Foto intera, mai ritagliata: le immagini d'epoca hanno la didascalia
+            // stampata in fondo, e alcune sono verticali
+            const foto = img(c.immagine, 900);
             return (
               <li class="tappa">
                 <span class="t-periodo">{c.periodo}</span>
@@ -33,7 +35,7 @@ const capitoli: any[] = storia?.capitoli ?? [];
                   {c.testo && <p>{c.testo}</p>}
                   {c.album?.slug && <a class="btn" href={`/gallery/${c.album.slug}/`}>Foto: {c.album.titolo}</a>}
                 </div>
-                {foto && <img class="t-foto" src={foto} alt="" loading="lazy" />}
+                {foto && <img class="t-foto" src={foto} alt={c.titolo ?? c.periodo} loading="lazy" />}
               </li>
             );
           })}
@@ -64,7 +66,8 @@ const capitoli: any[] = storia?.capitoli ?? [];
   .t-periodo { grid-column: 1 / -1; font-family: var(--font-display); text-transform: uppercase; font-size: 1.3rem; font-weight: 700; color: var(--grigio-verde); letter-spacing: .06em; }
   .t-corpo { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
   .t-titolo { font-size: clamp(1.6rem, 3vw, 2.1rem); }
-  .t-foto { width: 100%; border-radius: var(--radius); }
+  .t-foto { display: block; width: auto; max-width: 100%; max-height: 520px; height: auto; border-radius: 8px;
+    box-shadow: var(--shadow); justify-self: start; }
   @media (max-width: 1023px) { .tappa { grid-template-columns: minmax(0, 1fr); } }
   @media (max-width: 639px) { .tempo { padding-left: 20px; } .tappa::before { left: -30px; } }
   .ricon { margin: 0; padding-left: 1.2rem; display: flex; flex-direction: column; gap: 8px; color: var(--ink-soft); font-size: 1.08rem; }

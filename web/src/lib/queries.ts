@@ -2,7 +2,7 @@
 const groq = String.raw;
 
 export const settingsQuery = groq`*[_id == "siteSettings"][0]{
-  nome, denominazione, descrizione, annoFondazione, logo, logoChiaro, codiceFiscale, partitaIva, codiceFidal,
+  nome, denominazione, descrizione, fraseFooter, annoFondazione, logo, logoChiaro, codiceFiscale, partitaIva, codiceFidal,
   enti, email, telefoni, sede, social, linkUtili, puntiForza, cinquePerMille,
   "haPrivacy": count(privacy) > 0, "haSafeguarding": count(safeguarding) > 0
 }`;
@@ -32,7 +32,7 @@ export const storiaQuery = groq`*[_id == "storia"][0]{
 }`;
 
 export const recordQuery = groq`*[_type == "record"] | order(ordine asc, specialita asc){
-  _id, specialita, categoria, sesso, prestazione, atleta, staffetta, annoNascita, anno, data, luogo
+  _id, specialita, categoria, sesso, sezione, prestazione, atleta, staffetta, annoNascita, eta, anno, data, luogo
 }`;
 
 export const titoliQuery = groq`*[_type == "titolo"] | order(anno desc, atleta asc){

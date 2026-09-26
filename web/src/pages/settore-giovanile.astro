@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import PageHero from '../components/PageHero.astro';
 import SchedaCorso from '../components/SchedaCorso.astro';
-import { sfetch, richText, telHref } from '../lib/sanity';
+import { sfetch, richText, telHref, formatTel } from '../lib/sanity';
 import { settingsQuery, iscrizioniQuery, corsiQuery } from '../lib/queries';
 
 /**
@@ -116,7 +116,7 @@ const documenti = (i?.documenti ?? []).filter((d: any) => d?.url);
             <h3>Hai domande?</h3>
             <ul class="referenti">
               {telefoni.map((t) => (
-                <li><a class="btn" href={telHref(t.numero)}>{t.nome ? `${t.nome} · ` : ''}<span class="tabnums">{t.numero}</span></a></li>
+                <li><a class="btn" href={telHref(t.numero)}><span class="tabnums">{formatTel(t.numero)}</span>{t.nome && <span class="tel-nome">{t.nome}</span>}</a></li>
               ))}
               {settings?.email && <li><a class="btn" href={`mailto:${settings.email}`}>{settings.email}</a></li>}
             </ul>
@@ -159,5 +159,6 @@ const documenti = (i?.documenti ?? []).filter((d: any) => d?.url);
     display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; font-size: .9rem; }
   .doc-titolo { display: block; font-weight: 600; color: var(--ink); line-height: 1.3; }
   .doc-desc { display: block; font-size: .92rem; color: var(--ink-faint); }
+  .tel-nome { margin-left: .6em; color: var(--ink-faint); font-weight: 500; }
   .referenti .btn { width: 100%; justify-content: flex-start; text-transform: none; font-family: var(--font-body); font-weight: 600; font-size: 1rem; letter-spacing: 0; }
 </style>

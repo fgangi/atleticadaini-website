@@ -3,7 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import PageHero from '../components/PageHero.astro';
 import { sfetch } from '../lib/sanity';
 import { recordQuery, titoliQuery } from '../lib/queries';
-import { CATEGORIE_RECORD } from '../sanity/schemaTypes/record';
+import { CATEGORIE_RECORD, SEZIONI_RECORD } from '../sanity/schemaTypes/record';
 import { TIPI_TITOLO } from '../sanity/schemaTypes/titolo';
 
 /**
@@ -19,16 +19,23 @@ const [record, titoli] = await Promise.all([
 const annoCorrente = new Date().getFullYear();
 const categorie = CATEGORIE_RECORD.map((c) => ({
   ...c,
+  // Per sesso, e dentro ciascuno le sezioni come nelle tabelle storiche
   gruppi: [
-    { sesso: 'M', titolo: 'Maschili', righe: record.filter((r) => r.categoria === c.value && r.sesso === 'M') },
-    { sesso: 'F', titolo: 'Femminili', righe: record.filter((r) => r.categoria === c.value && r.sesso === 'F') },
-  ].filter((g) => g.righe.length > 0),
+    { sesso: 'M', titolo: 'Maschili' },
+    { sesso: 'F', titolo: 'Femminili' },
+  ].map((g) => ({
+    ...g,
+    sezioni: SEZIONI_RECORD.map((z) => ({
+      ...z,
+      righe: record.filter((r) => r.categoria === c.value && r.sesso === g.sesso && (r.sezione ?? 'aperto') === z.value),
+    })).filter((z) => z.righe.length > 0),
+  })).filter((g) => g.sezioni.length > 0),
 })).filter((c) => c.gruppi.length > 0);
 const tipiTitolo = TIPI_TITOLO.map((t) => ({ ...t, voci: titoli.filter((x) => x.tipo === t.value) })).filter((t) => t.voci.length > 0);
 const chi = (r: any) => r.atleta ?? (r.staffetta?.length ? r.staffetta.join(', ') : '');
 // La data esatta se c'è, altrimenti l'anno (molti record storici hanno solo quello)
 const quando = (r: any) => r.data ? new Date(r.data).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' }) : String(r.anno ?? '');
-const titoloTipo: Record<string, string> = { campione: 'Campioni italiani', azzurro: 'Maglie azzurre' };
+const titoloTipo: Record<string, string> = { campione: 'I nostri campioni', azzurro: 'Maglie azzurre' };
 ---
 <Layout title="Record" description="Record sociali dell'Atletica Daini per categoria, campioni italiani e maglie azzurre.">
   <PageHero eyebrow="Albo della società" title="Record" lead="I migliori risultati di sempre ottenuti da atlete e atleti dei Daini." />
@@ -49,21 +56,37 @@ const titoloTipo: Record<string, string> = { campione: 'Campioni italiani', azzu
             {c.gruppi.map((g) => (
               <div class="gruppo">
                 <h3 class="g-titolo">{g.titolo}</h3>
-                <table class="tabella">
-                  <thead><tr><th>Specialità</th><th class="num">Prestazione</th><th>Atleta</th><th class="num">Nato</th><th class="num">Data</th><th>Luogo</th></tr></thead>
-                  <tbody>
-                    {g.righe.map((r) => (
-                      <tr class:list={{ evidenziata: r.anno === annoCorrente }}>
-                        <td class="titolo-riga forte">{r.specialita}</td>
-                        <td class="num forte prest" data-label="Prestazione">{r.prestazione}</td>
-                        <td data-label={r.staffetta?.length ? 'Staffetta' : 'Atleta'}>{chi(r)}</td>
-                        <td class="num" data-label="Nato">{r.annoNascita ?? ''}</td>
-                        <td class="num" data-label="Data">{quando(r)}</td>
-                        <td data-label="Luogo">{r.luogo ?? ''}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                {g.sezioni.map((z) => {
+                  // Colonne senza dati in tutta la tabella (es. luogo nei record storici) non si mostrano
+                  const conLuogo = z.righe.some((r) => r.luogo);
+                  const tabella = (
+                    <table class="tabella tabella-record">
+                      <thead><tr><th>Specialità</th><th class="num">Prestazione</th><th>Atleta</th><th class="num">Nato / età</th><th class="num">Data</th>{conLuogo && <th>Luogo</th>}</tr></thead>
+                      <tbody>
+                        {z.righe.map((r) => (
+                          <tr class:list={{ evidenziata: r.anno === annoCorrente }}>
+                            <td class="c-spec">{r.specialita}</td>
+                            <td class="num c-prest">{r.prestazione}</td>
+                            <td class="c-atleta">{chi(r)}</td>
+                            <td class="num c-info">{r.annoNascita ? <><span class="solo-tel">nato nel </span>{r.annoNascita}</> : (r.eta ? `${r.eta} anni` : '')}</td>
+                            <td class="num c-info">{quando(r)}</td>
+                            {conLuogo && <td class="c-info">{r.luogo ?? ''}</td>}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  );
+                  // All'aperto sempre visibile; indoor e non olimpiche a scomparsa: tutto
+                  // resta consultabile, ma la pagina non diventa lunghissima sul telefono
+                  return z.value === 'aperto' ? (
+                    <>{g.sezioni.length > 1 && <h4 class="z-titolo">{z.title}</h4>}{tabella}</>
+                  ) : (
+                    <details class="z-det">
+                      <summary class="z-titolo">{z.title} <span class="z-n">{z.righe.length} record</span></summary>
+                      {tabella}
+                    </details>
+                  );
+                })}
               </div>
             ))}
           </div>
@@ -98,10 +121,39 @@ const titoloTipo: Record<string, string> = { campione: 'Campioni italiani', azzu
   .legenda { display: flex; align-items: center; gap: 8px; font-size: .95rem; margin-bottom: clamp(20px, 3vw, 32px); }
   .legenda .campione { width: 22px; height: 14px; border-radius: 3px; background: var(--tinta); border: 1px solid var(--giallo); }
   .categoria + .categoria { margin-top: clamp(40px, 6vw, 64px); }
-  .gruppo + .gruppo { margin-top: 30px; }
+  .gruppo + .gruppo { margin-top: 36px; }
+  .z-titolo { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .05em; font-size: 1.1rem; font-weight: 700; color: var(--verde); margin: 22px 0 6px; }
+  .gruppo .tabella + .z-titolo { margin-top: 30px; }
   .g-titolo { font-family: var(--font-display); text-transform: uppercase; font-size: 1.4rem; font-weight: 800; color: var(--grigio-verde); margin-bottom: 8px; }
   /* La prestazione è il dato principale: grande e condensata come su un tabellone */
-  .prest { font-family: var(--font-display); font-size: 1.25rem; color: var(--verde) !important; }
+  .c-prest { font-family: var(--font-display); font-size: 1.25rem; font-weight: 800; color: var(--verde); }
+  .c-spec { font-weight: 700; color: var(--ink); }
+  .solo-tel { display: none; }
+  .z-det { margin-top: 18px; border-top: 1px solid var(--line); }
+  .z-det summary { cursor: pointer; display: flex; align-items: center; gap: 10px; min-height: 48px; margin: 0; list-style: none; }
+  .z-det summary::-webkit-details-marker { display: none; }
+  .z-det summary::before { content: '+'; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--surface-2); color: var(--verde); font-family: var(--font-body); font-weight: 700; }
+  .z-det[open] summary::before { content: '–'; }
+  .z-n { font-family: var(--font-body); text-transform: none; letter-spacing: 0; font-weight: 500; font-size: .92rem; color: var(--ink-faint); }
+  /* Telefono: una riga compatta per record, al posto della scheda con le
+     etichette. Specialità e prestazione in alto, atleta e dettagli sotto. */
+  @media (max-width: 639px) {
+    .tabella-record tr { display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto; column-gap: 6px; row-gap: 2px;
+      padding: 10px 2px; margin: 0; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: none; }
+    .tabella-record tr.evidenziata { background: var(--tinta); border-color: var(--giallo); padding-inline: 8px; }
+    .tabella-record td { display: block; padding: 0; border: 0; text-align: left; }
+    .tabella-record td::before { content: none; }
+    /* Tre righe: specialità / atleta / nato · data · luogo; la prestazione a destra */
+    .tabella-record .c-spec { grid-column: 1 / 4; grid-row: 1; font-size: 1.02rem; }
+    .tabella-record .c-prest { grid-column: 4; grid-row: 1 / span 3; align-self: center; font-size: 1.5rem; padding-left: 8px; }
+    .tabella-record .c-atleta { grid-column: 1 / 4; grid-row: 2; color: var(--ink-soft); }
+    .tabella-record .c-info { grid-row: 3; font-size: .9rem; color: var(--ink-faint); white-space: nowrap; }
+    .tabella-record .c-info:last-child { white-space: normal; }
+    .tabella-record .c-info:empty { display: none; }
+    .tabella-record .c-info:not(:empty) ~ .c-info:not(:empty)::before { content: '· '; }
+    .solo-tel { display: inline; }
+  }
   .titoli { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
   .titoli li { padding: 14px 18px; display: flex; flex-direction: column; gap: 2px; border-left: 5px solid var(--giallo); }
   .t-anno { font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; color: var(--verde); line-height: 1; }
