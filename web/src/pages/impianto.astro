@@ -1,0 +1,94 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PageHero from '../components/PageHero.astro';
+import Mappa from '../components/Mappa.astro';
+import Indirizzo from '../components/Indirizzo.astro';
+import { sfetch, img, indicazioniUrl } from '../lib/sanity';
+import { impiantiQuery, corsiQuery } from '../lib/queries';
+
+/**
+ * Dove ci alleniamo: prima come trovarci (indirizzo, ingresso, navigatore,
+ * mappa), poi cosa c'è e quando ci siamo. Un blocco per ogni impianto.
+ */
+const [impianti, corsi] = await Promise.all([sfetch<any[]>(impiantiQuery, {}, []), sfetch<any[]>(corsiQuery, {}, [])]);
+const principale = impianti[0];
+// Orari di chi si allena in ciascun impianto (senza luogo = impianto principale)
+const orariDi = (nome: string, primo: boolean) => corsi.filter((c) => c.orari?.length && (c.luogo ? c.luogo === nome : primo));
+---
+<Layout title="Impianto" description={principale ? `Dove ci alleniamo: ${principale.nome}${principale.indirizzo ? ', ' + String(principale.indirizzo).replace(/\s*\n\s*/g, ', ') : ''}.` : 'Dove si allena l\'Atletica Daini.'}>
+  <PageHero eyebrow="Dove ci alleniamo" title={impianti.length === 1 ? principale.nome : 'Impianto'} lead={impianti.length === 1 ? null : 'I luoghi dove si allenano i Daini.'} />
+
+  {impianti.length > 0 ? impianti.map((im, n) => {
+    const foto = (im.foto ?? []).map((f: any) => ({ src: img(f, 900, 640), alt: f.alt ?? '' })).filter((f: any) => f.src);
+    const naviga = indicazioniUrl(im.indirizzo);
+    const orari = orariDi(im.nome, n === 0);
+    return (
+      <section class="section">
+        <div class="container">
+          {impianti.length > 1 && <div class="section-head"><h2>{im.nome}</h2></div>}
+          <div class="dove">
+            <div class="card dove-testo">
+              <h2 class="blocco-titolo">Come trovarci</h2>
+              {im.indirizzo && <p class="indirizzo"><Indirizzo testo={im.indirizzo} /></p>}
+              {im.ingresso && <p class="ingresso"><strong>{im.ingresso}</strong></p>}
+              {im.comeArrivare && <p class="arrivare">{im.comeArrivare}</p>}
+              {naviga && <a class="btn primary" href={naviga} target="_blank" rel="noopener">Apri il navigatore</a>}
+            </div>
+            <Mappa posizione={im.mappa} indirizzo={im.indirizzo} titolo={im.nome} />
+          </div>
+
+          {(im.descrizione || im.dotazioni?.length) && (
+            <div class="cosa">
+              <div>
+                <h2 class="blocco-titolo">L'impianto</h2>
+                {im.descrizione && <p>{im.descrizione}</p>}
+              </div>
+              {im.dotazioni?.length > 0 && <ul class="dotazioni">{im.dotazioni.map((d: string) => <li>{d}</li>)}</ul>}
+            </div>
+          )}
+
+          {foto.length > 0 && (
+            <ul class="foto">{foto.map((f: any) => <li><img src={f.src} alt={f.alt} loading="lazy" /></li>)}</ul>
+          )}
+
+          {orari.length > 0 && (
+            <div class="quando">
+              <h2 class="blocco-titolo">Quando ci trovi</h2>
+              <ul>
+                {orari.map((c) => (
+                  <li><strong>{c.nome}</strong> {c.orari.map((o: any) => <span class="o">{o.giorni} <span class="tabnums">{o.orario}</span></span>)}</li>
+                ))}
+              </ul>
+              <a class="btn" href="/settore-giovanile/#corsi">Corsi e iscrizioni</a>
+            </div>
+          )}
+        </div>
+      </section>
+    );
+  }) : (
+    <section class="section"><div class="container"><div class="empty"><strong>Impianto non ancora inserito</strong>Si compila nel pannello, alla voce "Impianti".</div></div></section>
+  )}
+</Layout>
+<style>
+  .dove { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); gap: clamp(14px, 2.4vw, 22px); align-items: stretch; }
+  @media (max-width: 1023px) { .dove { grid-template-columns: minmax(0, 1fr); } }
+  .dove-testo { padding: clamp(20px, 3vw, 30px); display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+  .blocco-titolo { font-size: clamp(1.5rem, 2.6vw, 1.9rem); margin-bottom: 4px; }
+  .indirizzo { font-size: 1.15rem; color: var(--ink); }
+  /* L'ingresso non è quello dell'indirizzo: va visto subito */
+  .ingresso { padding: 10px 14px; border-left: 4px solid var(--giallo); background: var(--tinta); color: var(--verde-scuro); border-radius: 0 10px 10px 0; }
+  .dove-testo .btn { margin-top: auto; }
+  .cosa { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px 40px; margin-top: clamp(36px, 5vw, 56px); }
+  @media (max-width: 1023px) { .cosa { grid-template-columns: minmax(0, 1fr); } }
+  .cosa p { margin-top: 8px; }
+  .dotazioni { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .dotazioni li { padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); font-weight: 500; }
+  .foto { list-style: none; margin: clamp(28px, 4vw, 44px) 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  @media (max-width: 639px) { .foto { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .foto img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 10px; }
+  .quando { margin-top: clamp(36px, 5vw, 56px); display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+  .quando ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .quando li { color: var(--ink-soft); }
+  .quando strong { color: var(--verde); margin-right: 6px; }
+  .quando .o + .o::before { content: ' · '; }
+</style>

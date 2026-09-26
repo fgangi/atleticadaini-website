@@ -1,0 +1,139 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PageHero from '../components/PageHero.astro';
+import { sfetch } from '../lib/sanity';
+import { recordQuery, titoliQuery } from '../lib/queries';
+import { CATEGORIE_RECORD } from '../sanity/schemaTypes/record';
+import { TIPI_TITOLO } from '../sanity/schemaTypes/titolo';
+
+/**
+ * Record sociali per categoria, poi campioni italiani e maglie azzurre.
+ * Senza JavaScript tutte le categorie sono una sotto l'altra; con JavaScript
+ * i pulsanti in alto ne mostrano una alla volta (l'indirizzo resta
+ * condivisibile: /record/?categoria=allievi).
+ */
+const [record, titoli] = await Promise.all([
+  sfetch<any[]>(recordQuery, {}, []),
+  sfetch<any[]>(titoliQuery, {}, []),
+]);
+const annoCorrente = new Date().getFullYear();
+const categorie = CATEGORIE_RECORD.map((c) => ({
+  ...c,
+  gruppi: [
+    { sesso: 'M', titolo: 'Maschili', righe: record.filter((r) => r.categoria === c.value && r.sesso === 'M') },
+    { sesso: 'F', titolo: 'Femminili', righe: record.filter((r) => r.categoria === c.value && r.sesso === 'F') },
+  ].filter((g) => g.righe.length > 0),
+})).filter((c) => c.gruppi.length > 0);
+const tipiTitolo = TIPI_TITOLO.map((t) => ({ ...t, voci: titoli.filter((x) => x.tipo === t.value) })).filter((t) => t.voci.length > 0);
+const chi = (r: any) => r.atleta ?? (r.staffetta?.length ? r.staffetta.join(', ') : '');
+// La data esatta se c'è, altrimenti l'anno (molti record storici hanno solo quello)
+const quando = (r: any) => r.data ? new Date(r.data).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' }) : String(r.anno ?? '');
+const titoloTipo: Record<string, string> = { campione: 'Campioni italiani', azzurro: 'Maglie azzurre' };
+---
+<Layout title="Record" description="Record sociali dell'Atletica Daini per categoria, campioni italiani e maglie azzurre.">
+  <PageHero eyebrow="Albo della società" title="Record" lead="I migliori risultati di sempre ottenuti da atlete e atleti dei Daini." />
+
+  {categorie.length > 0 && (
+    <section class="section">
+      <div class="container" data-record>
+        <div class="filtri" role="group" aria-label="Categoria" data-filtri hidden>
+          {categorie.map((c, n) => (
+            <button type="button" class="filtro" data-cat={c.value} aria-pressed={n === 0 ? 'true' : 'false'}>{c.title}</button>
+          ))}
+        </div>
+        <p class="legenda"><span class="campione" aria-hidden="true"></span>Evidenziati i record migliorati nel {annoCorrente}</p>
+
+        {categorie.map((c) => (
+          <div class="categoria" data-categoria={c.value}>
+            <div class="section-head" id={c.value}><span class="eyebrow">Record sociali</span><h2>{c.title}</h2></div>
+            {c.gruppi.map((g) => (
+              <div class="gruppo">
+                <h3 class="g-titolo">{g.titolo}</h3>
+                <table class="tabella">
+                  <thead><tr><th>Specialità</th><th class="num">Prestazione</th><th>Atleta</th><th class="num">Nato</th><th class="num">Data</th><th>Luogo</th></tr></thead>
+                  <tbody>
+                    {g.righe.map((r) => (
+                      <tr class:list={{ evidenziata: r.anno === annoCorrente }}>
+                        <td class="titolo-riga forte">{r.specialita}</td>
+                        <td class="num forte prest" data-label="Prestazione">{r.prestazione}</td>
+                        <td data-label={r.staffetta?.length ? 'Staffetta' : 'Atleta'}>{chi(r)}</td>
+                        <td class="num" data-label="Nato">{r.annoNascita ?? ''}</td>
+                        <td class="num" data-label="Data">{quando(r)}</td>
+                        <td data-label="Luogo">{r.luogo ?? ''}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </section>
+  )}
+
+  {tipiTitolo.map((t) => (
+    <section class="section fascia-tenue">
+      <div class="container">
+        <div class="section-head" id={t.value}><span class="eyebrow">Albo d'oro</span><h2>{titoloTipo[t.value] ?? t.title}</h2></div>
+        <ul class="titoli">
+          {t.voci.map((v) => <li class="card"><span class="t-anno tabnums">{v.anno}</span><strong>{v.atleta}</strong>{v.descrizione && <span>{v.descrizione}</span>}</li>)}
+        </ul>
+      </div>
+    </section>
+  ))}
+
+  {categorie.length === 0 && tipiTitolo.length === 0 && (
+    <section class="section"><div class="container"><div class="empty"><strong>Record non ancora inseriti</strong>Si compilano nel pannello, alla voce "Record sociali".</div></div></section>
+  )}
+</Layout>
+
+<style>
+  .filtri { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .filtro { display: inline-flex; align-items: center; min-height: 44px; padding: 0 1.1rem; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--ground); color: var(--verde);
+    font-family: var(--font-display); text-transform: uppercase; letter-spacing: .04em; font-weight: 700; font-size: 1.1rem; }
+  .filtro:hover { border-color: var(--verde); }
+  .filtro[aria-pressed='true'] { background: var(--verde); color: #fff; border-color: transparent; }
+  .legenda { display: flex; align-items: center; gap: 8px; font-size: .95rem; margin-bottom: clamp(20px, 3vw, 32px); }
+  .legenda .campione { width: 22px; height: 14px; border-radius: 3px; background: var(--tinta); border: 1px solid var(--giallo); }
+  .categoria + .categoria { margin-top: clamp(40px, 6vw, 64px); }
+  .gruppo + .gruppo { margin-top: 30px; }
+  .g-titolo { font-family: var(--font-display); text-transform: uppercase; font-size: 1.4rem; font-weight: 800; color: var(--grigio-verde); margin-bottom: 8px; }
+  /* La prestazione è il dato principale: grande e condensata come su un tabellone */
+  .prest { font-family: var(--font-display); font-size: 1.25rem; color: var(--verde) !important; }
+  .titoli { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+  .titoli li { padding: 14px 18px; display: flex; flex-direction: column; gap: 2px; border-left: 5px solid var(--giallo); }
+  .t-anno { font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; color: var(--verde); line-height: 1; }
+  .titoli strong { color: var(--ink); font-size: 1.08rem; }
+  .titoli span:last-child:not(.t-anno) { color: var(--ink-soft); font-size: .98rem; }
+</style>
+
+<script is:inline>
+  (() => {
+    const avvia = () => {
+      const box = document.querySelector('[data-record]');
+      if (!box || box.dataset.pronto) return;
+      box.dataset.pronto = '1';
+      const filtri = box.querySelector('[data-filtri]');
+      const bottoni = [...box.querySelectorAll('.filtro')];
+      // Una categoria sola: i pulsanti non servono
+      if (bottoni.length < 2) return;
+      filtri.hidden = false;
+      const applica = (cat, aggiornaUrl) => {
+        box.querySelectorAll('[data-categoria]').forEach((el) => { el.hidden = el.dataset.categoria !== cat; });
+        bottoni.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.cat === cat)));
+        if (aggiornaUrl) {
+          const u = new URL(location.href);
+          u.searchParams.set('categoria', cat);
+          history.replaceState(null, '', u);
+        }
+      };
+      bottoni.forEach((b) => { b.onclick = () => applica(b.dataset.cat, true); });
+      const iniziale = new URL(location.href).searchParams.get('categoria');
+      applica(bottoni.some((b) => b.dataset.cat === iniziale) ? iniziale : bottoni[0].dataset.cat, false);
+    };
+    avvia();
+    document.addEventListener('astro:page-load', avvia);
+  })();
+</script>

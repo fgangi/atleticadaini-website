@@ -1,0 +1,140 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PageHero from '../components/PageHero.astro';
+import Indirizzo from '../components/Indirizzo.astro';
+import SocialIcons from '../components/SocialIcons.astro';
+import { sfetch, telHref, indicazioniUrl } from '../lib/sanity';
+import { settingsQuery, impiantiQuery } from '../lib/queries';
+
+/**
+ * Contatti a blocchi, dal più usato al meno usato:
+ *  1. Chiamaci o scrivici: pulsanti grandi, comodi da toccare
+ *  2. Dove siamo: campo (allenamenti) e sede sociale
+ *  3. Link utili e social
+ *  4. Dati societari, in piccolo
+ * Ogni voce compare solo se il dato c'è nel pannello: niente righe vuote.
+ */
+const [s, impianti] = await Promise.all([sfetch<any>(settingsQuery, {}, null), sfetch<any[]>(impiantiQuery, {}, [])]);
+const telefoni: any[] = s?.telefoni ?? [];
+const campo = impianti[0];
+const sede = s?.sede ? String(s.sede).replace(/\s*\n\s*/g, ', ') : null;
+const conSocial = Object.values(s?.social ?? {}).some((u) => typeof u === 'string' && u.startsWith('http'));
+const dati = [
+  s?.denominazione ? { dt: 'Denominazione', dd: s.denominazione } : null,
+  sede ? { dt: 'Sede sociale', dd: sede } : null,
+  s?.codiceFiscale ? { dt: 'Codice fiscale', dd: s.codiceFiscale } : null,
+  s?.partitaIva ? { dt: 'Partita IVA', dd: s.partitaIva } : null,
+  s?.codiceFidal ? { dt: 'Codice FIDAL', dd: s.codiceFidal } : null,
+].filter(Boolean) as { dt: string; dd: string }[];
+---
+<Layout title="Contatti" description="Contatti dell'Atletica Daini: telefoni, email, campo di allenamento e sede a Carate Brianza.">
+  <PageHero eyebrow="Siamo qui" title="Contatti" lead="Chiamaci, scrivici o passa al campo prima o dopo gli allenamenti." />
+
+  <section class="section">
+    <div class="container contatti">
+      {(telefoni.length > 0 || s?.email) && (
+        <div class="card blocco">
+          <h2 class="blocco-titolo">Chiamaci o scrivici</h2>
+          <div class="azioni-contatto">
+            {telefoni.map((t) => (
+              <a class="contatto" href={telHref(t.numero)}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>
+                <span><span class="c-tipo">{[t.nome, t.ruolo].filter(Boolean).join(' · ') || 'Chiama'}</span><span class="c-valore tabnums">{t.numero}</span></span>
+              </a>
+            ))}
+            {s?.email && (
+              <a class="contatto" href={`mailto:${s.email}`}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><polyline points="3 7 12 13 21 7"/></svg>
+                <span><span class="c-tipo">Scrivi un'email</span><span class="c-valore">{s.email}</span></span>
+              </a>
+            )}
+          </div>
+        </div>
+      )}
+
+      {(campo || sede) && (
+        <div class="card blocco">
+          <h2 class="blocco-titolo">Dove siamo</h2>
+          <dl class="luoghi">
+            {campo && (
+              <div>
+                <dt>Campo di allenamento</dt>
+                <dd><strong>{campo.nome}</strong>{campo.indirizzo && <><br /><Indirizzo testo={campo.indirizzo} /></>}</dd>
+                {campo.ingresso && <dd class="ingresso">{campo.ingresso}</dd>}
+                <dd class="link-luogo">
+                  <a class="btn primary" href="/impianto/">Come arrivare</a>
+                  {indicazioniUrl(campo.indirizzo) && <a class="btn" href={indicazioniUrl(campo.indirizzo)} target="_blank" rel="noopener">Navigatore</a>}
+                </dd>
+              </div>
+            )}
+            {sede && <div><dt>Sede sociale</dt><dd><Indirizzo testo={sede} /></dd></div>}
+          </dl>
+        </div>
+      )}
+
+      {(s?.linkUtili?.length > 0 || conSocial) && (
+        <div class="card blocco largo" id="link-utili">
+          <h2 class="blocco-titolo">Link utili</h2>
+          {s?.linkUtili?.length > 0 && (
+            <ul class="link-utili">
+              {s.linkUtili.map((l: any) => (
+                <li><a href={l.url} target="_blank" rel="noopener"><strong>{l.nome}</strong>{l.nota && <span>{l.nota}</span>}</a></li>
+              ))}
+            </ul>
+          )}
+          {conSocial && <div class="social"><p>Seguici sui social</p><SocialIcons social={s.social} classe="su-chiaro" /></div>}
+        </div>
+      )}
+
+      {dati.length > 0 && (
+        <div class="card blocco largo">
+          <h2 class="blocco-titolo piccolo">Dati societari</h2>
+          <dl class="dati">{dati.map((d) => <div><dt>{d.dt}</dt><dd class="tabnums">{d.dd}</dd></div>)}</dl>
+        </div>
+      )}
+
+      {!s?.email && telefoni.length === 0 && !campo && !sede && (
+        <div class="empty largo"><strong>Recapiti non ancora inseriti</strong>Si compilano nel pannello, alla voce "Impostazioni sito".</div>
+      )}
+    </div>
+  </section>
+</Layout>
+
+<style>
+  /* PC: due blocchi affiancati, poi quelli larghi; tablet e telefono: uno sotto l'altro */
+  .contatti { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(14px, 2.4vw, 22px); align-items: start; }
+  .largo { grid-column: 1 / -1; }
+  @media (max-width: 1023px) { .contatti { grid-template-columns: minmax(0, 1fr); } }
+  .blocco { padding: clamp(20px, 3vw, 30px); }
+  .blocco-titolo { font-size: clamp(1.5rem, 2.4vw, 1.8rem); margin: 0 0 18px; }
+  .blocco-titolo.piccolo { font-size: 1.3rem; margin-bottom: 14px; }
+
+  .azioni-contatto { display: flex; flex-direction: column; gap: 10px; }
+  .contatto { display: flex; align-items: center; gap: 14px; min-height: 64px; padding: 12px 16px;
+    border: 1px solid var(--line); border-radius: 12px; color: var(--ink); transition: border-color .12s ease, transform .12s ease; }
+  .contatto:hover { border-color: var(--verde); transform: translateY(-1px); }
+  .contatto svg { flex: none; color: var(--verde); }
+  .contatto > span { display: flex; flex-direction: column; min-width: 0; }
+  .c-tipo { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .04em; font-size: .98rem; font-weight: 700; color: var(--grigio-verde); }
+  .c-valore { font-weight: 600; font-size: 1.1rem; overflow-wrap: anywhere; }
+
+  .luoghi { margin: 0; display: flex; flex-direction: column; gap: 20px; }
+  .luoghi dt { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .04em; font-weight: 700; color: var(--grigio-verde); }
+  .luoghi dd { margin: 4px 0 0; color: var(--ink); }
+  .luoghi .ingresso { padding: 8px 12px; border-left: 4px solid var(--giallo); background: var(--tinta); color: var(--verde-scuro); margin-top: 10px; }
+  .link-luogo { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px !important; }
+
+  .link-utili { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+  .link-utili a { display: flex; flex-direction: column; justify-content: center; min-height: 56px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; }
+  .link-utili a:hover { border-color: var(--verde); }
+  .link-utili strong { color: var(--verde); }
+  .link-utili span { font-size: .92rem; color: var(--ink-faint); }
+  .social { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
+  .social p { font-family: var(--font-display); text-transform: uppercase; font-weight: 700; letter-spacing: .04em; color: var(--grigio-verde); }
+  /* Su fondo bianco le icone diventano verdi */
+  .social :global(.su-chiaro a) { color: var(--verde); border-color: var(--line); }
+
+  .dati { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px 24px; margin: 0; }
+  .dati dt { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .05em; font-size: .95rem; font-weight: 700; color: var(--grigio-verde); }
+  .dati dd { margin: 2px 0 0; color: var(--ink-soft); overflow-wrap: anywhere; }
+</style>

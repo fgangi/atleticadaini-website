@@ -1,0 +1,103 @@
+---
+import '../styles/font.css';
+import '../styles/global.css';
+import { ClientRouter } from 'astro:transitions';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { sfetch, img } from '../lib/sanity';
+import { settingsQuery, presenzeQuery, impiantiQuery } from '../lib/queries';
+// Barra per simulare stati diversi: esiste solo durante lo sviluppo
+import AnteprimaStati from '../components/AnteprimaStati.astro';
+
+interface Props {
+  title?: string;
+  description?: string | null;
+  /** Immagine per le anteprime dei link condivisi (WhatsApp, Facebook…) */
+  immagine?: string | null;
+  /** true sulle pagine da non indicizzare mai (404) */
+  noindex?: boolean;
+}
+const { title, description, immagine, noindex = false } = Astro.props;
+
+const settings = await sfetch<any>(settingsQuery, {}, null);
+const presenze = await sfetch<any>(presenzeQuery, {}, null) ?? {};
+const p = {
+  album: presenze.album ?? 0, record: presenze.record ?? 0, team: presenze.team ?? 0, storia: presenze.storia ?? 0,
+  corsi: presenze.corsi ?? 0, quote: presenze.quote ?? 0, privacy: presenze.privacy ?? 0, safeguarding: presenze.safeguarding ?? 0,
+  iscrizioniAperte: presenze.iscrizioniAperte === true,
+};
+const [impianto] = await sfetch<any[]>(impiantiQuery, {}, []);
+
+const nome = settings?.nome ?? 'Atletica Daini';
+const titolo = title ? `${title} - ${nome}` : `${nome} - Atletica leggera a Carate Brianza`;
+// Descrizione sotto al titolo nei risultati di ricerca: sotto i 160 caratteri.
+// Un estratto che è solo un link non descrive nulla: si usa quella generale.
+const DESCRIZIONE_SITO = settings?.descrizione
+  ?? `${nome}: atletica leggera a Carate Brianza dal 1945. Corsi per ragazzi e ragazze dai 4 anni, settore agonistico, news e record della società.`;
+const desc = description && !/^\s*https?:\/\//i.test(description) ? description : DESCRIZIONE_SITO;
+
+// Sito di prova: nessuna pagina va su Google finché la variabile non è "true"
+const indicizzabile = import.meta.env.PUBLIC_INDICIZZABILE === 'true' && !noindex;
+const canonico = new URL(Astro.url.pathname, Astro.site).href;
+const origine = new URL('/', Astro.site).href;
+const ogImmagine = immagine ?? img(settings?.logo, 1200) ?? new URL('/anteprima-link.png', Astro.site).href;
+
+// Dati strutturati in home: dicono a Google il nome del sito e della società
+const social = Object.values(settings?.social ?? {}).filter((u) => typeof u === 'string' && u.startsWith('http'));
+const home = Astro.url.pathname === '/';
+const datiStrutturati = home ? JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    { '@type': 'WebSite', '@id': `${origine}#sito`, name: nome, url: origine, inLanguage: 'it-IT' },
+    { '@type': 'SportsOrganization', '@id': `${origine}#societa`, name: settings?.denominazione ?? nome, alternateName: nome,
+      sport: 'Atletica leggera', url: origine, foundingDate: String(settings?.annoFondazione ?? 1945),
+      ...(img(settings?.logo, 512) ? { logo: img(settings?.logo, 512) } : {}),
+      ...(settings?.email ? { email: settings.email } : {}),
+      ...(social.length ? { sameAs: social } : {}) },
+  ],
+}) : null;
+---
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{titolo}</title>
+    <meta name="description" content={desc} />
+    {indicizzabile ? <link rel="canonical" href={canonico} /> : <meta name="robots" content="noindex, nofollow" />}
+    <meta property="og:site_name" content={nome} />
+    <meta property="og:locale" content="it_IT" />
+    <meta property="og:title" content={titolo} />
+    <meta property="og:description" content={desc} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonico} />
+    <meta property="og:image" content={ogImmagine} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#1B573B" />
+    {datiStrutturati && <script type="application/ld+json" set:html={datiStrutturati} />}
+    {/* Icone provvisorie, da rifare col logo definitivo. Se si cambiano,
+        aumentare ?v= : i browser tengono a lungo in memoria le favicon. */}
+    <link rel="icon" href="/favicon.svg?v=3" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-96.png?v=3" type="image/png" sizes="96x96" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3" />
+    {/* Transizioni fluide fra le pagine invece del ricaricamento secco */}
+    <ClientRouter />
+  </head>
+  <body>
+    <a class="salta" href="#contenuto">Vai al contenuto</a>
+    <Header nome={nome} logoUrl={img(settings?.logoChiaro, 440)} social={settings?.social} presenze={p} />
+    <main id="contenuto">
+      <slot />
+    </main>
+    <Footer settings={settings} impianto={impianto} presenze={p} />
+    {import.meta.env.DEV && <AnteprimaStati />}
+  </body>
+</html>
+
+<style is:global>
+  /* Primo tasto Tab: salta menu e intestazione (chi naviga da tastiera) */
+  .salta { position: absolute; left: 12px; top: -60px; z-index: 2000; background: var(--giallo); color: var(--verde-scuro);
+    padding: .7rem 1rem; border-radius: 8px; font-weight: 700; }
+  .salta:focus { top: 12px; }
+</style>

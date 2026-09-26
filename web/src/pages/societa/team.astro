@@ -1,0 +1,30 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import PageHero from '../../components/PageHero.astro';
+import SchedaPersona from '../../components/SchedaPersona.astro';
+import { sfetch } from '../../lib/sanity';
+import { teamQuery } from '../../lib/queries';
+import { AREE_TEAM } from '../../sanity/schemaTypes/membroTeam';
+
+const team = await sfetch<any[]>(teamQuery, {}, []);
+// Gruppi nell'ordine del pannello; quelli vuoti non compaiono
+const gruppi = AREE_TEAM.map((a) => ({ ...a, membri: team.filter((m) => (m.area ?? 'tecnici') === a.value) }))
+  .filter((g) => g.membri.length > 0);
+---
+<Layout title="Team" description="Allenatori, istruttori e collaboratori dell'Atletica Daini.">
+  <PageHero eyebrow="La società" title="Il team" lead="Le persone che seguono ragazzi e atleti in pista, e quelle che fanno funzionare la società." />
+  {gruppi.length > 0 ? gruppi.map((g) => (
+    <section class="section">
+      <div class="container">
+        <div class="section-head" id={g.value}><h2>{g.title}</h2></div>
+        <div class="grid cols-4 team">{g.membri.map((m) => <SchedaPersona m={m} />)}</div>
+      </div>
+    </section>
+  )) : (
+    <section class="section"><div class="container"><div class="empty"><strong>Team non ancora inserito</strong>Si compila nel pannello, alla voce "Team".</div></div></section>
+  )}
+</Layout>
+<style>
+  /* Telefono: due colonne, le schede sono piccole e una sola sarebbe enorme */
+  @media (max-width: 639px) { .team { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+</style>

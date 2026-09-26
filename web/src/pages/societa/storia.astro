@@ -1,0 +1,72 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import PageHero from '../../components/PageHero.astro';
+import { sfetch, img, richText } from '../../lib/sanity';
+import { storiaQuery, settingsQuery } from '../../lib/queries';
+
+const [storia, s] = await Promise.all([sfetch<any>(storiaQuery, {}, null), sfetch<any>(settingsQuery, {}, null)]);
+const anno = s?.annoFondazione ?? 1945;
+const intro = richText(storia?.introduzione);
+const capitoli: any[] = storia?.capitoli ?? [];
+---
+<Layout title="Storia" description={`La storia della ${s?.nome ?? 'Atletica Daini'} dal ${anno}: la fondazione, i decenni, i campioni.`}>
+  <PageHero eyebrow={`Dal ${anno}`} title="La nostra storia" />
+
+  {intro && (
+    <section class="section">
+      <div class="container narrow prose" set:html={intro} />
+    </section>
+  )}
+
+  {capitoli.length > 0 && (
+    <section class="section">
+      <div class="container">
+        {/* Linea del tempo: una corsia verticale con un capitolo per periodo */}
+        <ol class="tempo">
+          {capitoli.map((c) => {
+            const foto = img(c.immagine, 720, 480);
+            return (
+              <li class="tappa">
+                <span class="t-periodo">{c.periodo}</span>
+                <div class="t-corpo">
+                  {c.titolo && <h2 class="t-titolo">{c.titolo}</h2>}
+                  {c.testo && <p>{c.testo}</p>}
+                  {c.album?.slug && <a class="btn" href={`/gallery/${c.album.slug}/`}>Foto: {c.album.titolo}</a>}
+                </div>
+                {foto && <img class="t-foto" src={foto} alt="" loading="lazy" />}
+              </li>
+            );
+          })}
+        </ol>
+      </div>
+    </section>
+  )}
+
+  {storia?.riconoscimenti?.length > 0 && (
+    <section class="section fascia-chiara">
+      <div class="container">
+        <div class="section-head"><span class="eyebrow">Albo d'oro</span><h2>Riconoscimenti</h2></div>
+        <ul class="ricon">
+          {storia.riconoscimenti.map((r: any) => <li><span class="tabnums">{r.anno}</span> <strong>{r.titolo}</strong>{r.descrizione && ` — ${r.descrizione}`}</li>)}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  {!intro && capitoli.length === 0 && (
+    <section class="section"><div class="container"><div class="empty"><strong>Storia non ancora inserita</strong>Si compila nel pannello, alla voce "Storia".</div></div></section>
+  )}
+</Layout>
+<style>
+  .tempo { list-style: none; margin: 0; padding: 0 0 0 28px; border-left: 4px solid var(--filetto); display: flex; flex-direction: column; gap: clamp(28px, 5vw, 48px); }
+  .tappa { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px 32px; align-items: start; }
+  .tappa::before { content: ''; position: absolute; left: -38px; top: 6px; width: 16px; height: 16px; border-radius: 50%; background: var(--giallo); border: 3px solid var(--verde); }
+  .t-periodo { grid-column: 1 / -1; font-family: var(--font-display); text-transform: uppercase; font-size: 1.3rem; font-weight: 700; color: var(--grigio-verde); letter-spacing: .06em; }
+  .t-corpo { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+  .t-titolo { font-size: clamp(1.6rem, 3vw, 2.1rem); }
+  .t-foto { width: 100%; border-radius: var(--radius); }
+  @media (max-width: 1023px) { .tappa { grid-template-columns: minmax(0, 1fr); } }
+  @media (max-width: 639px) { .tempo { padding-left: 20px; } .tappa::before { left: -30px; } }
+  .ricon { margin: 0; padding-left: 1.2rem; display: flex; flex-direction: column; gap: 8px; color: var(--ink-soft); font-size: 1.08rem; }
+  .ricon strong { color: var(--verde); }
+</style>

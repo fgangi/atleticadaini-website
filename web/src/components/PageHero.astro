@@ -1,0 +1,21 @@
+---
+/** Intestazione delle pagine interne: fascia verde con il motivo delle corsie. */
+interface Props { eyebrow?: string; title: string; lead?: string | null; }
+const { eyebrow, title, lead } = Astro.props;
+---
+<section class="page-hero sfondo-scuro">
+  <div class="container">
+    {eyebrow && <span class="eyebrow">{eyebrow}</span>}
+    <h1>{title}</h1>
+    {lead && <p class="lead">{lead}</p>}
+    <slot />
+  </div>
+</section>
+<style>
+  .page-hero { background: var(--sfondo-scuro); color: #fff; padding: clamp(40px, 7vw, 84px) 0 clamp(36px, 5vw, 60px); }
+  /* Colonna flex: fra occhiello e titolo la stessa distanza delle intestazioni di sezione */
+  .page-hero .container { display: flex; flex-direction: column; align-items: flex-start; gap: var(--stacco-occhiello); }
+  .page-hero .eyebrow { margin: 0; color: var(--giallo); }
+  .page-hero h1 { color: #fff; }
+  .page-hero .lead { max-width: 60ch; margin: 12px 0 0; color: #E3EAE1; }
+</style>

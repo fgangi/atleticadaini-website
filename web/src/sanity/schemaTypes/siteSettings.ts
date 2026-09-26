@@ -1,0 +1,116 @@
+import { defineType, defineField } from 'sanity';
+import { DESCRIZIONE_LOGO, validaLogo } from '../regoleLogo';
+
+/** Dati generali della società: un solo documento. */
+export const siteSettings = defineType({
+  name: 'siteSettings',
+  title: 'Impostazioni sito',
+  type: 'document',
+  groups: [
+    { name: 'societa', title: 'Società', default: true },
+    { name: 'contatti', title: 'Contatti' },
+    { name: 'home', title: 'Home' },
+    { name: 'legale', title: 'Pagine legali' },
+  ],
+  fields: [
+    defineField({ name: 'nome', title: 'Nome breve', type: 'string', group: 'societa',
+      description: 'Quello che compare nei titoli delle pagine, es. "Atletica Daini".',
+      validation: (r) => r.required() }),
+    defineField({ name: 'denominazione', title: 'Denominazione legale', type: 'string', group: 'societa',
+      description: 'Es. "A.S.D. Daini Carate Brianza". Compare nel footer e nei contatti.' }),
+    defineField({ name: 'descrizione', title: 'Descrizione per Google', type: 'text', rows: 2, group: 'societa',
+      description: 'Una frase sotto i 160 caratteri: compare nei risultati di ricerca e nelle anteprime dei link.',
+      validation: (r) => r.max(160).warning('Oltre i 160 caratteri Google la taglia.') }),
+    defineField({ name: 'annoFondazione', title: 'Anno di fondazione', type: 'number', group: 'societa', initialValue: 1945 }),
+    defineField({ name: 'logo', title: 'Logo (per fondi chiari)', type: 'image', group: 'societa',
+      description: DESCRIZIONE_LOGO, validation: validaLogo }),
+    defineField({ name: 'logoChiaro', title: 'Logo per fondi scuri', type: 'image', group: 'societa',
+      description: 'Versione bianca o chiara, usata nell\'intestazione e nel footer verdi. Se manca si usa il nome scritto.' }),
+    defineField({ name: 'codiceFiscale', title: 'Codice fiscale', type: 'string', group: 'societa',
+      description: 'Usato anche per il 5×1000.' }),
+    defineField({ name: 'partitaIva', title: 'Partita IVA', type: 'string', group: 'societa' }),
+    defineField({ name: 'codiceFidal', title: 'Codice società FIDAL', type: 'string', group: 'societa' }),
+    defineField({
+      name: 'enti',
+      title: 'Loghi istituzionali (FIDAL, CONI, Comune…)',
+      type: 'array',
+      group: 'societa',
+      description: 'Compaiono nel footer, tutti alla stessa altezza.',
+      of: [{ type: 'object', fields: [
+        { name: 'nome', type: 'string', title: 'Nome', validation: (r: any) => r.required() },
+        { name: 'logo', type: 'image', title: 'Logo', description: DESCRIZIONE_LOGO, validation: validaLogo },
+        { name: 'url', type: 'url', title: 'Link (facoltativo)' },
+      ], preview: { select: { title: 'nome', media: 'logo' } } }],
+    }),
+
+    defineField({ name: 'email', title: 'Email', type: 'string', group: 'contatti' }),
+    defineField({
+      name: 'telefoni',
+      title: 'Telefoni dei referenti',
+      type: 'array',
+      group: 'contatti',
+      of: [{ type: 'object', fields: [
+        { name: 'nome', type: 'string', title: 'Nome del referente', description: 'Es. "Angelo".' },
+        { name: 'ruolo', type: 'string', title: 'Per cosa (facoltativo)', description: 'Es. "Settore giovanile", "Segreteria".' },
+        { name: 'numero', type: 'string', title: 'Numero', validation: (r: any) => r.required() },
+      ], preview: { select: { title: 'numero', subtitle: 'nome' } } }],
+    }),
+    defineField({ name: 'sede', title: 'Sede sociale', type: 'text', rows: 2, group: 'contatti',
+      description: 'Es. "Via Donizetti 21, 20841 Carate Brianza (MB)".' }),
+    defineField({
+      name: 'social',
+      title: 'Social',
+      type: 'object',
+      group: 'contatti',
+      fields: [
+        { name: 'instagram', type: 'url', title: 'Instagram' },
+        { name: 'facebook', type: 'url', title: 'Facebook (pagina o gruppo)' },
+        { name: 'youtube', type: 'url', title: 'YouTube' },
+        { name: 'tiktok', type: 'url', title: 'TikTok' },
+      ],
+    }),
+    defineField({
+      name: 'linkUtili',
+      title: 'Link utili',
+      type: 'array',
+      group: 'contatti',
+      of: [{ type: 'object', fields: [
+        { name: 'nome', type: 'string', title: 'Nome', validation: (r: any) => r.required() },
+        { name: 'url', type: 'url', title: 'Indirizzo', validation: (r: any) => r.required() },
+        { name: 'nota', type: 'string', title: 'Descrizione breve' },
+      ], preview: { select: { title: 'nome', subtitle: 'url' } } }],
+    }),
+
+    defineField({
+      name: 'puntiForza',
+      title: 'Perché i Daini (home)',
+      type: 'array',
+      group: 'home',
+      description: 'Da 3 a 4 punti brevi, es. "80 anni" / "di atletica a Carate Brianza".',
+      validation: (r) => r.max(4),
+      of: [{ type: 'object', fields: [
+        { name: 'titolo', type: 'string', title: 'In grande', validation: (r: any) => r.required() },
+        { name: 'testo', type: 'string', title: 'Sotto' },
+      ], preview: { select: { title: 'titolo', subtitle: 'testo' } } }],
+    }),
+    defineField({
+      name: 'cinquePerMille',
+      title: 'Fascia 5×1000',
+      type: 'object',
+      group: 'home',
+      description: 'Da accendere nel periodo della dichiarazione dei redditi.',
+      options: { collapsible: true },
+      fields: [
+        { name: 'attiva', type: 'boolean', title: 'Mostra la fascia', initialValue: false },
+        { name: 'titolo', type: 'string', title: 'Titolo', initialValue: 'Il tuo 5×1000 ai Daini' },
+        { name: 'testo', type: 'text', rows: 3, title: 'Testo' },
+      ],
+    }),
+
+    defineField({ name: 'privacy', title: 'Privacy e cookie', type: 'blockContent', group: 'legale',
+      description: 'Testo fornito dalla società. Finché è vuoto la pagina /privacy/ non esiste.' }),
+    defineField({ name: 'safeguarding', title: 'Safeguarding (tutela dei minori)', type: 'blockContent', group: 'legale',
+      description: 'Modello, codice di condotta e responsabile. Finché è vuoto la pagina /safeguarding/ non esiste.' }),
+  ],
+  preview: { prepare: () => ({ title: 'Impostazioni sito' }) },
+});

@@ -1,0 +1,71 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import PageHero from '../../components/PageHero.astro';
+import NewsCard from '../../components/NewsCard.astro';
+import { sfetch } from '../../lib/sanity';
+import { newsUltimeQuery } from '../../lib/queries';
+import { SEZIONI_NEWS } from '../../sanity/schemaTypes/news';
+
+// Archivio: tutte le notizie sullo stesso piano (l'evidenza è compito della home)
+const news = await sfetch<any[]>(newsUltimeQuery, { limit: 200 }, []);
+// Un filtro compare solo se ha notizie, e la barra solo se c'è da scegliere
+const filtri = [
+  { id: 'tutte', label: 'Tutte', n: news.length },
+  ...SEZIONI_NEWS.map((s) => ({ id: s.value, label: s.title, n: news.filter((x) => x.sezione === s.value).length })).filter((f) => f.n > 0),
+];
+const mostraFiltri = filtri.length > 2;
+---
+<Layout title="News" description="Tutte le notizie dell'Atletica Daini: gare, risultati, record, corsi e vita della società.">
+  <PageHero eyebrow="Aggiornamenti" title="News" lead="Gare, risultati, record e vita della società." />
+  <section class="section">
+    <div class="container" data-news>
+      {mostraFiltri && (
+        <div class="filtri" role="group" aria-label="Filtra per sezione">
+          {filtri.map((f) => (
+            <button type="button" class="filtro" data-filtro={f.id} aria-pressed={f.id === 'tutte' ? 'true' : 'false'}>
+              {f.label}<span class="quanti">{f.n}</span>
+            </button>
+          ))}
+        </div>
+      )}
+      {news.length ? <div class="grid cols-3">{news.map((n) => <NewsCard item={n} />)}</div>
+        : <div class="empty"><strong>Nessuna notizia pubblicata</strong>Le notizie inserite nel pannello appariranno qui, dalla più recente.</div>}
+    </div>
+  </section>
+</Layout>
+<style>
+  .filtri { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: clamp(18px, 2.6vw, 30px); }
+  .filtro { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 1rem; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--ground); color: var(--verde);
+    font-family: var(--font-display); text-transform: uppercase; letter-spacing: .04em; font-weight: 700; font-size: 1.05rem; }
+  .filtro:hover { border-color: var(--verde); }
+  .filtro[aria-pressed='true'] { background: var(--verde); color: #fff; border-color: transparent; }
+  .quanti { font-family: var(--font-body); font-size: .8rem; font-variant-numeric: tabular-nums; background: var(--surface-2); color: var(--ink-soft); border-radius: 999px; padding: .1rem .45rem; }
+  .filtro[aria-pressed='true'] .quanti { background: rgba(255, 255, 255, .22); color: #fff; }
+</style>
+<script is:inline>
+  (() => {
+    const avvia = () => {
+      const box = document.querySelector('[data-news]');
+      if (!box || box.dataset.pronto) return;
+      box.dataset.pronto = '1';
+      const bottoni = [...box.querySelectorAll('.filtro')];
+      if (!bottoni.length) return;
+      const applica = (sez, aggiornaUrl) => {
+        box.querySelectorAll('[data-sezione]').forEach((el) => { el.hidden = sez !== 'tutte' && el.dataset.sezione !== sez; });
+        bottoni.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.filtro === sez)));
+        if (aggiornaUrl) {
+          const u = new URL(location.href);
+          if (sez === 'tutte') u.searchParams.delete('sezione'); else u.searchParams.set('sezione', sez);
+          history.replaceState(null, '', u);
+        }
+      };
+      bottoni.forEach((b) => { b.onclick = () => applica(b.dataset.filtro, true); });
+      // Un link con ?sezione=giovanile apre già filtrato: gli indirizzi restano condivisibili
+      const iniziale = new URL(location.href).searchParams.get('sezione');
+      applica(bottoni.some((b) => b.dataset.filtro === iniziale) ? iniziale : 'tutte', false);
+    };
+    avvia();
+    document.addEventListener('astro:page-load', avvia);
+  })();
+</script>

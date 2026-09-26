@@ -1,0 +1,164 @@
+---
+import { img, telHref } from '../lib/sanity';
+import { logoRifilato, misuraLogo } from '../lib/loghi';
+import SocialIcons from './SocialIcons.astro';
+import Indirizzo from './Indirizzo.astro';
+
+interface Props {
+  settings: any;
+  impianto?: { nome?: string; indirizzo?: string; ingresso?: string } | null;
+  presenze: { album: number; record: number; team: number; storia: number; privacy: number; safeguarding: number };
+}
+const { settings, impianto, presenze: p } = Astro.props;
+const s = settings ?? {};
+const nome = s.nome ?? 'Atletica Daini';
+const logoUrl = img(s.logoChiaro, 360);
+const anno = new Date().getFullYear();
+const telefoni: { nome?: string; ruolo?: string; numero: string }[] = s.telefoni ?? [];
+const sede = s.sede ? String(s.sede).replace(/\s*\n\s*/g, ', ') : null;
+
+// Loghi istituzionali: margini vuoti tolti e stessa altezza per tutti,
+// così un file con molto spazio attorno non appare più piccolo degli altri
+const pid = import.meta.env.PUBLIC_SANITY_PROJECT_ID;
+const ds = import.meta.env.PUBLIC_SANITY_DATASET || 'production';
+const enti = (await Promise.all((s.enti ?? []).map(async (e: any) => {
+  const r = await logoRifilato(e.logo, pid, ds, 400);
+  return r ? { ...e, src: r.url, stile: misuraLogo(r.prop, 52) } : null;
+}))).filter(Boolean);
+
+/**
+ * Crediti del sito: una riga, ruolo e nome per esteso. Chi non ha ancora un
+ * nome qui non compare: meglio una riga in meno che un segnaposto pubblicato.
+ */
+const CREDITI: { ruolo: string; nome: string; url?: string }[] = [];
+
+const identificativi = [
+  s.codiceFiscale ? `C.F. ${s.codiceFiscale}` : null,
+  s.partitaIva ? `P. IVA ${s.partitaIva}` : null,
+  s.codiceFidal ? `Cod. FIDAL ${s.codiceFidal}` : null,
+].filter(Boolean).join(' · ');
+---
+<footer class="site-footer sfondo-scuro">
+  <div class="container">
+    <div class="foot-grid">
+      <!-- 1. Società: marchio, frase, social -->
+      <div class="foot-brand">
+        <a class="brand" href="/" aria-label={`${nome} – home`}>
+          <img class="foot-logo" src={logoUrl ?? '/loghi/logo-daini-chiaro.svg'} alt="" width="143" height="71" />
+        </a>
+        {s.descrizione && <p class="foot-desc">{s.descrizione}</p>}
+        <SocialIcons social={s.social} />
+      </div>
+
+      <!-- 2. Naviga: le stesse voci del menu -->
+      <div>
+        <h4>Naviga</h4>
+        <ul class="fnav">
+          <li><a href="/societa/">Chi siamo</a></li>
+          {p.storia > 0 && <li><a href="/societa/storia/">Storia</a></li>}
+          {p.team > 0 && <li><a href="/societa/team/">Team</a></li>}
+          <li><a href="/settore-giovanile/">Settore giovanile</a></li>
+          {p.record > 0 && <li><a href="/record/">Record</a></li>}
+          <li><a href="/impianto/">Impianto</a></li>
+          <li><a href="/news/">News</a></li>
+          {p.album > 0 && <li><a href="/gallery/">Gallery</a></li>}
+        </ul>
+      </div>
+
+      <!-- 3. Contatti e dove siamo -->
+      <div>
+        <h4>Contatti</h4>
+        <ul class="fnav contatti">
+          {telefoni.map((t) => (
+            <li><a href={telHref(t.numero)}><span class="tabnums">{t.numero}</span>{t.nome && <span class="nota"> · {t.nome}</span>}</a></li>
+          ))}
+          {s.email && <li><a href={`mailto:${s.email}`}>{s.email}</a></li>}
+          <li><a href="/contatti/">Tutti i contatti →</a></li>
+        </ul>
+        {impianto?.indirizzo && (
+          <div class="dove">
+            <h4>Dove ci alleniamo</h4>
+            <p><Indirizzo testo={impianto.nome ? `${impianto.nome}, ${String(impianto.indirizzo).replace(/\s*\n\s*/g, ', ')}` : impianto.indirizzo} nomeSuRiga /></p>
+            {impianto.ingresso && <p class="nota">{impianto.ingresso}</p>}
+            <a class="link-dove" href="/impianto/">Come arrivare →</a>
+          </div>
+        )}
+      </div>
+    </div>
+
+    {enti.length > 0 && (
+      <div class="enti">
+        {enti.map((e: any) => {
+          const logo = <img src={e.src} alt={e.nome} style={e.stile} loading="lazy" />;
+          return e.url ? <a href={e.url} target="_blank" rel="noopener">{logo}</a> : <span>{logo}</span>;
+        })}
+      </div>
+    )}
+
+    <div class="foot-legale">
+      {(s.denominazione || sede) && (
+        <span>
+          {s.denominazione && <strong>{s.denominazione}</strong>}
+          {s.denominazione && sede && ' – '}
+          {sede && <>Sede sociale: <Indirizzo testo={sede} /></>}
+        </span>
+      )}
+      {identificativi && <span>{identificativi}</span>}
+    </div>
+
+    <div class="foot-bottom">
+      <span>© {anno} {s.denominazione ?? nome}</span>
+      <span class="foot-link">
+        {p.privacy > 0 && <a href="/privacy/">Privacy e cookie</a>}
+        {p.safeguarding > 0 && <a href="/safeguarding/">Safeguarding</a>}
+        {CREDITI.map((c) => <span>{c.ruolo} di {c.url ? <a href={c.url} target="_blank" rel="noopener">{c.nome}</a> : c.nome}</span>)}
+      </span>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer { background: var(--sfondo-footer); color: #E8EDE6; margin-top: clamp(40px, 6vw, 72px); }
+  .site-footer a { color: #fff; }
+  .foot-grid { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, .8fr) minmax(0, 1.1fr); gap: 40px; padding: 56px 0 36px; }
+  /* Tablet: il marchio occupa da solo la prima riga, Naviga e Contatti affiancati sotto */
+  @media (max-width: 1023px) {
+    .foot-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 36px 28px; }
+    .foot-brand { grid-column: 1 / -1; }
+  }
+  /* Telefono: una colonna sola */
+  @media (max-width: 639px) { .foot-grid { grid-template-columns: minmax(0, 1fr); gap: 30px; padding-top: 44px; } }
+
+  .foot-brand { display: flex; flex-direction: column; align-items: flex-start; gap: 18px; }
+  .brand { display: inline-flex; min-height: 44px; align-items: center; color: #fff; }
+  .foot-logo { height: 84px; width: auto; max-width: 240px; object-fit: contain; }
+  .foot-desc { color: #C9D2C8; max-width: 38ch; font-size: 1rem; line-height: 1.5; }
+  .site-footer h4 { font-size: .95rem; letter-spacing: .14em; font-weight: 700; margin: 0 0 12px; color: var(--giallo); }
+  .fnav { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+  /* Ogni link del footer è alto 44px: vicini e più bassi, sul telefono si toccava quello accanto */
+  .fnav a { display: inline-flex; align-items: center; min-height: 44px;
+    font-family: var(--font-display); text-transform: uppercase; letter-spacing: .03em; font-size: 1.1rem; font-weight: 600; opacity: .88; }
+  .fnav a:hover { opacity: 1; color: var(--giallo); }
+  /* Email e numeri restano in caso normale: in maiuscolo un indirizzo si legge male */
+  .fnav.contatti a { font-family: var(--font-body); text-transform: none; letter-spacing: 0; font-size: 1rem; font-weight: 500; overflow-wrap: anywhere; }
+  .nota { opacity: .7; }
+  .dove { margin-top: 18px; }
+  .dove p { color: #E8EDE6; font-size: 1rem; line-height: 1.5; }
+  .dove .nota { font-size: .92rem; margin-top: 4px; }
+  .link-dove { display: inline-flex; align-items: center; min-height: 44px; font-weight: 600; opacity: .88; }
+  .link-dove:hover { opacity: 1; color: var(--giallo); }
+
+  /* Loghi istituzionali su una striscia chiara: i loghi a colori sul verde si leggerebbero male */
+  .enti { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 20px 40px;
+    background: #fff; border-radius: var(--radius); padding: 18px 24px; margin-bottom: 28px; }
+  .enti img { height: var(--lh); width: var(--lw); object-fit: contain; }
+  @media (max-width: 639px) { .enti img { height: var(--lh-mob); width: var(--lw-mob); } }
+
+  .foot-legale { border-top: 1px solid rgba(255, 255, 255, .14); padding: 16px 0 4px;
+    display: flex; flex-direction: column; gap: 4px; font-size: .88rem; color: #B9C4B8; line-height: 1.5; }
+  .foot-legale strong { font-weight: 600; color: #E8EDE6; }
+  .foot-bottom { padding: 8px 0 20px; font-size: .88rem; color: #B9C4B8; display: flex; align-items: center;
+    justify-content: space-between; flex-wrap: wrap; gap: 4px 16px; }
+  .foot-link { display: flex; flex-wrap: wrap; gap: 0 18px; }
+  .foot-link a { display: inline-flex; align-items: center; min-height: 44px; text-decoration: underline; text-underline-offset: 2px; color: #E8EDE6; }
+</style>

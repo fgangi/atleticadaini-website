@@ -1,0 +1,35 @@
+---
+/**
+ * Indirizzo scritto in modo che vada a capo nei punti giusti.
+ * Dal pannello arriva come testo unico, per esempio
+ * "Centro sportivo XXV Aprile, Via XXV Aprile, 20841 Carate Brianza (MB)".
+ *
+ * Lasciato al browser andava a capo dove capitava: "(MB)" da solo sulla
+ * seconda riga, oppure il nome del comune spezzato a metà.
+ * Qui CAP, comune e provincia restano sempre interi, e con `nomeSuRiga` il
+ * nome del luogo sta da solo sulla prima riga.
+ */
+interface Props { testo?: string | null; nomeSuRiga?: boolean }
+const { testo, nomeSuRiga = false } = Astro.props;
+
+const parti = String(testo ?? '').replace(/\s*\n\s*/g, ', ').split(/\s*,\s*/).filter(Boolean);
+// L'ultima parte è la città se contiene il CAP o la provincia tra parentesi
+const ultima = parti.at(-1) ?? '';
+const haCitta = parti.length > 1 && (/\b\d{5}\b/.test(ultima) || /\([A-Z]{2}\)/.test(ultima));
+const citta = haCitta ? ultima : null;
+const resto = haCitta ? parti.slice(0, -1) : parti;
+// Con tre o più parti la prima è il nome del luogo (es. "Centro sportivo XXV Aprile"):
+// su una riga sua con nomeSuRiga, altrimenti in linea ma senza spezzarsi
+const nome = resto.length > 1 ? resto[0] : null;
+const via = (nome ? resto.slice(1) : resto).join(', ');
+---
+{parti.length > 0 && (
+  <span class="indirizzo">
+    {nome && (nomeSuRiga ? <span class="ind-nome">{nome}</span> : <><span class="ind-intero">{nome}</span>{(via || citta) && ', '}</>)}
+    {via}{via && citta && ', '}{citta && <span class="ind-intero">{citta}</span>}
+  </span>
+)}
+<style>
+  .ind-nome { display: block; }
+  .ind-intero { white-space: nowrap; }
+</style>

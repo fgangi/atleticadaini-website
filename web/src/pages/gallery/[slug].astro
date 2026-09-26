@@ -1,0 +1,108 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import PageHero from '../../components/PageHero.astro';
+import { sfetch, img } from '../../lib/sanity';
+import { albumSlugsQuery, albumBySlugQuery } from '../../lib/queries';
+
+export async function getStaticPaths() {
+  const slugs = await sfetch<any[]>(albumSlugsQuery, {}, []);
+  return slugs.filter((s) => s.slug).map((s) => ({ params: { slug: s.slug } }));
+}
+const { slug } = Astro.params;
+const a = await sfetch<any>(albumBySlugQuery, { slug }, null);
+if (!a) return Astro.redirect('/gallery/');
+const foto = (a.foto ?? []).map((f: any) => ({
+  mini: img(f, 520, 390), grande: img(f, 1800), alt: f.alt ?? '',
+})).filter((f: any) => f.mini);
+---
+<Layout title={a.titolo} description={a.descrizione ?? `Foto: ${a.titolo}`} immagine={foto[0]?.grande}>
+  <PageHero eyebrow={a.storico ? 'Album storico' : 'Gallery'} title={a.titolo} lead={a.descrizione}>
+    <a class="indietro" href="/gallery/">← Tutti gli album</a>
+  </PageHero>
+  <section class="section">
+    <div class="container">
+      {foto.length ? (
+        <ul class="foto" data-album>
+          {foto.map((f: any, i: number) => (
+            <li>
+              <a href={f.grande} data-indice={i} data-alt={f.alt}>
+                <img src={f.mini} alt={f.alt || `Foto ${i + 1} di ${foto.length}`} loading="lazy" />
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : <div class="empty"><strong>Album vuoto</strong>Le foto caricate nel pannello appariranno qui.</div>}
+    </div>
+  </section>
+
+  {/* Visore a schermo intero. Senza JavaScript i link aprono la foto grande. */}
+  <dialog class="visore" data-visore aria-label="Foto a schermo intero">
+    <img data-visore-img alt="" />
+    <p class="v-didascalia" data-visore-testo></p>
+    <button type="button" class="v-btn v-chiudi" data-visore-chiudi aria-label="Chiudi">✕</button>
+    <button type="button" class="v-btn v-prec" data-visore-prec aria-label="Foto precedente">‹</button>
+    <button type="button" class="v-btn v-succ" data-visore-succ aria-label="Foto successiva">›</button>
+  </dialog>
+</Layout>
+<style>
+  .indietro { display: inline-flex; align-items: center; min-height: 44px; margin-top: 10px; color: var(--giallo-chiaro); font-weight: 600; }
+  .foto { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  @media (max-width: 1023px) { .foto { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 639px) { .foto { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; } }
+  .foto a { display: block; aspect-ratio: 4 / 3; overflow: hidden; border-radius: 8px; background: var(--surface-2); }
+  .foto img { width: 100%; height: 100%; object-fit: cover; transition: transform .2s ease; }
+  .foto a:hover img { transform: scale(1.04); }
+
+  .visore { width: 100vw; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0;
+    background: rgba(12, 18, 14, .96); color: #fff; }
+  .visore[open] { display: grid; place-items: center; }
+  .visore::backdrop { background: rgba(0, 0, 0, .6); }
+  .visore img { max-width: 94vw; max-height: 84dvh; object-fit: contain; }
+  .v-didascalia { position: absolute; bottom: 16px; left: 70px; right: 70px; text-align: center; color: #E3EAE1; font-size: .95rem; }
+  .v-btn { position: absolute; width: 48px; height: 48px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .3);
+    background: rgba(0, 0, 0, .35); color: #fff; font-size: 1.6rem; line-height: 1; cursor: pointer; display: grid; place-items: center; }
+  .v-btn:hover { background: rgba(255, 255, 255, .15); }
+  .v-chiudi { top: 14px; right: 14px; font-size: 1.2rem; }
+  .v-prec { left: 12px; top: 50%; transform: translateY(-50%); }
+  .v-succ { right: 12px; top: 50%; transform: translateY(-50%); }
+  @media (max-width: 639px) { .v-prec, .v-succ { top: auto; bottom: 12px; transform: none; } }
+</style>
+<script>
+  function initVisore() {
+    const album = document.querySelector<HTMLElement>('[data-album]');
+    const dlg = document.querySelector<HTMLDialogElement>('[data-visore]');
+    if (!album || !dlg || album.dataset.bound) return;
+    album.dataset.bound = '1';
+    const link = Array.from(album.querySelectorAll<HTMLAnchorElement>('a[data-indice]'));
+    const im = dlg.querySelector<HTMLImageElement>('[data-visore-img]')!;
+    const testo = dlg.querySelector('[data-visore-testo]')!;
+    let i = 0;
+    const mostra = (n: number) => {
+      i = (n + link.length) % link.length;
+      im.src = link[i].href;
+      im.alt = link[i].dataset.alt || `Foto ${i + 1} di ${link.length}`;
+      testo.textContent = `${link[i].dataset.alt ? link[i].dataset.alt + ' · ' : ''}${i + 1} / ${link.length}`;
+    };
+    link.forEach((a, n) => a.addEventListener('click', (e) => { e.preventDefault(); mostra(n); dlg.showModal(); }));
+    dlg.querySelector('[data-visore-chiudi]')!.addEventListener('click', () => dlg.close());
+    dlg.querySelector('[data-visore-prec]')!.addEventListener('click', () => mostra(i - 1));
+    dlg.querySelector('[data-visore-succ]')!.addEventListener('click', () => mostra(i + 1));
+    dlg.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') mostra(i - 1);
+      if (e.key === 'ArrowRight') mostra(i + 1);
+    });
+    // Sul telefono si scorre col dito
+    let x0: number | null = null;
+    dlg.addEventListener('touchstart', (e) => { x0 = e.touches[0].clientX; }, { passive: true });
+    dlg.addEventListener('touchend', (e) => {
+      if (x0 === null) return;
+      const dx = e.changedTouches[0].clientX - x0;
+      if (Math.abs(dx) > 50) mostra(dx < 0 ? i + 1 : i - 1);
+      x0 = null;
+    });
+    // Riportando il focus alla foto da cui si era partiti
+    dlg.addEventListener('close', () => link[i]?.focus());
+  }
+  initVisore();
+  document.addEventListener('astro:page-load', initVisore);
+</script>

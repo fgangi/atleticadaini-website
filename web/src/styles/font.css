@@ -1,0 +1,20 @@
+/* ============================================================
+   Caratteri del sito: si cambiano solo qui.
+   File serviti dal sito stesso (nessuna chiamata a server esterni).
+   Scelta attuale: abbinamento A, Barlow Condensed (titoli) + Barlow (testo).
+   Riserva: abbinamento B, Oswald + Source Sans 3 (provabile in sviluppo
+   dalla barra "Anteprima stati", senza pesare sul sito pubblicato).
+   ============================================================ */
+@import '@fontsource/barlow/400.css';
+@import '@fontsource/barlow/400-italic.css';
+@import '@fontsource/barlow/500.css';
+@import '@fontsource/barlow/600.css';
+@import '@fontsource/barlow/700.css';
+@import '@fontsource/barlow-condensed/600.css';
+@import '@fontsource/barlow-condensed/700.css';
+@import '@fontsource/barlow-condensed/800.css';
+
+:root {
+  --font-display: 'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif;
+  --font-body: 'Barlow', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+}

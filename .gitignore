@@ -1,0 +1,26 @@
+# Dipendenze
+node_modules/
+
+# Build / output
+dist/
+.output/
+
+# Ambiente (contiene l'id del progetto Sanity: NON committare)
+.env
+.env.*
+!.env.example
+
+# Cache e strumenti
+.astro/
+*.log
+.cache/
+
+# Sistema operativo / editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+
+# Copia del vecchio sito WordPress (foto, PDF, testi): serve solo a
+# ricaricare i contenuti nel pannello, non va nel repository
+/archivio-sito-vecchio/

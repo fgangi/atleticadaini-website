@@ -1,0 +1,274 @@
+---
+import SocialIcons from './SocialIcons.astro';
+
+type Voce = { href: string; label: string; children?: { href: string; label: string }[] };
+interface Props {
+  nome: string;
+  logoUrl?: string | null;
+  social?: Record<string, string> | null;
+  /** Sezioni che compaiono solo quando hanno contenuto: la voce le segue */
+  presenze: { album: number; record: number; team: number; storia: number; corsi: number; quote: number; iscrizioniAperte: boolean };
+}
+const { nome, logoUrl, social, presenze: p } = Astro.props;
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+
+const nav: Voce[] = [
+  {
+    href: '/societa/', label: 'Società',
+    // Le tendine elencano sezioni e sottopagine che esistono davvero
+    children: [
+      { href: '/societa/', label: 'Chi siamo' },
+      ...(p.storia ? [{ href: '/societa/storia/', label: 'Storia' }] : []),
+      ...(p.team ? [{ href: '/societa/team/', label: 'Team' }] : []),
+      ...(p.album ? [{ href: '/gallery/', label: 'Gallery' }] : []),
+    ],
+  },
+  {
+    href: '/settore-giovanile/', label: 'Settore giovanile',
+    children: [
+      ...(p.corsi ? [{ href: '/settore-giovanile/#corsi', label: 'Corsi e orari' }] : []),
+      ...(p.quote ? [{ href: '/settore-giovanile/#quote', label: 'Quote' }] : []),
+      { href: '/settore-giovanile/#iscrizioni', label: 'Come iscriversi' },
+    ],
+  },
+  ...(p.record ? [{ href: '/record/', label: 'Record' }] : []),
+  { href: '/impianto/', label: 'Impianto' },
+  { href: '/news/', label: 'News' },
+  { href: '/contatti/', label: 'Contatti' },
+];
+// Con una sola voce la tendina non serve: resta un link diretto
+nav.forEach((v) => { if (v.children && v.children.length < 2) delete v.children; });
+
+const attiva = (href: string) => {
+  // I link hanno lo slash finale, il pathname no: normalizzo entrambi
+  const pulito = href.split('#')[0].replace(/\/$/, '') || '/';
+  if (pulito === '/gallery') return path.startsWith('/gallery');
+  return path === pulito || path.startsWith(pulito + '/');
+};
+// Nelle tendine "pagina corrente" è solo la pagina esatta (o un album dentro Gallery):
+// "Chi siamo" non deve risultare attiva mentre si guarda la Storia
+const correnteEsatta = (href: string) => {
+  if (href.includes('#')) return false;
+  const pulito = href.replace(/\/$/, '') || '/';
+  return pulito === '/gallery' ? path.startsWith('/gallery') : path === pulito;
+};
+// "Società" è attiva anche in Gallery, che sta nella sua tendina
+const attivaVoce = (v: Voce) => attiva(v.href) || !!v.children?.some((c) => attiva(c.href));
+const conSocial = Object.values(social ?? {}).some((u) => typeof u === 'string' && u.startsWith('http'));
+---
+<header class:list={['site-header', 'sfondo-scuro', { 'senza-striscia': !conSocial }]}>
+  {conSocial && (
+    <div class="topbar">
+      <div class="container"><SocialIcons social={social} /></div>
+    </div>
+  )}
+
+  <div class="container bar">
+    <a class="brand" href="/" aria-label={`${nome} – home`}>
+      {/* Logo dal pannello (versione per fondi scuri) o, se manca, quello provvisorio del sito */}
+      <img class="brand-logo" src={logoUrl ?? '/loghi/logo-daini-chiaro.svg'} alt="" width="143" height="71" />
+    </a>
+
+    <button class="nav-toggle" type="button" aria-label="Apri il menu" aria-expanded="false" data-nav-toggle>
+      <svg class="ico-apri" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      <svg class="ico-chiudi" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>
+    </button>
+
+    <nav class="mainnav" data-nav data-open="false" aria-label="Navigazione principale">
+      {nav.map((v) => v.children ? (
+        <div class="mainnav-item has-sub" data-sub data-open="false">
+          <button class="mainnav-link mainnav-trigger" type="button" aria-expanded="false" data-trigger data-active={attivaVoce(v) ? 'true' : undefined}>
+            {v.label}
+            <svg class="caret" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="submenu">
+            {v.children.map((c) => (
+              <a href={c.href} aria-current={correnteEsatta(c.href) ? 'page' : undefined}>{c.label}</a>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <a class="mainnav-link" href={v.href} aria-current={attiva(v.href) ? 'page' : undefined}>{v.label}</a>
+      ))}
+      {/* Il pulsante segue l'interruttore "Iscrizioni aperte" del pannello.
+          In sviluppo esiste sempre: la barra "Anteprima stati" lo mostra o lo nasconde. */}
+      {(p.iscrizioniAperte || import.meta.env.DEV) && (
+        <a class="btn cta nav-cta" href="/settore-giovanile/#iscrizioni" data-sim-iscrizioni="aperte" hidden={!p.iscrizioniAperte}>Iscriviti</a>
+      )}
+    </nav>
+  </div>
+</header>
+
+<style>
+  /* La striscia dei social esce dallo schermo scorrendo, da sola: l'header è
+     "sticky" con top negativo pari all'altezza della striscia, quindi resta
+     attaccata solo la barra con marchio e menu. Nessun JavaScript e nessun
+     salto della pagina, perché l'altezza dell'header non cambia mai. */
+  .site-header {
+    position: sticky; top: calc(-1 * var(--altezza-striscia)); z-index: 1000;
+    background: var(--verde); color: #fff;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, .12);
+  }
+  .site-header.senza-striscia { top: 0; }
+  .topbar { height: var(--altezza-striscia); background: var(--verde-scuro); }
+  .topbar .container { display: flex; justify-content: flex-end; align-items: center; height: 100%; }
+  /* Icone nude nella striscia: il bersaglio resta 36px, il minimo per una
+     riga di servizio così sottile; nel footer le stesse icone sono da 44px */
+  .topbar :global(.social-icons) { margin: 0; gap: 2px; }
+  .topbar :global(.social-icons a) { width: 36px; height: 36px; border: 0; border-radius: 8px; opacity: .88; }
+  .topbar :global(.social-icons a:hover) { opacity: 1; background: rgba(255, 255, 255, .1); transform: none; }
+  .topbar :global(.social-icons svg) { width: 18px; height: 18px; }
+
+  .bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: var(--altezza-intestazione); }
+  .brand { display: flex; align-items: center; min-height: 44px; flex: none; color: #fff; }
+  .brand-logo { height: calc(var(--altezza-intestazione) - 22px); width: auto; max-width: 200px; object-fit: contain; }
+
+  /* --- menu da PC (da 1024px) --- */
+  .mainnav { display: flex; align-items: center; gap: 2px; }
+  .mainnav-link {
+    display: inline-flex; align-items: center; gap: .3rem; min-height: 44px; padding: 0 .7rem;
+    font-family: var(--font-display); text-transform: uppercase; letter-spacing: .03em;
+    font-size: 1.1rem; font-weight: 700; color: #fff; white-space: nowrap;
+    border: 0; background: transparent; cursor: pointer; border-radius: 8px;
+  }
+  .mainnav-link:hover { background: rgba(255, 255, 255, .1); }
+  /* Pagina corrente: filetto giallo sotto, come la barra del volantino */
+  .mainnav-link[aria-current='page'], .mainnav-link[data-active='true'] { box-shadow: inset 0 -3px 0 var(--giallo); border-radius: 0; }
+  .caret { opacity: .8; transition: transform .15s ease; flex: none; }
+  .mainnav-item { position: relative; }
+  .mainnav-item[data-open='true'] .caret { transform: rotate(180deg); }
+  .submenu { display: none; flex-direction: column; }
+  .mainnav-item[data-open='true'] > .submenu { display: flex; }
+  .nav-cta { margin-left: 10px; }
+  .nav-toggle { display: none; }
+
+  @media (min-width: 1024px) {
+    .submenu {
+      position: absolute; top: 100%; left: 0; min-width: 220px; z-index: 1001;
+      /* padding-top fa da "ponte" fra bottone e tendina: il mouse non la perde */
+      padding: 10px 6px 6px; gap: 2px;
+    }
+    .submenu::before {
+      content: ''; position: absolute; inset: 6px 0 0 0; z-index: -1;
+      background: var(--ground); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow);
+    }
+    /* Su PC la tendina si apre anche al passaggio del mouse */
+    .mainnav-item.has-sub:hover > .submenu, .mainnav-item.has-sub:focus-within > .submenu { display: flex; }
+    .mainnav-item.has-sub:hover .caret { transform: rotate(180deg); }
+    .submenu a {
+      display: flex; align-items: center; min-height: 44px; padding: 0 .8rem; border-radius: 8px;
+      color: var(--ink-soft); white-space: nowrap;
+      font-family: var(--font-display); text-transform: uppercase; letter-spacing: .03em; font-size: 1.05rem; font-weight: 700;
+    }
+    .submenu a:hover, .submenu a[aria-current='page'] { background: var(--surface-2); color: var(--verde); }
+  }
+
+  /* --- menu da telefono e tablet: pannello a scomparsa + tendine a fisarmonica --- */
+  @media (max-width: 1023px) {
+    .nav-toggle {
+      display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px;
+      border: 1px solid rgba(255, 255, 255, .3); background: transparent; border-radius: 10px; cursor: pointer; color: #fff; flex: none;
+    }
+    .nav-toggle .ico-chiudi { display: none; }
+    .nav-toggle[aria-expanded='true'] .ico-apri { display: none; }
+    .nav-toggle[aria-expanded='true'] .ico-chiudi { display: block; }
+    .mainnav {
+      position: absolute; top: 100%; left: 0; right: 0; flex-direction: column; align-items: stretch;
+      background: var(--verde-scuro); border-top: 1px solid rgba(255, 255, 255, .12);
+      padding: 8px clamp(16px, 4vw, 32px) 20px; gap: 0; display: none;
+      max-height: calc(100dvh - var(--altezza-intestazione)); overflow-y: auto; z-index: 1001;
+    }
+    .mainnav[data-open='true'] { display: flex; }
+    .mainnav-link { width: 100%; justify-content: space-between; min-height: 52px; font-size: 1.2rem; border-radius: 0;
+      border-bottom: 1px solid rgba(255, 255, 255, .08); }
+    .mainnav-link[aria-current='page'], .mainnav-link[data-active='true'] { box-shadow: inset 3px 0 0 var(--giallo); }
+    .submenu { padding: 4px 0 8px 1rem; }
+    .submenu a { display: flex; align-items: center; min-height: 44px; color: rgba(255, 255, 255, .8);
+      font-family: var(--font-display); text-transform: uppercase; letter-spacing: .03em; font-size: 1.08rem; font-weight: 700; }
+    .submenu a:hover, .submenu a[aria-current='page'] { color: var(--giallo); }
+    .nav-cta { margin: 16px 0 0; }
+  }
+</style>
+
+<script>
+// Con le transizioni fra pagine lo script si riesegue: il flag "bound"
+// evita di agganciare due volte gli stessi eventi.
+function initHeader() {
+  const toggle = document.querySelector<HTMLElement>('[data-nav-toggle]');
+  const nav = document.querySelector('[data-nav]');
+  const items = Array.from(document.querySelectorAll('[data-sub]'));
+  if (!toggle || !nav || toggle.dataset.bound === '1') return;
+  toggle.dataset.bound = '1';
+
+  /** Chiude tutte le tendine, tranne quella indicata. */
+  const chiudiTendine = (tranne?: Element) => items.forEach((i) => {
+    if (i === tranne) return;
+    i.setAttribute('data-open', 'false');
+    i.querySelector('[data-trigger]')?.setAttribute('aria-expanded', 'false');
+  });
+  const chiudiMenu = () => {
+    nav.setAttribute('data-open', 'false');
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-label', 'Apri il menu');
+  };
+
+  toggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const aperto = nav.getAttribute('data-open') === 'true';
+    nav.setAttribute('data-open', String(!aperto));
+    toggle.setAttribute('aria-expanded', String(!aperto));
+    toggle.setAttribute('aria-label', aperto ? 'Apri il menu' : 'Chiudi il menu');
+    if (aperto) chiudiTendine();
+  });
+
+  // Su PC la tendina si apre già al passaggio del mouse (CSS);
+  // il click resta per touch e tastiera.
+  items.forEach((item) => {
+    const trigger = item.querySelector('[data-trigger]');
+    trigger?.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const aperta = item.getAttribute('data-open') === 'true';
+      chiudiTendine(item);
+      item.setAttribute('data-open', String(!aperta));
+      trigger.setAttribute('aria-expanded', String(!aperta));
+    });
+    // Allontanando il mouse, una tendina aperta col click non resta bloccata
+    item.addEventListener('mouseleave', () => {
+      if (!matchMedia('(min-width: 1024px)').matches) return;
+      item.setAttribute('data-open', 'false');
+      trigger?.setAttribute('aria-expanded', 'false');
+    });
+  });
+
+  // Toccando un link a una sezione della stessa pagina il menu si chiude
+  nav.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => { chiudiTendine(); chiudiMenu(); }));
+
+  // Click fuori dal menu: chiude tutto
+  document.addEventListener('click', (e) => {
+    if (!(e.target instanceof Element)) return;
+    if (e.target.closest('[data-nav]') || e.target.closest('[data-nav-toggle]')) return;
+    chiudiTendine();
+    chiudiMenu();
+  });
+
+  // Esc chiude e riporta il focus al comando che aveva aperto
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    const aperta = items.find((i) => i.getAttribute('data-open') === 'true');
+    const menuAperto = nav.getAttribute('data-open') === 'true';
+    chiudiTendine();
+    chiudiMenu();
+    if (aperta) aperta.querySelector<HTMLElement>('[data-trigger]')?.focus();
+    else if (menuAperto) toggle.focus();
+  });
+}
+
+initHeader();
+document.addEventListener('astro:page-load', initHeader);
+// Cambiando pagina il menu del telefono va richiuso
+document.addEventListener('astro:before-swap', () => {
+  document.querySelector('[data-nav]')?.setAttribute('data-open', 'false');
+  document.querySelectorAll('[data-sub]').forEach((i) => i.setAttribute('data-open', 'false'));
+});
+</script>

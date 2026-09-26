@@ -1,0 +1,163 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PageHero from '../components/PageHero.astro';
+import SchedaCorso from '../components/SchedaCorso.astro';
+import { sfetch, richText, telHref } from '../lib/sanity';
+import { settingsQuery, iscrizioniQuery, corsiQuery } from '../lib/queries';
+
+/**
+ * Pagina per chi vuole iscriversi, nell'ordine in cui un genitore si fa le
+ * domande: che corsi ci sono e quando → quanto costa → come ci si iscrive →
+ * a chi chiedere. Ogni blocco compare solo se nel pannello ci sono i dati.
+ */
+const [settings, i, corsi] = await Promise.all([
+  sfetch<any>(settingsQuery, {}, null),
+  sfetch<any>(iscrizioniQuery, {}, null),
+  sfetch<any[]>(corsiQuery, {}, []),
+]);
+const giovanili = corsi.filter((c) => c.giovanile !== false);
+const agonisti = corsi.filter((c) => c.giovanile === false);
+const aperte = i?.aperte === true;
+const euro = (n?: number | null) => (typeof n === 'number' ? n.toLocaleString('it-IT', { style: 'currency', currency: 'EUR' }) : '–');
+const pagamento = richText(i?.pagamento);
+const telefoni: any[] = settings?.telefoni ?? [];
+const documenti = (i?.documenti ?? []).filter((d: any) => d?.url);
+---
+<Layout title="Settore giovanile" description="Corsi di atletica leggera a Carate Brianza per ragazze e ragazzi dai 4 anni: orari, quote, moduli e come iscriversi.">
+  <PageHero eyebrow={i?.stagione ? `Stagione ${i.stagione}` : 'Scuola di atletica'} title="Settore giovanile"
+    lead="Corsi di avviamento all'atletica leggera per ragazze e ragazzi, con istruttori federali e laureati in scienze motorie.">
+    <div class="azioni hero-azioni">
+      <a class="btn cta" href="#iscrizioni">{aperte ? 'Iscriviti' : 'Come iscriversi'}</a>
+      {giovanili.length > 0 && <a class="btn chiaro" href="#corsi">Corsi e orari</a>}
+    </div>
+  </PageHero>
+
+  {giovanili.length > 0 && (
+    <section class="section">
+      <div class="container">
+        <div class="section-head" id="corsi"><span class="eyebrow">Per età</span><h2>Corsi e orari</h2></div>
+        <div class:list={['grid', giovanili.length >= 3 ? 'cols-3' : 'cols-2']}>
+          {giovanili.map((c) => <SchedaCorso c={c} completa />)}
+        </div>
+        {agonisti.length > 0 && (
+          <div class="agonisti">
+            <h3>E dopo? Il gruppo agonistico</h3>
+            <div class="grid cols-2">{agonisti.map((c) => <SchedaCorso c={c} completa />)}</div>
+          </div>
+        )}
+      </div>
+    </section>
+  )}
+
+  {i?.tariffe?.length > 0 && (
+    <section class="section fascia-tenue">
+      <div class="container">
+        <div class="section-head" id="quote"><span class="eyebrow">Quote associative{i?.stagione ? ` ${i.stagione}` : ''}</span><h2>Quanto costa</h2></div>
+        <table class="tabella card-tab">
+          <thead><tr><th>Tipologia</th><th>Abbigliamento incluso</th><th class="num">Nuovi iscritti</th><th class="num">Rinnovi</th></tr></thead>
+          <tbody>
+            {i.tariffe.map((t: any) => (
+              <tr>
+                <td class="titolo-riga forte">{t.tipologia}</td>
+                <td data-label="Include">{t.fornitura}</td>
+                <td class="num forte" data-label="Nuovi iscritti">{euro(t.nuovi)}</td>
+                <td class="num" data-label="Rinnovi">{euro(t.rinnovi)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {i?.noteQuote && <p class="nota-quote">{i.noteQuote}</p>}
+        {pagamento && <div class="prose pagamento"><h3>Come pagare</h3><div set:html={pagamento} /></div>}
+      </div>
+    </section>
+  )}
+
+  <section class="section">
+    <div class="container iscr">
+      <div class="iscr-principale">
+        <div class="section-head" id="iscrizioni">
+          <span class="eyebrow">{aperte ? 'Iscrizioni aperte' : 'Iscrizioni'}</span>
+          <h2>Come iscriversi</h2>
+        </div>
+        {i?.periodi && <p class="periodi">{i.periodi}</p>}
+        {i?.lezioneProva?.attiva && (
+          <div class="prova"><strong>Lezione di prova</strong><p>{i.lezioneProva.testo || 'Prima di iscriverti puoi venire a provare: contattaci per concordare il giorno.'}</p></div>
+        )}
+        {i?.requisiti?.length > 0 && (
+          <>
+            <h3 class="sotto">Cosa serve</h3>
+            <ol class="requisiti">{i.requisiti.map((r: string) => <li>{r}</li>)}</ol>
+          </>
+        )}
+        {i?.linkModulo && aperte && <a class="btn cta grande" href={i.linkModulo} target="_blank" rel="noopener">Compila l'iscrizione online</a>}
+        {!i?.periodi && !i?.requisiti?.length && (
+          <p>Per informazioni su corsi e iscrizioni vieni al campo prima o dopo gli allenamenti, oppure contattaci.</p>
+        )}
+      </div>
+
+      <aside class="iscr-lato">
+        {documenti.length > 0 && (
+          <div class="card blocco" id="moduli">
+            <h3>Moduli da scaricare</h3>
+            <ul class="documenti">
+              {documenti.map((d: any) => (
+                <li>
+                  <a href={`${d.url}?dl=`} download>
+                    <span class="doc-ico" aria-hidden="true">{(d.est ?? 'pdf').toUpperCase()}</span>
+                    <span><span class="doc-titolo">{d.titolo}</span>{d.descrizione && <span class="doc-desc">{d.descrizione}</span>}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {(telefoni.length > 0 || settings?.email) && (
+          <div class="card blocco">
+            <h3>Hai domande?</h3>
+            <ul class="referenti">
+              {telefoni.map((t) => (
+                <li><a class="btn" href={telHref(t.numero)}>{t.nome ? `${t.nome} · ` : ''}<span class="tabnums">{t.numero}</span></a></li>
+              ))}
+              {settings?.email && <li><a class="btn" href={`mailto:${settings.email}`}>{settings.email}</a></li>}
+            </ul>
+          </div>
+        )}
+      </aside>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .hero-azioni { margin-top: 22px; }
+  .agonisti { margin-top: clamp(32px, 5vw, 56px); }
+  .agonisti h3 { font-family: var(--font-display); text-transform: uppercase; font-size: 1.6rem; font-weight: 800; color: var(--verde); margin-bottom: 16px; }
+
+  .card-tab { background: var(--ground); border-radius: var(--radius); }
+  .nota-quote { margin-top: 14px; font-weight: 600; color: var(--verde); }
+  .pagamento { margin-top: 26px; max-width: 70ch; }
+  .pagamento h3 { font-size: 1.25rem; }
+
+  .iscr { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 48px); align-items: start; }
+  @media (max-width: 1023px) { .iscr { grid-template-columns: minmax(0, 1fr); } }
+  .iscr-principale { display: flex; flex-direction: column; align-items: flex-start; gap: 16px; }
+  .iscr-principale .section-head { margin-bottom: 4px; }
+  .periodi { white-space: pre-line; color: var(--ink); }
+  .prova { border-left: 4px solid var(--giallo); background: var(--tinta); padding: 12px 16px; border-radius: 0 10px 10px 0; }
+  .prova strong { color: var(--verde); }
+  .sotto { margin-top: 8px; }
+  .requisiti { margin: 0; padding-left: 1.3rem; display: flex; flex-direction: column; gap: 6px; color: var(--ink-soft); }
+  .btn.grande { min-height: 52px; font-size: 1.15rem; margin-top: 6px; }
+
+  .iscr-lato { display: flex; flex-direction: column; gap: 16px; }
+  .blocco { padding: 20px; }
+  .blocco h3 { margin-bottom: 12px; }
+  .documenti, .referenti { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .documenti a { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px;
+    transition: border-color .12s ease; }
+  .documenti a:hover { border-color: var(--verde); }
+  .doc-ico { flex: none; width: 40px; height: 40px; border-radius: 8px; background: var(--verde); color: var(--giallo-chiaro);
+    display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; font-size: .9rem; }
+  .doc-titolo { display: block; font-weight: 600; color: var(--ink); line-height: 1.3; }
+  .doc-desc { display: block; font-size: .92rem; color: var(--ink-faint); }
+  .referenti .btn { width: 100%; justify-content: flex-start; text-transform: none; font-family: var(--font-body); font-weight: 600; font-size: 1rem; letter-spacing: 0; }
+</style>

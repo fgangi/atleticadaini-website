@@ -1,0 +1,29 @@
+---
+import { img } from '../lib/sanity';
+
+/** Scheda di una persona del team. Senza foto: le iniziali su verde. */
+interface Props { m: any }
+const { m } = Astro.props;
+const foto = img(m.foto, 400, 480);
+const iniziali = String(m.nome ?? '').split(/\s+/).map((w: string) => w[0]).join('').slice(0, 2).toUpperCase();
+---
+<article class="card persona">
+  <div class="p-foto">
+    {foto ? <img src={foto} alt="" loading="lazy" /> : <span class="p-iniziali" aria-hidden="true">{iniziali}</span>}
+  </div>
+  <div class="p-corpo">
+    <h3>{m.nome}</h3>
+    {m.ruolo && <p class="p-ruolo">{m.ruolo}</p>}
+    {m.qualifica && <p class="p-nota">{m.qualifica}</p>}
+    {m.specialita && <p class="p-nota">{m.specialita}</p>}
+  </div>
+</article>
+<style>
+  .persona { display: flex; flex-direction: column; height: 100%; }
+  .p-foto { aspect-ratio: 5 / 6; background: var(--sfondo-scuro); display: grid; place-items: center; overflow: hidden; }
+  .p-foto img { width: 100%; height: 100%; object-fit: cover; }
+  .p-iniziali { font-family: var(--font-display); font-size: 3.4rem; font-weight: 800; color: var(--giallo-chiaro); letter-spacing: .04em; }
+  .p-corpo { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 4px; }
+  .p-ruolo { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .03em; font-weight: 700; color: var(--verde); font-size: 1.05rem; line-height: 1.2; }
+  .p-nota { font-size: .95rem; line-height: 1.4; }
+</style>

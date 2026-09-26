@@ -1,0 +1,126 @@
+---
+/**
+ * Carosello orizzontale: scorre con le frecce, con il dito (swipe) o
+ * con la rotellina. Le schede vengono passate come contenuto (slot).
+ */
+interface Props {
+  /** Descrizione per i lettori di schermo (es. "Ultime news") */
+  etichetta: string;
+  /** Larghezza delle schede su schermi larghi (default 200px) */
+  larghezza?: string;
+  /** Larghezza delle schede su schermi stretti (default 158px) */
+  larghezzaMobile?: string;
+  /**
+   * 'stretch' rende tutte le schede alte uguali (utile per schede con testo);
+   * 'flex-start' lascia l'altezza naturale (necessario dove c'è aspect-ratio).
+   */
+  allinea?: 'stretch' | 'flex-start';
+  /**
+   * Numero di colonne su PC (da 1024px in su). Se indicato, sopra quella
+   * larghezza le schede stanno in griglia e non scorrono; sotto diventano un
+   * carosello. Serve per le news: su PC tre schede ci stanno tutte,
+   * su tablet e telefono la terza restava sola o allungava la pagina.
+   */
+  grigliaPc?: number;
+  /** Larghezza delle schede su tablet (640–1023px); se manca vale `larghezza` */
+  larghezzaTablet?: string;
+}
+const {
+  etichetta,
+  larghezza = '200px',
+  larghezzaMobile = '158px',
+  allinea = 'flex-start',
+  grigliaPc,
+  larghezzaTablet,
+} = Astro.props;
+const vars = `--car-w: ${larghezza}; --car-w-tab: ${larghezzaTablet ?? larghezza}; --car-w-mob: ${larghezzaMobile}; --car-align: ${allinea};`
+  + (grigliaPc ? ` --car-cols: ${grigliaPc};` : '');
+---
+<div class:list={['carousel', { 'griglia-pc': grigliaPc }]} data-carousel style={vars}>
+  <button class="car-btn prev" type="button" data-prev aria-label={`${etichetta}: scorri indietro`}>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+
+  <div class="car-track" data-track tabindex="0" role="group" aria-label={etichetta}>
+    <slot />
+  </div>
+
+  <button class="car-btn next" type="button" data-next aria-label={`${etichetta}: scorri avanti`}>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
+</div>
+
+<style>
+  .carousel { position: relative; }
+  .car-track {
+    /* flex-start di default: lo stiramento sovrascriverebbe le proporzioni
+       (aspect-ratio) delle schede. 'stretch' dove servono alte uguali. */
+    display: flex; align-items: var(--car-align, flex-start); gap: 14px; overflow-x: auto; scroll-behavior: smooth;
+    scroll-snap-type: x mandatory; padding: 4px 2px 10px;
+    /* I 4px sopra servono al sollevamento delle schede al passaggio del mouse,
+       che overflow altrimenti taglierebbe. Il margine negativo li restituisce:
+       così la distanza dal titolo è la stessa delle sezioni senza carosello. */
+    margin-top: -4px;
+    scrollbar-width: none; -ms-overflow-style: none;
+  }
+  .car-track::-webkit-scrollbar { display: none; }
+  .car-track > :global(*) { flex: 0 0 auto; width: var(--car-w, 200px); scroll-snap-align: start; }
+  @media (max-width: 1023px) { .car-track > :global(*) { width: var(--car-w-tab, var(--car-w, 200px)); } }
+  @media (max-width: 639px) { .car-track > :global(*) { width: var(--car-w-mob, 158px); } }
+
+  /* Da 1024px in su, con grigliaPc: griglia ferma come le altre del sito
+     (stesso stacco di .grid), senza frecce né scorrimento. */
+  @media (min-width: 1024px) {
+    .griglia-pc .car-track { display: grid; grid-template-columns: repeat(var(--car-cols), minmax(0, 1fr));
+      gap: clamp(14px, 2.4vw, 22px); overflow: visible; scroll-snap-type: none; padding: 0; margin-top: 0; }
+    .griglia-pc .car-track > :global(*) { width: auto; }
+    .griglia-pc .car-btn { display: none !important; }
+  }
+
+  .car-btn {
+    position: absolute; top: 42%; transform: translateY(-50%); z-index: 5;
+    width: 44px; height: 44px; border-radius: 50%; cursor: pointer;
+    display: grid; place-items: center;
+    background: var(--ground); color: var(--ink);
+    border: 1px solid var(--line); box-shadow: var(--shadow);
+    transition: background .12s ease, opacity .15s ease, transform .12s ease;
+  }
+  .car-btn:hover { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+  .car-btn.prev { left: -14px; }
+  .car-btn.next { right: -14px; }
+  .car-btn[hidden] { display: none; }
+  @media (max-width: 1023px) { .car-btn.prev { left: -6px; } .car-btn.next { right: -6px; } }
+  @media (prefers-reduced-motion: reduce) { .car-track { scroll-behavior: auto; } }
+</style>
+
+<script>
+function initCarousels() {
+  document.querySelectorAll('[data-carousel]').forEach((car) => {
+    const track = car.querySelector('[data-track]') as HTMLElement | null;
+    const prev = car.querySelector('[data-prev]') as HTMLButtonElement | null;
+    const next = car.querySelector('[data-next]') as HTMLButtonElement | null;
+    if (!track || !prev || !next) return;
+    // Evita di agganciare due volte gli eventi dopo una transizione di pagina
+    if ((car as HTMLElement).dataset.bound === '1') return;
+    (car as HTMLElement).dataset.bound = '1';
+
+    /** Nasconde le frecce quando non c'è altro da scorrere in quella direzione. */
+    function aggiornaFrecce() {
+      const max = track.scrollWidth - track.clientWidth - 2;
+      const scorribile = max > 2;
+      prev.hidden = !scorribile || track.scrollLeft <= 2;
+      next.hidden = !scorribile || track.scrollLeft >= max;
+    }
+
+    const passo = () => Math.max(track.clientWidth * 0.8, 200);
+    prev.addEventListener('click', () => track.scrollBy({ left: -passo() }));
+    next.addEventListener('click', () => track.scrollBy({ left: passo() }));
+    track.addEventListener('scroll', aggiornaFrecce, { passive: true });
+    window.addEventListener('resize', aggiornaFrecce);
+    aggiornaFrecce();
+  });
+}
+
+initCarousels();
+document.addEventListener('astro:page-load', initCarousels);
+</script>

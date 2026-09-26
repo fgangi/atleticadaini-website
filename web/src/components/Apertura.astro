@@ -1,0 +1,69 @@
+---
+import { img } from '../lib/sanity';
+
+/**
+ * Apertura della home. Due versioni, decise dall'interruttore "Iscrizioni
+ * aperte" del pannello:
+ *  - aperte: la campagna iscrizioni (titolo, testo, "Iscriviti");
+ *  - chiuse: presentazione della società, con l'invito a scoprire i corsi.
+ * In sviluppo esistono entrambe e la barra "Anteprima stati" sceglie quale vedere.
+ */
+interface Props { iscrizioni: any; nome: string; anno?: number | null; }
+const { iscrizioni: i, nome, anno } = Astro.props;
+const aperte = i?.aperte === true;
+const sfondo = img(i?.immagine, 2000);
+const sfondoPiccolo = img(i?.immagine, 1000);
+const annoFondazione = anno ?? 1945;
+const stile = sfondo ? `--foto:url('${sfondo}');--foto-piccola:url('${sfondoPiccolo}')` : undefined;
+const mostraAperte = aperte || import.meta.env.DEV;
+const mostraChiuse = !aperte || import.meta.env.DEV;
+---
+<section class:list={['apertura', 'sfondo-scuro', { 'con-foto': !!sfondo }]} style={stile}>
+  {mostraAperte && (
+    <div class="container ap-testo" data-sim-iscrizioni="aperte" hidden={!aperte}>
+      <span class="eyebrow">{i?.occhiello || (i?.stagione ? `Iscrizioni ${i.stagione}` : 'Iscrizioni aperte')}</span>
+      <h1>{i?.titolo || 'Ripartono i corsi'}</h1>
+      {i?.testo && <p class="lead">{i.testo}</p>}
+      <div class="azioni">
+        <a class="btn cta grande" href="/settore-giovanile/#iscrizioni">Iscriviti</a>
+        <a class="btn chiaro grande" href="/settore-giovanile/#corsi">Scopri i corsi</a>
+      </div>
+      {i?.lezioneProva?.attiva && <p class="prova"><span class="pill">Lezione di prova</span> Vieni a provare prima di iscriverti.</p>}
+    </div>
+  )}
+  {mostraChiuse && (
+    <div class="container ap-testo" data-sim-iscrizioni="chiuse" hidden={aperte}>
+      <span class="eyebrow">Carate Brianza · dal {annoFondazione}</span>
+      <h1>{nome}</h1>
+      <p class="lead">Atletica leggera per ragazze e ragazzi dai 4 anni, fino al settore agonistico.</p>
+      <div class="azioni">
+        <a class="btn cta grande" href="/settore-giovanile/">Scopri i corsi</a>
+        <a class="btn chiaro grande" href="/societa/">Chi siamo</a>
+      </div>
+    </div>
+  )}
+</section>
+
+<style>
+  .apertura { position: relative; background: var(--sfondo-apertura); color: #fff;
+    padding: clamp(56px, 11vw, 132px) 0 clamp(52px, 9vw, 112px); overflow: hidden; }
+  /* Con la foto dal pannello: un velo verde a sinistra tiene leggibile il testo */
+  .apertura.con-foto { background: linear-gradient(90deg, rgba(18, 58, 40, .94) 0%, rgba(18, 58, 40, .78) 48%, rgba(18, 58, 40, .35) 100%),
+    var(--foto) center / cover no-repeat, var(--verde-scuro); }
+  @media (max-width: 1023px) {
+    .apertura.con-foto { background: linear-gradient(rgba(18, 58, 40, .82), rgba(18, 58, 40, .82)),
+      var(--foto-piccola, var(--foto)) center / cover no-repeat, var(--verde-scuro); }
+  }
+  .ap-testo { display: flex; flex-direction: column; align-items: flex-start; gap: var(--stacco-occhiello); }
+  .eyebrow { color: var(--giallo); margin: 0; font-size: clamp(1.05rem, 1.6vw, 1.3rem); letter-spacing: .12em; }
+  h1 { color: #fff; font-size: clamp(3rem, 9vw, 6.4rem); line-height: .92; max-width: 14ch; }
+  .lead { color: #E3EAE1; margin-top: 18px; max-width: 52ch; }
+  .azioni { margin-top: clamp(22px, 3vw, 34px); }
+  .btn.grande { min-height: 52px; padding: 0 1.5rem; font-size: 1.2rem; }
+  .prova { margin-top: 18px; color: #E3EAE1; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .prova .pill { background: rgba(244, 246, 173, .16); color: var(--giallo-chiaro); }
+  @media (max-width: 639px) {
+    .azioni { width: 100%; }
+    .azioni .btn { flex: 1 1 100%; }
+  }
+</style>

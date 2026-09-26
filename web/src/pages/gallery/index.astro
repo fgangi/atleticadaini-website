@@ -1,0 +1,51 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import PageHero from '../../components/PageHero.astro';
+import { sfetch, img } from '../../lib/sanity';
+import { albumListQuery } from '../../lib/queries';
+
+const album = await sfetch<any[]>(albumListQuery, {}, []);
+// Due gruppi: gli album di oggi, poi quelli storici (dal più antico)
+const recenti = album.filter((a) => !a.storico);
+const storici = album.filter((a) => a.storico).sort((a, b) => String(a.data ?? '').localeCompare(String(b.data ?? '')));
+const gruppi = [
+  { id: 'recenti', titolo: storici.length ? 'Gli ultimi album' : null, album: recenti },
+  { id: 'storici', titolo: 'Album storici', album: storici },
+].filter((g) => g.album.length > 0);
+---
+<Layout title="Gallery" description="Le foto dell'Atletica Daini: gare, allenamenti e gli album storici della società.">
+  <PageHero eyebrow="Immagini" title="Gallery" lead="Gare, allenamenti e ottant'anni di storia in pista." />
+  {gruppi.length > 0 ? gruppi.map((g) => (
+    <section class="section">
+      <div class="container">
+        {g.titolo && <div class="section-head" id={g.id}><h2>{g.titolo}</h2></div>}
+        <div class="grid cols-3">
+          {g.album.map((a) => {
+            const cover = img(a.copertina, 640, 480);
+            return (
+              <a class="card album" href={`/gallery/${a.slug}/`}>
+                <div class="ph">
+                  {cover ? <img src={cover} alt="" loading="lazy" /> : <div class="ph-vuota" aria-hidden="true"></div>}
+                  {a.conteggio > 0 && <span class="count">{a.conteggio} foto</span>}
+                </div>
+                <div class="body"><h3>{a.titolo}</h3>{a.data && !a.storico && <span class="tag">{new Date(a.data).getFullYear()}</span>}</div>
+              </a>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  )) : (
+    <section class="section"><div class="container"><div class="empty"><strong>Nessun album pubblicato</strong>Gli album inseriti nel pannello appariranno qui.</div></div></section>
+  )}
+</Layout>
+<style>
+  .album { display: flex; flex-direction: column; transition: transform .14s ease, border-color .14s ease; }
+  .album:hover { transform: translateY(-3px); border-color: var(--salvia); }
+  .ph { position: relative; aspect-ratio: 4 / 3; background: var(--surface-2); overflow: hidden; }
+  .ph img { width: 100%; height: 100%; object-fit: cover; }
+  .ph-vuota { width: 100%; height: 100%; background: var(--sfondo-scuro); }
+  .count { position: absolute; bottom: 10px; right: 10px; background: rgba(20, 30, 24, .78); color: #fff; font-size: .85rem;
+    font-weight: 600; padding: .25rem .6rem; border-radius: 999px; }
+  .body { padding: 14px 16px 18px; display: flex; flex-direction: column; gap: 3px; }
+</style>

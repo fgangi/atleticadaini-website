@@ -1,0 +1,204 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Apertura from '../components/Apertura.astro';
+import SchedaCorso from '../components/SchedaCorso.astro';
+import NewsCard from '../components/NewsCard.astro';
+import NewsInEvidenza from '../components/NewsInEvidenza.astro';
+import Carousel from '../components/Carousel.astro';
+import SchedaRecord from '../components/SchedaRecord.astro';
+import Mappa from '../components/Mappa.astro';
+import Fascia5x1000 from '../components/Fascia5x1000.astro';
+import Indirizzo from '../components/Indirizzo.astro';
+import { sfetch, img, indicazioniUrl, testoSemplice } from '../lib/sanity';
+import {
+  settingsQuery, iscrizioniQuery, corsiQuery, newsUltimeQuery, newsInEvidenzaQuery,
+  recordQuery, impiantiQuery, storiaQuery, albumListQuery,
+} from '../lib/queries';
+
+/**
+ * Home pensata per portare nuovi iscritti: prima i corsi e come iscriversi,
+ * poi ciò che racconta la società (news, record, impianto, storia).
+ * Ogni sezione compare solo se nel pannello c'è qualcosa da mostrare.
+ */
+const [settings, iscrizioni, corsi, inEvidenza, ultime, record, impianti, storia, album] = await Promise.all([
+  sfetch<any>(settingsQuery, {}, null),
+  sfetch<any>(iscrizioniQuery, {}, null),
+  sfetch<any[]>(corsiQuery, {}, []),
+  sfetch<any>(newsInEvidenzaQuery, {}, null),
+  sfetch<any[]>(newsUltimeQuery, { limit: 4 }, []),
+  sfetch<any[]>(recordQuery, {}, []),
+  sfetch<any[]>(impiantiQuery, {}, []),
+  sfetch<any>(storiaQuery, {}, null),
+  sfetch<any[]>(albumListQuery, {}, []),
+]);
+const nome = settings?.nome ?? 'Atletica Daini';
+
+const giovanili = corsi.filter((c) => c.giovanile !== false);
+// L'elenco "ultime news" non ripete quella già in evidenza
+const notizie = ultime.filter((n) => n._id !== inEvidenza?._id).slice(0, 3);
+
+// Record in evidenza: i più recenti, così i nuovi primati si vedono subito
+const annoCorrente = new Date().getFullYear();
+const recordRecenti = [...record].sort((a, b) => (b.anno ?? 0) - (a.anno ?? 0) || String(b.data ?? '').localeCompare(String(a.data ?? ''))).slice(0, 4);
+
+const impianto = impianti[0];
+const fotoImpianto = img(impianto?.foto?.[0], 900, 640);
+const naviga = indicazioniUrl(impianto?.indirizzo);
+
+// Dalla storia solo l'inizio: il racconto completo sta nella sua pagina
+const introStoria = storia?.introduzione ? testoSemplice(storia.introduzione) : '';
+const incipit = introStoria.length > 320 ? introStoria.slice(0, introStoria.lastIndexOf(' ', 300)) + '…' : introStoria;
+const albumStorici = album.filter((a) => a.storico).slice(0, 3);
+const albumHome = (albumStorici.length ? albumStorici : album).slice(0, 3);
+---
+<Layout>
+  <Apertura iscrizioni={iscrizioni} nome={nome} anno={settings?.annoFondazione} />
+
+  {/* 1. Corsi: la prima cosa che cerca un genitore */}
+  {giovanili.length > 0 && (
+    <section class="section" id="corsi">
+      <div class="container">
+        <div class="section-head between">
+          <div>
+            <span class="eyebrow">Settore giovanile{iscrizioni?.stagione ? ` · ${iscrizioni.stagione}` : ''}</span>
+            <h2>Corsi e orari</h2>
+          </div>
+          <a class="btn primary" href="/settore-giovanile/">Quote e iscrizioni</a>
+        </div>
+        <div class:list={['grid', giovanili.length >= 3 ? 'cols-3' : 'cols-2']}>
+          {giovanili.map((c) => <SchedaCorso c={c} />)}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {/* 2. Perché i Daini: pochi numeri, scelti dalla società */}
+  {settings?.puntiForza?.length > 0 && (
+    <section class="section fascia-chiara">
+      <div class="container">
+        <div class="section-head"><span class="eyebrow">Perché i Daini</span><h2>Atletica a Carate dal {settings?.annoFondazione ?? 1945}</h2></div>
+        <ul class="punti">
+          {settings.puntiForza.map((pf: any) => (
+            <li><strong>{pf.titolo}</strong>{pf.testo && <span>{pf.testo}</span>}</li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  {/* 3. News */}
+  {(inEvidenza || notizie.length > 0) && (
+    <section class="section">
+      <div class="container">
+        <div class="section-head between">
+          <div><span class="eyebrow">Dalla pista</span><h2>Ultime news</h2></div>
+          <a class="btn" href="/news/">Tutte le news</a>
+        </div>
+        {inEvidenza && <div class="evidenza"><NewsInEvidenza item={inEvidenza} /></div>}
+        {notizie.length > 0 && (
+          <Carousel etichetta="Ultime news" grigliaPc={3} allinea="stretch" larghezza="320px" larghezzaTablet="300px" larghezzaMobile="82vw">
+            {notizie.map((n) => <NewsCard item={n} />)}
+          </Carousel>
+        )}
+      </div>
+    </section>
+  )}
+
+  {/* 4. Record: i primati di chi è passato dai Daini */}
+  {recordRecenti.length > 0 && (
+    <section class="section fascia-tenue">
+      <div class="container">
+        <div class="section-head between">
+          <div><span class="eyebrow">Record sociali</span><h2>I nostri primati</h2></div>
+          <a class="btn primary" href="/record/">Tutti i record</a>
+        </div>
+        <Carousel etichetta="Record recenti" grigliaPc={4} allinea="stretch" larghezza="260px" larghezzaTablet="260px" larghezzaMobile="72vw">
+          {recordRecenti.map((r) => <SchedaRecord r={r} annoCorrente={annoCorrente} />)}
+        </Carousel>
+      </div>
+    </section>
+  )}
+
+  {/* 5. Impianto: dove trovarci */}
+  {impianto && (
+    <section class="section">
+      <div class="container impianto">
+        <div class="imp-testo">
+          <span class="eyebrow">Dove ci alleniamo</span>
+          <h2>{impianto.nome}</h2>
+          {impianto.indirizzo && <p class="imp-indirizzo"><Indirizzo testo={impianto.indirizzo} /></p>}
+          {impianto.ingresso && <p class="imp-ingresso"><strong>{impianto.ingresso}</strong></p>}
+          <div class="azioni">
+            <a class="btn primary" href="/impianto/">Scopri l'impianto</a>
+            {naviga && <a class="btn" href={naviga} target="_blank" rel="noopener">Portami lì</a>}
+          </div>
+        </div>
+        {fotoImpianto
+          ? <img class="imp-foto" src={fotoImpianto} alt={impianto.foto?.[0]?.alt ?? impianto.nome} loading="lazy" />
+          : <Mappa posizione={impianto.mappa} indirizzo={impianto.indirizzo} titolo={impianto.nome} />}
+      </div>
+    </section>
+  )}
+
+  <Fascia5x1000 dati={settings?.cinquePerMille} codiceFiscale={settings?.codiceFiscale} nome={nome} />
+
+  {/* 6. Storia e gallery */}
+  {(incipit || albumHome.length > 0) && (
+    <section class="section">
+      <div class="container storia">
+        {incipit && (
+          <div class="st-testo">
+            <span class="eyebrow">Dal {settings?.annoFondazione ?? 1945}</span>
+            <h2>La nostra storia</h2>
+            <p class="lead">{incipit}</p>
+            <a class="btn primary" href="/societa/storia/">Leggi la storia</a>
+          </div>
+        )}
+        {albumHome.length > 0 && (
+          <div class="st-album">
+            {albumHome.map((a) => {
+              const cover = img(a.copertina, 520, 390);
+              return (
+                <a class="card album" href={`/gallery/${a.slug}/`}>
+                  {cover ? <img src={cover} alt="" loading="lazy" /> : <span class="album-ph" aria-hidden="true"></span>}
+                  <span class="album-titolo">{a.titolo}</span>
+                </a>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </section>
+  )}
+</Layout>
+
+<style>
+  .evidenza { margin-bottom: clamp(14px, 2.4vw, 22px); }
+
+  .punti { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px 28px; }
+  @media (max-width: 1023px) { .punti { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .punti li { display: flex; flex-direction: column; gap: 4px; border-top: 3px solid var(--verde); padding-top: 12px; }
+  .punti strong { font-family: var(--font-display); text-transform: uppercase; font-size: clamp(1.9rem, 3.4vw, 2.6rem); font-weight: 800; line-height: 1; color: var(--verde); }
+  .punti span { color: var(--ink-soft); }
+
+  .impianto { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: clamp(22px, 4vw, 48px); align-items: center; }
+  @media (max-width: 1023px) { .impianto { grid-template-columns: minmax(0, 1fr); } }
+  .imp-testo { display: flex; flex-direction: column; align-items: flex-start; gap: var(--stacco-occhiello); }
+  .imp-testo .eyebrow { margin: 0; }
+  .imp-indirizzo { margin-top: 14px; font-size: 1.1rem; color: var(--ink); }
+  .imp-ingresso { margin: 8px 0 18px; padding: 8px 12px; border-left: 4px solid var(--giallo); background: var(--tinta); color: var(--verde-scuro); }
+  .imp-foto { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--radius); }
+
+  .storia { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: clamp(22px, 4vw, 48px); align-items: center; }
+  @media (max-width: 1023px) { .storia { grid-template-columns: minmax(0, 1fr); } }
+  .st-testo { display: flex; flex-direction: column; align-items: flex-start; gap: var(--stacco-occhiello); }
+  .st-testo .eyebrow { margin: 0; }
+  .st-testo .lead { margin: 14px 0 20px; }
+  .st-album { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  @media (max-width: 639px) { .st-album { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .album { position: relative; display: block; aspect-ratio: 4 / 3; }
+  .album img, .album-ph { width: 100%; height: 100%; object-fit: cover; display: block; background: var(--sfondo-scuro); }
+  .album-titolo { position: absolute; left: 0; right: 0; bottom: 0; padding: 22px 10px 8px; color: #fff;
+    background: linear-gradient(transparent, rgba(20, 30, 24, .85));
+    font-family: var(--font-display); text-transform: uppercase; font-weight: 700; letter-spacing: .03em; font-size: 1.05rem; line-height: 1.1; }
+</style>

@@ -1,0 +1,121 @@
+---
+/**
+ * Barra di anteprima — SOLO IN SVILUPPO (esclusa dalla build pubblicata).
+ *
+ * Mostra come apparirà il sito in situazioni che nel pannello non sono ancora
+ * vere: iscrizioni aperte o chiuse, fascia del 5×1000 accesa, e l'abbinamento
+ * di caratteri di riserva (B). Non tocca i dati: cambia solo ciò che si vede
+ * in questo browser.
+ */
+---
+<div class="anteprima" data-anteprima>
+  <button class="ap-tab" type="button" data-ap-toggle aria-expanded="false">
+    <span class="ap-punto" aria-hidden="true"></span>Anteprima stati
+  </button>
+  <div class="ap-corpo" hidden>
+    <div class="ap-riga" data-gruppo="iscrizioni">
+      <span class="ap-tit">Iscrizioni</span>
+      <button type="button" data-v="reale" aria-pressed="true">Reale</button>
+      <button type="button" data-v="aperte" aria-pressed="false">Aperte</button>
+      <button type="button" data-v="chiuse" aria-pressed="false">Chiuse</button>
+    </div>
+    <div class="ap-riga" data-gruppo="cinque">
+      <span class="ap-tit">Fascia 5×1000 (home)</span>
+      <button type="button" data-v="reale" aria-pressed="true">Reale</button>
+      <button type="button" data-v="accesa" aria-pressed="false">Accesa</button>
+      <button type="button" data-v="spenta" aria-pressed="false">Spenta</button>
+    </div>
+    <div class="ap-riga" data-gruppo="font">
+      <span class="ap-tit">Caratteri</span>
+      <button type="button" data-v="reale" aria-pressed="true">A · Barlow</button>
+      <button type="button" data-v="b" aria-pressed="false">B · Oswald + Source Sans</button>
+    </div>
+    <p class="ap-nota">Solo in sviluppo: i dati del pannello non vengono modificati.</p>
+  </div>
+</div>
+
+<style is:global>
+  .anteprima { position: fixed; right: 14px; bottom: 14px; z-index: 9999;
+    display: flex; flex-direction: column; align-items: flex-end; gap: 8px; max-width: calc(100vw - 28px);
+    font-family: system-ui, sans-serif; }
+  .ap-tab { display: inline-flex; align-items: center; gap: 7px; min-height: 36px;
+    background: rgba(20, 28, 23, .94); color: #fff; border: 0; padding: .45rem .85rem;
+    border-radius: 999px; font-size: .78rem; font-weight: 650; cursor: pointer; box-shadow: 0 8px 30px rgba(0, 0, 0, .3); }
+  .ap-punto { width: .5rem; height: .5rem; border-radius: 50%; background: var(--giallo); }
+  .ap-corpo { background: rgba(20, 28, 23, .96); color: #fff; border-radius: 14px; padding: 12px 14px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, .35); display: flex; flex-direction: column; gap: 12px; max-width: 100%; }
+  .ap-riga { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .ap-tit { text-transform: uppercase; letter-spacing: .1em; font-size: .62rem; opacity: .6; font-weight: 700; width: 100%; }
+  .ap-corpo button { color: #fff; background: transparent; border: 1px solid rgba(255, 255, 255, .25); border-radius: 999px;
+    padding: .3rem .65rem; font-size: .78rem; font-weight: 600; white-space: nowrap; cursor: pointer; font-family: inherit; }
+  .ap-corpo button:hover { background: rgba(255, 255, 255, .12); }
+  .ap-corpo button[aria-pressed='true'] { background: var(--giallo); color: var(--verde-scuro); border-color: transparent; }
+  .ap-nota { margin: 0; font-size: .7rem; opacity: .55; max-width: 300px; color: #fff; }
+</style>
+
+<script is:inline>
+  (() => {
+    // I caratteri B si caricano dal dev server solo quando servono:
+    // nel sito pubblicato non esistono e non pesano
+    const caricaFontB = () => {
+      if (document.querySelector('[data-font-b]')) return;
+      for (const pkg of ['oswald', 'source-sans-3']) {
+        const l = document.createElement('link');
+        l.rel = 'stylesheet'; l.dataset.fontB = '1';
+        l.href = `/node_modules/@fontsource-variable/${pkg}/index.css`;
+        document.head.append(l);
+      }
+      // Abbinamento B: stesse variabili, altri caratteri
+      const st = document.createElement('style');
+      st.dataset.fontB = '1';
+      st.textContent = ":root[data-ap-font='b']{--font-display:'Oswald Variable','Arial Narrow',sans-serif;--font-body:'Source Sans 3 Variable',system-ui,sans-serif}";
+      document.head.append(st);
+    };
+    const avvia = () => {
+      const box = document.querySelector('[data-anteprima]');
+      if (!box || box.dataset.pronto) return;
+      box.dataset.pronto = '1';
+      const tab = box.querySelector('[data-ap-toggle]');
+      const corpo = box.querySelector('.ap-corpo');
+      const leggi = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
+      const scrivi = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
+
+      const mostraPannello = (v) => {
+        corpo.hidden = !v;
+        tab.setAttribute('aria-expanded', String(v));
+        scrivi('ap_aperta', v ? '1' : '0');
+      };
+
+      /**
+       * Ogni elemento che dipende da uno stato porta data-sim-<gruppo>="<valore>"
+       * e data-reale (se è quello visibile davvero): si mostra quello scelto.
+       */
+      const applicaVarianti = (gruppo, v) => {
+        document.querySelectorAll(`[data-sim-${gruppo}]`).forEach((el) => {
+          if (el.dataset.realeHidden === undefined) el.dataset.realeHidden = el.hidden ? '1' : '0';
+          el.hidden = v === 'reale' ? el.dataset.realeHidden === '1' : el.getAttribute(`data-sim-${gruppo}`) !== v;
+        });
+      };
+      const applica = (gruppo, v) => {
+        scrivi('ap_' + gruppo, v);
+        box.querySelectorAll(`[data-gruppo="${gruppo}"] button`).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
+        if (gruppo === 'font') {
+          if (v === 'b') { caricaFontB(); document.documentElement.dataset.apFont = 'b'; }
+          else delete document.documentElement.dataset.apFont;
+        } else applicaVarianti(gruppo, v);
+      };
+
+      box.querySelectorAll('[data-gruppo]').forEach((riga) => {
+        const gruppo = riga.dataset.gruppo;
+        riga.querySelectorAll('button').forEach((b) => { b.onclick = () => applica(gruppo, b.dataset.v); });
+        // La scelta resta fra una pagina e l'altra: si sta confrontando
+        applica(gruppo, leggi('ap_' + gruppo) || 'reale');
+      });
+      mostraPannello(leggi('ap_aperta') === '1');
+      tab.onclick = () => mostraPannello(corpo.hidden);
+    };
+    avvia();
+    // Dopo una transizione la barra è nuova: si riapplicano le scelte
+    document.addEventListener('astro:page-load', avvia);
+  })();
+</script>

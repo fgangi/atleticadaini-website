@@ -1,0 +1,21 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PageHero from '../components/PageHero.astro';
+/**
+ * Pagina per gli indirizzi che non esistono. Senza questo file Cloudflare
+ * Pages risponderebbe a qualsiasi indirizzo sbagliato con la home e lo stato
+ * "200 OK", e i motori di ricerca la riceverebbero al posto di robots.txt o
+ * della sitemap.
+ */
+---
+<Layout title="Pagina non trovata" noindex>
+  <PageHero eyebrow="Errore 404" title="Pagina non trovata" lead="L'indirizzo che hai aperto non esiste o è stato spostato." />
+  <section class="section">
+    <div class="container azioni">
+      <a class="btn primary" href="/">Torna alla home</a>
+      <a class="btn" href="/settore-giovanile/">Corsi e iscrizioni</a>
+      <a class="btn" href="/news/">News</a>
+      <a class="btn" href="/contatti/">Contatti</a>
+    </div>
+  </section>
+</Layout>

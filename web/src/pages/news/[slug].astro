@@ -1,0 +1,53 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { sfetch, img, richText, formatData } from '../../lib/sanity';
+import { newsSlugsQuery, newsBySlugQuery } from '../../lib/queries';
+import { SEZIONI_NEWS } from '../../sanity/schemaTypes/news';
+
+export async function getStaticPaths() {
+  const slugs = await sfetch<any[]>(newsSlugsQuery, {}, []);
+  return slugs.filter((s) => s.slug).map((s) => ({ params: { slug: s.slug } }));
+}
+const { slug } = Astro.params;
+const post = await sfetch<any>(newsBySlugQuery, { slug }, null);
+if (!post) return Astro.redirect('/news/');
+// Larghezza massima ma nessun ritaglio: la copertina resta intera
+const cover = img(post.copertina, 1200);
+const html = richText(post.corpo);
+const sezione = SEZIONI_NEWS.find((s) => s.value === post.sezione)?.title;
+const allegati = (post.allegati ?? []).filter((a: any) => a?.url);
+---
+<Layout title={post.titolo} description={post.estratto} immagine={img(post.copertina, 1200, 630)}>
+  <article class="post">
+    <div class="container narrow">
+      <a class="indietro" href="/news/">← Tutte le news</a>
+      <div class="meta">
+        {sezione && <span class="pill">{sezione}</span>}
+        <span class="tag">{formatData(post.data)}</span>
+      </div>
+      <h1>{post.titolo}</h1>
+      {post.estratto && <p class="lead">{post.estratto}</p>}
+    </div>
+    {cover && <figure class="cover"><div class="container narrow"><img src={cover} alt="" /></div></figure>}
+    <div class="container narrow">
+      {html ? <div class="prose" set:html={html} /> : !post.estratto && <p class="muted">Contenuto in aggiornamento.</p>}
+      {allegati.length > 0 && (
+        <div class="allegati">
+          <h2>Allegati</h2>
+          <ul>{allegati.map((a: any) => <li><a class="btn" href={`${a.url}?dl=`} download>{a.titolo || a.nome || 'Scarica'}</a></li>)}</ul>
+        </div>
+      )}
+    </div>
+  </article>
+</Layout>
+<style>
+  .post { padding: clamp(28px, 5vw, 56px) 0 clamp(24px, 5vw, 48px); }
+  .indietro { display: inline-flex; align-items: center; min-height: 44px; margin-bottom: 12px; color: var(--verde); font-weight: 600; }
+  .meta { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+  .post h1 { font-size: clamp(2.2rem, 5.4vw, 3.4rem); margin-bottom: 14px; }
+  .cover { margin: clamp(22px, 4vw, 38px) 0; }
+  .cover img { display: block; margin: 0 auto; max-width: 100%; max-height: 80vh; width: auto; height: auto; border-radius: var(--radius); }
+  .allegati { margin-top: 32px; }
+  .allegati h2 { font-size: 1.6rem; margin-bottom: 12px; }
+  .allegati ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+</style>

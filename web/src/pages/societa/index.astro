@@ -1,0 +1,75 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import PageHero from '../../components/PageHero.astro';
+import SchedaPersona from '../../components/SchedaPersona.astro';
+import { sfetch, testoSemplice } from '../../lib/sanity';
+import { settingsQuery, storiaQuery, teamQuery, presenzeQuery } from '../../lib/queries';
+
+/**
+ * Chi siamo: la società in breve, i riconoscimenti, il consiglio direttivo
+ * e le porte verso storia, team, gallery e impianto.
+ */
+const [s, storia, team, presenze] = await Promise.all([
+  sfetch<any>(settingsQuery, {}, null),
+  sfetch<any>(storiaQuery, {}, null),
+  sfetch<any[]>(teamQuery, {}, []),
+  sfetch<any>(presenzeQuery, {}, {}),
+]);
+const nome = s?.nome ?? 'Atletica Daini';
+const anno = s?.annoFondazione ?? 1945;
+// Il primo paragrafo della storia fa da presentazione
+const primo = testoSemplice(storia?.introduzione).split('\n\n')[0] ?? '';
+const direttivo = team.filter((m) => m.area === 'direttivo');
+const porte = [
+  presenze?.storia ? { href: '/societa/storia/', titolo: 'La storia', testo: `Dal ${anno} a oggi, decennio per decennio.` } : null,
+  presenze?.team ? { href: '/societa/team/', titolo: 'Il team', testo: 'Allenatori, istruttori e chi manda avanti la società.' } : null,
+  { href: '/impianto/', titolo: 'L\'impianto', testo: 'Dove ci alleniamo e come arrivare.' },
+  presenze?.album ? { href: '/gallery/', titolo: 'Gallery', testo: 'Foto di ieri e di oggi.' } : null,
+].filter(Boolean) as { href: string; titolo: string; testo: string }[];
+---
+<Layout title="Chi siamo" description={`${s?.denominazione ?? nome}: atletica leggera a Carate Brianza dal ${anno}.`}>
+  <PageHero eyebrow={`Carate Brianza · dal ${anno}`} title="Chi siamo" lead={primo || null} />
+
+  {storia?.riconoscimenti?.length > 0 && (
+    <section class="section">
+      <div class="container">
+        <div class="section-head"><span class="eyebrow">Riconoscimenti</span><h2>Il nostro albo</h2></div>
+        <ul class="ricon">
+          {storia.riconoscimenti.map((r: any) => (
+            <li class="card"><span class="r-anno tabnums">{r.anno}</span><strong>{r.titolo}</strong>{r.descrizione && <p>{r.descrizione}</p>}</li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  {direttivo.length > 0 && (
+    <section class="section">
+      <div class="container">
+        <div class="section-head"><span class="eyebrow">La società</span><h2>Consiglio direttivo</h2></div>
+        <div class="grid cols-4">{direttivo.map((m) => <SchedaPersona m={m} />)}</div>
+      </div>
+    </section>
+  )}
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head"><span class="eyebrow">Scopri di più</span><h2>La società</h2></div>
+      <div class="grid cols-2 porte">
+        {porte.map((p) => (
+          <a class="card porta" href={p.href}><h3>{p.titolo}</h3><p>{p.testo}</p><span class="more" aria-hidden="true">Vai →</span></a>
+        ))}
+      </div>
+    </div>
+  </section>
+</Layout>
+<style>
+  .ricon { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+  .ricon li { padding: 18px 20px; display: flex; flex-direction: column; gap: 4px; border-top: 5px solid var(--giallo); }
+  .r-anno { font-family: var(--font-display); font-size: 2.2rem; font-weight: 800; color: var(--verde); line-height: 1; }
+  .ricon strong { font-size: 1.1rem; color: var(--ink); }
+  .porta { padding: 22px; display: flex; flex-direction: column; gap: 6px; transition: transform .14s ease, border-color .14s ease; }
+  .porta:hover { transform: translateY(-3px); border-color: var(--salvia); }
+  .porta h3 { font-family: var(--font-display); text-transform: uppercase; font-size: 1.6rem; font-weight: 800; color: var(--verde); }
+  .porta .more { margin-top: 6px; }
+</style>

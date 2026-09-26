@@ -1,0 +1,52 @@
+---
+import { mapEmbedSrc, indicazioniUrl } from '../lib/sanity';
+
+/**
+ * Mappa di Google caricata solo al click. Finché non la si apre, Google non
+ * riceve nulla (niente cookie di terze parti senza una scelta di chi visita)
+ * e la pagina resta leggera. Il link al navigatore funziona sempre.
+ */
+interface Props { posizione?: string | null; indirizzo?: string | null; titolo: string }
+const { posizione, indirizzo, titolo } = Astro.props;
+const src = mapEmbedSrc(posizione || indirizzo);
+const naviga = indicazioniUrl(indirizzo || posizione);
+---
+{src && (
+  <div class="mappa" data-mappa={src} data-titolo={titolo}>
+    <div class="mappa-copertina">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+      <button type="button" class="btn primary" data-mappa-apri>Mostra la mappa</button>
+      <p>La mappa viene caricata da Google Maps.</p>
+      {naviga && <a class="btn" href={naviga} target="_blank" rel="noopener">Apri il navigatore</a>}
+    </div>
+  </div>
+)}
+<style>
+  .mappa { position: relative; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); min-height: 300px; height: 100%;
+    background: var(--sfondo-chiaro); }
+  .mappa-copertina { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 12px; padding: 20px; text-align: center; color: var(--verde); }
+  .mappa-copertina p { font-size: .92rem; color: var(--ink-soft); }
+  .mappa :global(iframe) { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+</style>
+<script>
+  function initMappe() {
+    document.querySelectorAll<HTMLElement>('[data-mappa]').forEach((box) => {
+      const btn = box.querySelector('[data-mappa-apri]');
+      if (!btn || box.dataset.bound) return;
+      box.dataset.bound = '1';
+      btn.addEventListener('click', () => {
+        const f = document.createElement('iframe');
+        f.src = box.dataset.mappa!;
+        f.title = `Mappa: ${box.dataset.titolo}`;
+        f.referrerPolicy = 'strict-origin-when-cross-origin';
+        f.allowFullscreen = true;
+        box.querySelector('.mappa-copertina')?.remove();
+        box.append(f);
+        f.focus();
+      });
+    });
+  }
+  initMappe();
+  document.addEventListener('astro:page-load', initMappe);
+</script>

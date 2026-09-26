@@ -1,0 +1,62 @@
+---
+/**
+ * Fascia del 5×1000, accesa dal pannello nel periodo delle dichiarazioni.
+ * Il codice fiscale si copia con un tocco: è l'unica cosa che serve davvero.
+ * In sviluppo esiste sempre (nascosta se spenta) per la barra "Anteprima stati".
+ */
+interface Props { dati?: any; codiceFiscale?: string | null; nome: string }
+const { dati, codiceFiscale, nome } = Astro.props;
+const attiva = dati?.attiva === true && !!codiceFiscale;
+const esiste = attiva || (import.meta.env.DEV && !!codiceFiscale);
+---
+{esiste && (
+  <section class="cinque sfondo-scuro" data-sim-cinque="accesa" hidden={!attiva} aria-labelledby="titolo-5x1000">
+    <div class="container c-griglia">
+      <div>
+        <span class="eyebrow">Sostieni i {nome.split(' ').at(-1)}</span>
+        <h2 id="titolo-5x1000">{dati?.titolo || 'Il tuo 5×1000 ai Daini'}</h2>
+        <p class="c-testo">{dati?.testo || 'Nella dichiarazione dei redditi, firma nel riquadro delle associazioni sportive dilettantistiche e scrivi il nostro codice fiscale. A te non costa nulla.'}</p>
+      </div>
+      <div class="c-codice">
+        <span class="c-etichetta">Codice fiscale</span>
+        <span class="c-numero tabnums" data-cf>{codiceFiscale}</span>
+        <button type="button" class="btn cta" data-copia-cf>Copia il codice</button>
+        <span class="c-esito" role="status" aria-live="polite"></span>
+      </div>
+    </div>
+  </section>
+)}
+<style>
+  .cinque { background: var(--sfondo-campagna); color: #fff; padding: clamp(44px, 7vw, 80px) 0; }
+  .c-griglia { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 28px 48px; align-items: center; }
+  @media (max-width: 1023px) { .c-griglia { grid-template-columns: minmax(0, 1fr); } }
+  .eyebrow { color: var(--giallo); }
+  h2 { color: #fff; }
+  .c-testo { color: #E3EAE1; margin-top: 14px; max-width: 54ch; }
+  .c-codice { background: rgba(244, 246, 173, .1); border: 1px solid rgba(244, 246, 173, .3); border-radius: var(--radius);
+    padding: 22px; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+  .c-etichetta { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .1em; font-weight: 700; color: var(--giallo-chiaro); }
+  .c-numero { font-family: var(--font-display); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 800; letter-spacing: .06em; line-height: 1; }
+  .c-esito { font-size: .95rem; color: var(--giallo-chiaro); min-height: 1.4em; }
+</style>
+<script>
+  function initCf() {
+    document.querySelectorAll<HTMLButtonElement>('[data-copia-cf]').forEach((b) => {
+      if (b.dataset.bound) return;
+      b.dataset.bound = '1';
+      b.addEventListener('click', async () => {
+        const box = b.closest('.c-codice');
+        const cf = box?.querySelector('[data-cf]')?.textContent?.trim() ?? '';
+        const esito = box?.querySelector('.c-esito');
+        try {
+          await navigator.clipboard.writeText(cf);
+          if (esito) esito.textContent = 'Codice copiato.';
+        } catch {
+          if (esito) esito.textContent = 'Non riesco a copiarlo: selezionalo e copialo a mano.';
+        }
+      });
+    });
+  }
+  initCf();
+  document.addEventListener('astro:page-load', initCf);
+</script>

@@ -1,0 +1,25 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PageHero from '../components/PageHero.astro';
+import { sfetch, richText } from '../lib/sanity';
+import { PAGINE_LEGALI as PAGINE, type PaginaLegale } from '../lib/legali';
+
+/**
+ * Privacy e Safeguarding: la pagina esiste solo quando la società ne ha
+ * scritto il testo nel pannello. Una pagina legale vuota sarebbe peggio di
+ * nessuna pagina.
+ */
+export async function getStaticPaths() {
+  const s = await sfetch<any>(`*[_id == "siteSettings"][0]{ privacy, safeguarding }`, {}, null);
+  return (Object.keys(PAGINE) as PaginaLegale[])
+    .filter((k) => Array.isArray(s?.[PAGINE[k].campo]) && s[PAGINE[k].campo].length > 0)
+    .map((k) => ({ params: { legale: k }, props: { corpo: s[PAGINE[k].campo] } }));
+}
+const { legale } = Astro.params as { legale: PaginaLegale };
+const pagina = PAGINE[legale];
+const html = richText(Astro.props.corpo);
+---
+<Layout title={pagina.titolo}>
+  <PageHero eyebrow={pagina.occhiello} title={pagina.titolo} />
+  <section class="section"><div class="container narrow prose" set:html={html} /></section>
+</Layout>

@@ -1,0 +1,25 @@
+---
+/** Record in evidenza (home): la prestazione grande, come un tabellone. */
+interface Props { r: any; annoCorrente: number }
+const { r, annoCorrente } = Astro.props;
+const nuovo = r.anno === annoCorrente;
+const chi = r.atleta ?? (r.staffetta?.length ? r.staffetta.join(', ') : 'Staffetta');
+---
+<article class="card rec">
+  <div class="rec-testa">
+    <span class="rec-spec">{r.specialita}</span>
+    {nuovo ? <span class="pill nuovo">Nuovo {r.anno}</span> : <span class="tag">{r.anno}</span>}
+  </div>
+  <span class="rec-prest tabnums">{r.prestazione}</span>
+  <p class="rec-atleta">{chi}</p>
+  {r.luogo && <p class="rec-luogo">{r.luogo}</p>}
+</article>
+<style>
+  .rec { padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; height: 100%; border-top: 5px solid var(--verde); }
+  .rec-testa { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .rec-spec { font-family: var(--font-display); text-transform: uppercase; font-size: 1.3rem; font-weight: 800; color: var(--verde); }
+  .pill.nuovo { background: var(--giallo); color: var(--verde-scuro); }
+  .rec-prest { font-family: var(--font-display); font-size: clamp(2.4rem, 4vw, 3rem); font-weight: 800; line-height: 1; color: var(--ink); }
+  .rec-atleta { font-weight: 600; color: var(--ink); }
+  .rec-luogo { font-size: .95rem; }
+</style>

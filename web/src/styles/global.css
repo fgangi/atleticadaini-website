@@ -1,0 +1,216 @@
+/* ============================================================
+   Atletica Daini — tema base
+   Colori provvisori: il verde è quello del logo, gli altri vengono dal
+   volantino "Ripartono i corsi" 2026. Quando arriverà la linea grafica
+   definitiva si cambiano solo qui.
+   ============================================================ */
+:root {
+  color-scheme: light;
+
+  /* --- Palette --- */
+  /* Verde del logo: 8,5:1 col bianco, 5,1:1 col giallo (minimo richiesto 4,5) */
+  --verde: #1B573B;
+  --verde-scuro: #123A28;    /* stesso verde più scuro: footer, menu del telefono */
+  --giallo: #E0C955;         /* barra gialla: accento, "Iscriviti" */
+  --giallo-chiaro: #F4F6AD;  /* fondo del volantino: fasce chiare */
+  --salvia: #849C6C;         /* omini del volantino: SOLO grafica (3:1 su bianco) */
+  --grigio-verde: #657269;   /* sottotitoli: testo secondario */
+  --filetto: #B2B77F;        /* riga del volantino: separatori */
+
+  /* --- Ruoli: il resto del sito usa solo questi nomi --- */
+  --ground: #FFFFFF;
+  --surface: #F7F8F2;
+  --surface-2: #EDF0E4;
+  --ink: #1E2B23;
+  --ink-soft: #46524A;
+  --ink-faint: var(--grigio-verde);
+  --line: #DCE1D3;
+  --line-soft: #E9ECE2;
+  --accent: var(--verde);         /* link, pulsanti, occhielli su bianco */
+  --accent-ink: #FFFFFF;          /* testo sopra --accent */
+  --cta: var(--giallo);           /* inviti all'azione */
+  --cta-ink: var(--verde-scuro);  /* sul giallo mai il bianco: 1,7:1 */
+  --tinta: var(--giallo-chiaro);
+
+  /* --- Sfondi provvisori: ogni fascia legge la sua variabile, così
+     quando arriveranno gli sfondi della società basta cambiare il valore
+     (es. url('/sfondi/apertura.jpg')). Il motivo richiama le corsie
+     della pista, come le linee della "D" del logo. --- */
+  --motivo-corsie: repeating-radial-gradient(ellipse 120% 90% at 108% 118%,
+      transparent 0 34px, rgba(244, 246, 173, .07) 34px 37px);
+  --sfondo-scuro: var(--motivo-corsie), linear-gradient(135deg, var(--verde) 0%, var(--verde-scuro) 78%);
+  --sfondo-apertura: var(--sfondo-scuro);
+  --sfondo-campagna: var(--sfondo-scuro);
+  --sfondo-chiaro: repeating-radial-gradient(ellipse 120% 90% at -8% 118%,
+      transparent 0 34px, rgba(132, 156, 108, .12) 34px 37px), var(--giallo-chiaro);
+  --sfondo-footer: var(--motivo-corsie), var(--verde-scuro);
+
+  --radius: 14px; --maxw: 1120px; --contentw: 760px;
+  --shadow: 0 1px 2px rgba(30, 43, 35, .05), 0 8px 30px rgba(30, 43, 35, .07);
+
+  /* Altezza della barra che resta attaccata in alto scorrendo (senza la
+     striscia dei social, che esce): serve agli ancoraggi del menu */
+  --altezza-striscia: 36px;
+  --altezza-intestazione: 84px;
+  --stacco-occhiello: 4px;
+}
+/* Tre standard: telefono < 640px, tablet 640–1023px, PC >= 1024px */
+@media (max-width: 1023px) { :root { --altezza-intestazione: 72px; } }
+@media (max-width: 639px) { :root { --altezza-intestazione: 64px; } }
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; font-family: var(--font-body); }
+body {
+  margin: 0; background: var(--ground); color: var(--ink);
+  font-family: var(--font-body); font-size: 1.0625rem;
+  line-height: 1.6; -webkit-font-smoothing: antialiased;
+  overflow-wrap: break-word;
+}
+img { max-width: 100%; height: auto; display: block; }
+a { color: inherit; text-decoration: none; }
+/* I comandi non ereditano il carattere: senza questa riga finiscono in Arial */
+button, input, select, textarea { font-family: inherit; }
+/* L'attributo hidden deve prevalere sui display: delle schede */
+[hidden] { display: none !important; }
+
+/* --- layout --- */
+.container { width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 clamp(16px, 4vw, 32px); }
+.container.narrow { max-width: var(--contentw); }
+main { display: block; min-height: 60vh; }
+.section { padding: clamp(44px, 7vw, 88px) 0; }
+.section + .section { padding-top: 0; }
+/* Fasce colorate: si staccano dalle sezioni bianche vicine */
+.fascia-chiara { background: var(--sfondo-chiaro); }
+.fascia-chiara + .section, .section + .fascia-chiara { padding-top: clamp(44px, 7vw, 88px); }
+.fascia-tenue { background: var(--surface); }
+.fascia-tenue + .section, .section + .fascia-tenue { padding-top: clamp(44px, 7vw, 88px); }
+
+/* --- tipografia ---
+   Convenzione: ciò che è MAIUSCOLO usa il condensato (titoli, occhielli,
+   menu, pulsanti); il testo in caso normale usa Barlow, titoli di scheda compresi. */
+h1, h2, h3 { margin: 0; text-wrap: balance; line-height: 1; }
+h1, h2 { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .005em; color: var(--verde); }
+h1 { font-size: clamp(2.6rem, 6.4vw, 4.2rem); font-weight: 800; }
+h2 { font-size: clamp(1.9rem, 4vw, 2.7rem); font-weight: 800; }
+h3 { font-size: 1.2rem; font-weight: 700; line-height: 1.25; }
+p { margin: 0; color: var(--ink-soft); }
+.lead { font-size: clamp(1.08rem, 2.2vw, 1.28rem); color: var(--ink-soft); }
+.eyebrow, .tag, .pill, .btn, th, .site-footer h4 { font-family: var(--font-display); text-transform: uppercase; }
+.eyebrow { font-size: 1.15rem; font-weight: 700; letter-spacing: .04em; line-height: 1; color: var(--grigio-verde); margin: 0 0 .6rem; }
+@media (max-width: 639px) { .eyebrow { font-size: 1.02rem; } }
+.section-head { display: flex; flex-direction: column; gap: var(--stacco-occhiello); margin-bottom: clamp(24px, 4vw, 40px); }
+.section-head .eyebrow { margin: 0; }
+.section-head .lead { margin-top: 10px; max-width: 62ch; }
+.section-head.between { flex-direction: row; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 12px 24px; }
+.section-head.between > div { display: flex; flex-direction: column; gap: var(--stacco-occhiello); }
+/* Link del menu alle sezioni: il titolo atterra sotto l'intestazione fissa */
+main [id] { scroll-margin-top: calc(var(--altezza-intestazione) + 24px); }
+
+/* --- pulsanti (bersaglio minimo 44px) --- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem; cursor: pointer;
+  min-height: 44px; padding: 0 1.2rem; border-radius: 999px;
+  letter-spacing: .03em; font-weight: 700; font-size: 1.08rem; line-height: 1;
+  border: 1px solid var(--line); background: var(--ground); color: var(--verde);
+  transition: transform .12s ease, background .12s ease, border-color .12s ease, box-shadow .12s ease;
+}
+.btn:hover { transform: translateY(-1px); border-color: var(--verde); box-shadow: var(--shadow); }
+/* Il pulsante "affonda" alla pressione: dà il senso del click */
+.btn:active { transform: translateY(0) scale(.97); transition-duration: .06s; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+.btn.primary:hover { background: var(--verde-scuro); }
+.btn.cta { background: var(--cta); color: var(--cta-ink); border-color: transparent; }
+.btn.cta:hover { background: #EAD676; }
+/* Su fondo scuro il pulsante secondario è un contorno chiaro */
+.btn.chiaro { background: transparent; color: #fff; border-color: rgba(255, 255, 255, .5); }
+.btn.chiaro:hover { border-color: #fff; background: rgba(255, 255, 255, .08); }
+.azioni { display: flex; flex-wrap: wrap; gap: 10px; }
+
+/* --- schede --- */
+.card { background: var(--ground); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.grid { display: grid; gap: clamp(14px, 2.4vw, 22px); }
+.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 1023px) { .cols-3, .cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 639px) { .cols-2, .cols-3, .cols-4 { grid-template-columns: minmax(0, 1fr); } }
+
+/* Etichette piccole: condensato con peso alto, sotto i 13px diventa illeggibile */
+.pill {
+  display: inline-flex; align-items: center; gap: .4rem; line-height: 1.15;
+  font-size: .88rem; font-weight: 700; letter-spacing: .05em;
+  padding: .3rem .65rem; border-radius: 999px; background: var(--tinta); color: var(--verde);
+}
+.tag { font-size: .95rem; color: var(--ink-faint); letter-spacing: .05em; font-weight: 700; }
+.more { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .04em; font-weight: 700; color: var(--accent); }
+
+/* Testo nascosto ma leggibile dai lettori di schermo */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* --- testo ricco (news, storia, pagine legali) --- */
+.prose { display: flex; flex-direction: column; gap: 1.05rem; font-size: 1.08rem; line-height: 1.7; }
+.prose h2 { font-size: 1.7rem; margin-top: 1rem; }
+.prose h3 { font-size: 1.25rem; margin-top: .6rem; }
+.prose p, .prose ul, .prose ol { color: var(--ink-soft); }
+.prose a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+.prose blockquote { border-left: 3px solid var(--giallo); padding-left: 16px; color: var(--ink-soft); font-style: italic; margin: 0; }
+.prose img { border-radius: var(--radius); }
+.prose ul, .prose ol { padding-left: 1.3rem; margin: 0; display: flex; flex-direction: column; gap: .4rem; }
+
+/* --- stato vuoto --- */
+.empty {
+  border: 1px dashed var(--line); border-radius: var(--radius); padding: 40px 24px; text-align: center;
+  color: var(--ink-faint); background: var(--surface);
+}
+.empty strong { color: var(--ink-soft); display: block; margin-bottom: 4px; }
+
+/* --- utilità --- */
+.muted { color: var(--ink-faint); }
+/* Tempi e misure: cifre a larghezza fissa, si allineano in colonna */
+.tabnums { font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 3px solid var(--giallo); outline-offset: 2px; border-radius: 4px; }
+/* Su fondo chiaro il giallo non si vede: lì il contorno è verde */
+.fascia-chiara :focus-visible, .card :focus-visible, main :focus-visible { outline-color: var(--verde); }
+.sfondo-scuro :focus-visible { outline-color: var(--giallo); }
+
+/* --- transizione fra pagine: dissolvenza --- */
+@keyframes pagIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pagOut { from { opacity: 1; } to { opacity: 0; } }
+::view-transition-old(root) { animation: pagOut .14s ease-out both; }
+::view-transition-new(root) { animation: pagIn .22s ease-in both; }
+
+/* Feedback alla pressione sulle schede che sono link */
+a.card:active { transform: scale(.985); }
+
+/* "Riduci movimento": niente animazioni né scorrimenti fluidi */
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none !important; }
+}
+
+/* --- tabelle (quote, record) ---
+   Su PC e tablet una tabella vera; sul telefono ogni riga diventa una scheda
+   con l'etichetta accanto al valore (data-label sulle celle): le colonne
+   strette mandavano a capo nomi e tempi a ogni parola. */
+.tabella { width: 100%; border-collapse: collapse; font-size: 1rem; }
+.tabella th { text-align: left; font-weight: 700; letter-spacing: .04em; font-size: 1rem; color: var(--grigio-verde);
+  border-bottom: 2px solid var(--verde); padding: 8px 10px; white-space: nowrap; }
+.tabella td { padding: 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.tabella .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tabella td.forte { font-weight: 700; color: var(--ink); }
+.tabella tr.evidenziata td { background: var(--tinta); }
+@media (max-width: 639px) {
+  .tabella thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .tabella, .tabella tbody, .tabella tr, .tabella td { display: block; width: 100%; }
+  .tabella tr { border: 1px solid var(--line); border-radius: 12px; padding: 8px 14px; margin-bottom: 10px; background: var(--ground); }
+  .tabella tr.evidenziata { background: var(--tinta); border-color: var(--giallo); }
+  .tabella tr.evidenziata td { background: transparent; }
+  .tabella td { border: 0; padding: 5px 0; display: flex; justify-content: space-between; gap: 14px; text-align: right; }
+  .tabella td::before { content: attr(data-label); font-family: var(--font-display); text-transform: uppercase;
+    letter-spacing: .04em; font-weight: 700; color: var(--grigio-verde); text-align: left; flex: none; }
+  .tabella td.titolo-riga { font-family: var(--font-display); text-transform: uppercase; font-size: 1.3rem; font-weight: 800;
+    color: var(--verde); text-align: left; padding-bottom: 6px; border-bottom: 1px solid var(--line-soft); margin-bottom: 4px; }
+  .tabella td.titolo-riga::before { content: none; }
+  .tabella td:empty { display: none; }
+}

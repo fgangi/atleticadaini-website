@@ -1,0 +1,36 @@
+---
+import { img, formatData, posizione } from '../lib/sanity';
+import { SEZIONI_NEWS } from '../sanity/schemaTypes/news';
+interface Props { item: any; }
+const { item } = Astro.props;
+// Immagine intera: il ritaglio lo fa il CSS, seguendo l'inquadratura scelta nel pannello
+const cover = img(item.copertina, 700);
+const pos = posizione(item.posizioneAnteprima);
+const sezione = SEZIONI_NEWS.find((s) => s.value === item.sezione)?.title;
+---
+<a class="card news-card" href={`/news/${item.slug}/`} data-sezione={item.sezione}>
+  <div class="thumb">
+    {cover ? <img src={cover} alt="" loading="lazy" style={`object-position:${pos}`} /> : <div class="thumb-ph" aria-hidden="true"></div>}
+    {sezione && item.sezione !== 'societa' && <span class="pill on-thumb">{sezione}</span>}
+  </div>
+  <div class="body">
+    <span class="tag">{formatData(item.data)}</span>
+    <h3>{item.titolo}</h3>
+    {item.estratto && <p>{item.estratto}</p>}
+    <span class="more" aria-hidden="true">Leggi →</span>
+  </div>
+</a>
+<style>
+  .news-card { display: flex; flex-direction: column; height: 100%; transition: transform .14s ease, border-color .14s ease; }
+  .news-card:hover { transform: translateY(-3px); border-color: var(--salvia); }
+  .thumb { position: relative; aspect-ratio: 16 / 10; background: var(--surface-2); overflow: hidden; }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; }
+  /* Senza foto: le corsie del motivo del sito, non un riquadro grigio */
+  .thumb-ph { width: 100%; height: 100%; background: var(--sfondo-scuro); }
+  .pill.on-thumb { position: absolute; top: 10px; left: 10px; background: var(--giallo); color: var(--verde-scuro); }
+  /* flex:1 + margin-top:auto allineano il "Leggi" in fondo a tutte le schede */
+  .body { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+  .body h3 { margin: 2px 0; color: var(--ink); }
+  .body p { font-size: .98rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .more { margin-top: auto; padding-top: 10px; font-size: 1rem; }
+</style>
