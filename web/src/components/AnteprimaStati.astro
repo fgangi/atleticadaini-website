@@ -25,6 +25,13 @@
       <button type="button" data-v="accesa" aria-pressed="false">Accesa</button>
       <button type="button" data-v="spenta" aria-pressed="false">Spenta</button>
     </div>
+    <div class="ap-riga" data-gruppo="record" data-solo="/">
+      <span class="ap-tit">Record in home</span>
+      <button type="button" data-v="reale" aria-pressed="true">Attuale</button>
+      <button type="button" data-v="tabellone" aria-pressed="false">A · Tabellone</button>
+      <button type="button" data-v="numeri" aria-pressed="false">B+C · Numeri e storie</button>
+      <button type="button" data-v="campioni" aria-pressed="false">D · Campioni</button>
+    </div>
     <div class="ap-riga" data-gruppo="font">
       <span class="ap-tit">Caratteri</span>
       <button type="button" data-v="reale" aria-pressed="true">A · Barlow</button>
@@ -105,6 +112,7 @@
         } else applicaVarianti(gruppo, v);
       };
 
+      box.querySelectorAll('[data-solo]').forEach((r) => { r.hidden = location.pathname !== r.dataset.solo; });
       box.querySelectorAll('[data-gruppo]').forEach((riga) => {
         const gruppo = riga.dataset.gruppo;
         riga.querySelectorAll('button').forEach((b) => { b.onclick = () => applica(gruppo, b.dataset.v); });

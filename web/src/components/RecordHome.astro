@@ -1,0 +1,183 @@
+---
+import Carousel from './Carousel.astro';
+import SchedaRecord from './SchedaRecord.astro';
+
+/**
+ * Sezione record della home, in più versioni da confrontare.
+ * In sviluppo le versioni stanno tutte nella pagina e la barra "Anteprima
+ * stati" sceglie quale vedere; nel sito pubblicato esce solo `variante`.
+ *  - attuale:   i 4 record migliorati più di recente
+ *  - tabellone: fascia scura da stadio con 6 record simbolo
+ *  - numeri:    contatore + record più recente + record più longevo
+ *  - campioni:  scorrimento dei titoli, con il contatore delle maglie azzurre
+ */
+interface Props { record: any[]; titoli: any[]; variante?: string }
+const { record, titoli, variante = 'attuale' } = Astro.props;
+const annoCorrente = new Date().getFullYear();
+const tutte = import.meta.env.DEV;
+const mostra = (v: string) => tutte || variante === v;
+const nascosta = (v: string) => variante !== v;
+const chi = (r: any) => r.atleta ?? (r.staffetta?.length ? r.staffetta.join(', ') : 'Staffetta');
+
+// attuale
+const recenti = [...record].sort((a, b) => (b.anno ?? 0) - (a.anno ?? 0) || String(b.data ?? '').localeCompare(String(a.data ?? ''))).slice(0, 4);
+
+// tabellone: record simbolo, uno per famiglia (per l'anteprima scelti qui;
+// nella versione definitiva li sceglierebbe la società dal pannello)
+const SIMBOLO: [string, string, string][] = [
+  ['Velocità', '400 metri', 'M'], ['Mezzofondo', '800 metri', 'M'], ['Strada', 'Maratona', 'M'],
+  ['Velocità donne', '100 metri', 'F'], ['Salti', 'Salto in alto', 'F'], ['Salti', 'Salto in lungo', 'M'],
+];
+const tabellone = SIMBOLO.map(([famiglia, spec, sesso]) => {
+  const r = record.find((x) => x.categoria === 'assoluti' && (x.sezione ?? 'aperto') === 'aperto' && x.sesso === sesso && x.specialita === spec);
+  return r ? { ...r, famiglia } : null;
+}).filter(Boolean) as any[];
+
+// numeri + storie
+const nRecord = record.length;
+const nCampioni = titoli.filter((t) => t.tipo === 'campione').length;
+const nAzzurri = titoli.filter((t) => t.tipo === 'azzurro').length;
+const singoliAssoluti = record.filter((r) => r.categoria === 'assoluti' && (r.sezione ?? 'aperto') === 'aperto' && r.atleta);
+const piuRecente = recenti[0];
+const piuLongevo = [...singoliAssoluti].sort((a, b) => (a.anno ?? 9999) - (b.anno ?? 9999))[0];
+const anniResiste = piuLongevo ? annoCorrente - piuLongevo.anno : 0;
+
+// campioni: i titoli più recenti prima
+const campioni = titoli.filter((t) => t.tipo === 'campione').slice(0, 8);
+---
+{record.length > 0 && (
+  <>
+    {mostra('attuale') && (
+      <section class="section fascia-tenue" data-sim-record="attuale" hidden={nascosta('attuale')}>
+        <div class="container">
+          <div class="section-head between">
+            <div><span class="eyebrow">Record sociali</span><h2>I nostri primati</h2></div>
+            <a class="btn primary" href="/record/">Tutti i record</a>
+          </div>
+          <Carousel etichetta="Record recenti" grigliaPc={4} allinea="stretch" larghezza="260px" larghezzaTablet="260px" larghezzaMobile="72vw">
+            {recenti.map((r) => <SchedaRecord r={r} annoCorrente={annoCorrente} />)}
+          </Carousel>
+        </div>
+      </section>
+    )}
+
+    {mostra('tabellone') && tabellone.length > 0 && (
+      <section class="section tabellone sfondo-scuro" data-sim-record="tabellone" hidden={nascosta('tabellone')}>
+        <div class="container">
+          <div class="section-head between">
+            <div><span class="eyebrow">Record sociali assoluti</span><h2>Il tabellone dei Daini</h2></div>
+            <a class="btn cta" href="/record/">Tutti i record</a>
+          </div>
+          <ol class="tb-righe">
+            {tabellone.map((r) => (
+              <li class="tb-riga">
+                <span class="tb-spec"><span class="tb-fam">{r.famiglia}</span>{r.specialita}</span>
+                <span class="tb-prest tabnums">{r.prestazione}</span>
+                <span class="tb-chi">{chi(r)}<span class="tb-anno tabnums">{r.anno}</span></span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+    )}
+
+    {mostra('numeri') && (
+      <section class="section fascia-tenue" data-sim-record="numeri" hidden={nascosta('numeri')}>
+        <div class="container">
+          <div class="section-head between">
+            <div><span class="eyebrow">Record e campioni</span><h2>I nostri primati</h2></div>
+            <a class="btn primary" href="/record/">Tutti i record</a>
+          </div>
+          <ul class="nu-contatori">
+            <li><strong class="tabnums">{nRecord}</strong><span>record sociali</span></li>
+            <li><strong class="tabnums">{nCampioni}</strong><span>titoli conquistati</span></li>
+            <li><strong class="tabnums">{nAzzurri}</strong><span>presenze in maglia azzurra</span></li>
+          </ul>
+          <div class="nu-storie">
+            {piuRecente && (
+              <article class="card nu-storia">
+                <span class="pill nuovo">L'ultimo record · {piuRecente.anno}</span>
+                <span class="nu-spec">{piuRecente.specialita}</span>
+                <span class="nu-prest tabnums">{piuRecente.prestazione}</span>
+                <p class="nu-chi">{chi(piuRecente)}{piuRecente.luogo && ` · ${piuRecente.luogo}`}</p>
+              </article>
+            )}
+            {piuLongevo && (
+              <article class="card nu-storia longevo">
+                <span class="pill">Il record più longevo</span>
+                <span class="nu-spec">{piuLongevo.specialita}</span>
+                <span class="nu-prest tabnums">{piuLongevo.prestazione}</span>
+                <p class="nu-chi">{chi(piuLongevo)} · {piuLongevo.anno}</p>
+                <p class="nu-resiste"><strong class="tabnums">{anniResiste}</strong> anni di imbattibilità</p>
+              </article>
+            )}
+          </div>
+        </div>
+      </section>
+    )}
+
+    {mostra('campioni') && campioni.length > 0 && (
+      <section class="section fascia-chiara" data-sim-record="campioni" hidden={nascosta('campioni')}>
+        <div class="container">
+          <div class="section-head between">
+            <div><span class="eyebrow">Albo d'oro · {nAzzurri} presenze in maglia azzurra</span><h2>I nostri campioni</h2></div>
+            <a class="btn primary" href="/record/#campione">Albo completo</a>
+          </div>
+          <Carousel etichetta="Titoli conquistati" grigliaPc={4} allinea="stretch" larghezza="260px" larghezzaTablet="260px" larghezzaMobile="72vw">
+            {campioni.map((t) => {
+              const [titolo, ...resto] = String(t.descrizione ?? '').split(' · ');
+              return (
+                <article class="card ca-scheda">
+                  <span class="ca-anno tabnums">{t.anno}</span>
+                  <span class="ca-titolo">{titolo}</span>
+                  <p class="ca-chi">{t.atleta}</p>
+                  {resto.length > 0 && <p class="ca-dove">{resto.join(' · ')}</p>}
+                </article>
+              );
+            })}
+          </Carousel>
+        </div>
+      </section>
+    )}
+  </>
+)}
+
+<style>
+  /* --- A. Tabellone: righe come un tabellone luminoso, cifre gialle --- */
+  .tabellone { background: var(--sfondo-scuro); color: #fff; }
+  .tabellone h2 { color: #fff; }
+  .tabellone .eyebrow { color: var(--giallo); }
+  .tb-righe { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 40px; }
+  @media (max-width: 1023px) { .tb-righe { grid-template-columns: minmax(0, 1fr); } }
+  .tb-riga { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto; column-gap: 16px;
+    padding: 14px 0; border-bottom: 1px solid rgba(244, 246, 173, .18); }
+  .tb-spec { font-family: var(--font-display); text-transform: uppercase; font-weight: 800; font-size: 1.35rem; letter-spacing: .03em; display: flex; flex-direction: column; line-height: 1.1; }
+  .tb-fam { font-size: .82rem; font-weight: 700; letter-spacing: .12em; color: var(--giallo-chiaro); opacity: .8; }
+  .tb-prest { grid-column: 2; grid-row: 1 / span 2; align-self: center; font-family: var(--font-display); font-weight: 800;
+    font-size: clamp(2.2rem, 4vw, 3rem); color: var(--giallo); line-height: 1; }
+  .tb-chi { color: #D5DED3; font-size: .98rem; margin-top: 2px; }
+  .tb-anno { margin-left: .5em; color: var(--giallo-chiaro); opacity: .8; }
+
+  /* --- B+C. Contatori e due storie --- */
+  .nu-contatori { list-style: none; margin: 0 0 clamp(24px, 3vw, 36px); padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .nu-contatori li { display: flex; flex-direction: column; border-top: 4px solid var(--verde); padding-top: 10px; }
+  .nu-contatori strong { font-family: var(--font-display); font-size: clamp(2.6rem, 6vw, 4rem); font-weight: 800; line-height: 1; color: var(--verde); }
+  .nu-contatori span { color: var(--ink-soft); font-size: 1rem; }
+  .nu-storie { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(14px, 2.4vw, 22px); }
+  @media (max-width: 639px) { .nu-contatori { grid-template-columns: minmax(0, 1fr); gap: 10px; } .nu-storie { grid-template-columns: minmax(0, 1fr); } }
+  .nu-storia { padding: clamp(18px, 2.6vw, 28px); display: flex; flex-direction: column; align-items: flex-start; gap: 6px; border-top: 5px solid var(--giallo); }
+  .nu-storia.longevo { border-top-color: var(--verde); }
+  .pill.nuovo { background: var(--giallo); color: var(--verde-scuro); }
+  .nu-spec { font-family: var(--font-display); text-transform: uppercase; font-weight: 800; font-size: 1.4rem; color: var(--verde); margin-top: 6px; }
+  .nu-prest { font-family: var(--font-display); font-weight: 800; font-size: clamp(2.8rem, 5vw, 3.6rem); line-height: 1; color: var(--ink); }
+  .nu-chi { font-weight: 600; color: var(--ink); }
+  .nu-resiste { margin-top: 6px; color: var(--ink-soft); }
+  .nu-resiste strong { font-family: var(--font-display); font-size: 1.8rem; color: var(--verde); }
+
+  /* --- D. Campioni --- */
+  .ca-scheda { padding: 18px 20px; display: flex; flex-direction: column; gap: 4px; height: 100%; border-top: 5px solid var(--giallo); }
+  .ca-anno { font-family: var(--font-display); font-size: 2.4rem; font-weight: 800; line-height: 1; color: var(--verde); }
+  .ca-titolo { font-family: var(--font-display); text-transform: uppercase; font-weight: 800; font-size: 1.15rem; color: var(--verde-scuro); letter-spacing: .03em; }
+  .ca-chi { font-weight: 700; color: var(--ink); }
+  .ca-dove { font-size: .95rem; }
+</style>

@@ -5,14 +5,14 @@ import SchedaCorso from '../components/SchedaCorso.astro';
 import NewsCard from '../components/NewsCard.astro';
 import NewsInEvidenza from '../components/NewsInEvidenza.astro';
 import Carousel from '../components/Carousel.astro';
-import SchedaRecord from '../components/SchedaRecord.astro';
+import RecordHome from '../components/RecordHome.astro';
 import Mappa from '../components/Mappa.astro';
 import Fascia5x1000 from '../components/Fascia5x1000.astro';
 import Indirizzo from '../components/Indirizzo.astro';
 import { sfetch, img, indicazioniUrl, testoSemplice } from '../lib/sanity';
 import {
   settingsQuery, iscrizioniQuery, corsiQuery, newsUltimeQuery, newsInEvidenzaQuery,
-  recordQuery, impiantiQuery, storiaQuery, albumListQuery,
+  recordQuery, titoliQuery, impiantiQuery, storiaQuery, albumListQuery,
 } from '../lib/queries';
 
 /**
@@ -20,7 +20,7 @@ import {
  * poi ciò che racconta la società (news, record, impianto, storia).
  * Ogni sezione compare solo se nel pannello c'è qualcosa da mostrare.
  */
-const [settings, iscrizioni, corsi, inEvidenza, ultime, record, impianti, storia, album] = await Promise.all([
+const [settings, iscrizioni, corsi, inEvidenza, ultime, record, impianti, storia, album, titoli] = await Promise.all([
   sfetch<any>(settingsQuery, {}, null),
   sfetch<any>(iscrizioniQuery, {}, null),
   sfetch<any[]>(corsiQuery, {}, []),
@@ -30,6 +30,7 @@ const [settings, iscrizioni, corsi, inEvidenza, ultime, record, impianti, storia
   sfetch<any[]>(impiantiQuery, {}, []),
   sfetch<any>(storiaQuery, {}, null),
   sfetch<any[]>(albumListQuery, {}, []),
+  sfetch<any[]>(titoliQuery, {}, []),
 ]);
 const nome = settings?.nome ?? 'Atletica Daini';
 
@@ -37,9 +38,6 @@ const giovanili = corsi.filter((c) => c.giovanile !== false);
 // L'elenco "ultime news" non ripete quella già in evidenza
 const notizie = ultime.filter((n) => n._id !== inEvidenza?._id).slice(0, 3);
 
-// Record in evidenza: i più recenti, così i nuovi primati si vedono subito
-const annoCorrente = new Date().getFullYear();
-const recordRecenti = [...record].sort((a, b) => (b.anno ?? 0) - (a.anno ?? 0) || String(b.data ?? '').localeCompare(String(a.data ?? ''))).slice(0, 4);
 
 const impianto = impianti[0];
 const fotoImpianto = img(impianto?.foto?.[0], 900, 640);
@@ -104,20 +102,8 @@ const albumHome = (albumStorici.length ? albumStorici : album).slice(0, 3);
     </section>
   )}
 
-  {/* 4. Record: i primati di chi è passato dai Daini */}
-  {recordRecenti.length > 0 && (
-    <section class="section fascia-tenue">
-      <div class="container">
-        <div class="section-head between">
-          <div><span class="eyebrow">Record sociali</span><h2>I nostri primati</h2></div>
-          <a class="btn primary" href="/record/">Tutti i record</a>
-        </div>
-        <Carousel etichetta="Record recenti" grigliaPc={4} allinea="stretch" larghezza="260px" larghezzaTablet="260px" larghezzaMobile="72vw">
-          {recordRecenti.map((r) => <SchedaRecord r={r} annoCorrente={annoCorrente} />)}
-        </Carousel>
-      </div>
-    </section>
-  )}
+  {/* 4. Record: i primati di chi è passato dai Daini (più versioni in prova) */}
+  <RecordHome record={record} titoli={titoli} variante="attuale" />
 
   {/* 5. Impianto: dove trovarci */}
   {impianto && (

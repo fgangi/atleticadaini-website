@@ -45,6 +45,11 @@ const ogImmagine = immagine ?? img(settings?.logo, 1200) ?? new URL('/anteprima-
 // Dati strutturati in home: dicono a Google il nome del sito e della società
 const social = Object.values(settings?.social ?? {}).filter((u) => typeof u === 'string' && u.startsWith('http'));
 const home = Astro.url.pathname === '/';
+// Riconoscimenti della società (pagina Storia): Google li legge dai dati strutturati
+const riconoscimenti = home
+  ? await sfetch<any[]>(`*[_id == "storia"][0].riconoscimenti[]{ titolo, anno }`, {}, [])
+  : [];
+const premi = (riconoscimenti ?? []).filter((r) => r?.titolo).map((r) => r.anno ? `${r.titolo} (${r.anno})` : r.titolo);
 const datiStrutturati = home ? JSON.stringify({
   '@context': 'https://schema.org',
   '@graph': [
@@ -53,6 +58,7 @@ const datiStrutturati = home ? JSON.stringify({
       sport: 'Atletica leggera', url: origine, foundingDate: String(settings?.annoFondazione ?? 1945),
       ...(img(settings?.logo, 512) ? { logo: img(settings?.logo, 512) } : {}),
       ...(settings?.email ? { email: settings.email } : {}),
+      ...(premi.length ? { award: premi } : {}),
       ...(social.length ? { sameAs: social } : {}) },
   ],
 }) : null;
