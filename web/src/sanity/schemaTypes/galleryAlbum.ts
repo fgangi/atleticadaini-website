@@ -1,4 +1,5 @@
 import { defineType, defineField } from 'sanity';
+import { foto } from './foto';
 
 /** Album fotografico: ha una pagina propria in /gallery/<indirizzo>/. */
 export const galleryAlbum = defineType({
@@ -29,13 +30,13 @@ export const galleryAlbum = defineType({
       initialValue: false,
     }),
     defineField({ name: 'descrizione', title: 'Descrizione', type: 'text', rows: 3 }),
-    defineField({ name: 'copertina', title: 'Copertina', type: 'image', options: { hotspot: true },
+    defineField({ name: 'copertina', title: 'Copertina', ...foto('album'),
       description: 'Se manca, si usa la prima foto dell\'album.' }),
     defineField({
       name: 'foto',
       title: 'Foto',
       type: 'array',
-      of: [{ type: 'image', options: { hotspot: true }, fields: [{ name: 'alt', type: 'string', title: 'Didascalia' }] }],
+      of: [foto('album', { fields: [{ name: 'alt', type: 'string', title: 'Didascalia' }] })],
       options: { layout: 'grid' },
     }),
   ],

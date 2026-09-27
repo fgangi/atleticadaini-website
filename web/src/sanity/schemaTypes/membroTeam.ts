@@ -1,4 +1,5 @@
 import { defineType, defineField } from 'sanity';
+import { foto } from './foto';
 
 export const AREE_TEAM = [
   { title: 'Allenatori e istruttori', value: 'tecnici' },
@@ -18,7 +19,7 @@ export const membroTeam = defineType({
       initialValue: 'tecnici', validation: (r) => r.required() }),
     defineField({ name: 'qualifica', title: 'Qualifica', type: 'string', description: 'Es. "Istruttore FIDAL", "Laurea in Scienze motorie".' }),
     defineField({ name: 'specialita', title: 'Specialità seguite', type: 'string', description: 'Es. "Velocità e ostacoli".' }),
-    defineField({ name: 'foto', title: 'Foto', type: 'image', options: { hotspot: true } }),
+    defineField({ name: 'foto', title: 'Foto', ...foto('persona') }),
     defineField({ name: 'ordine', title: 'Ordine', type: 'number', description: 'Numero più basso = prima.' }),
   ],
   orderings: [{ title: 'Ordine', name: 'ordine', by: [{ field: 'ordine', direction: 'asc' }] }],

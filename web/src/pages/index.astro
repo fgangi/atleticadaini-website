@@ -12,7 +12,7 @@ import Indirizzo from '../components/Indirizzo.astro';
 import { sfetch, img, indicazioniUrl, testoSemplice } from '../lib/sanity';
 import {
   settingsQuery, iscrizioniQuery, corsiQuery, newsUltimeQuery, newsInEvidenzaQuery,
-  recordQuery, titoliQuery, impiantiQuery, storiaQuery, albumListQuery,
+  recordQuery, titoliQuery, impiantiQuery, storiaQuery, albumListQuery, openDayQuery,
 } from '../lib/queries';
 
 /**
@@ -20,7 +20,7 @@ import {
  * poi ciò che racconta la società (news, record, impianto, storia).
  * Ogni sezione compare solo se nel pannello c'è qualcosa da mostrare.
  */
-const [settings, iscrizioni, corsi, inEvidenza, ultime, record, impianti, storia, album, titoli] = await Promise.all([
+const [settings, iscrizioni, corsi, inEvidenza, ultime, record, impianti, storia, album, titoli, openDay] = await Promise.all([
   sfetch<any>(settingsQuery, {}, null),
   sfetch<any>(iscrizioniQuery, {}, null),
   sfetch<any[]>(corsiQuery, {}, []),
@@ -31,10 +31,12 @@ const [settings, iscrizioni, corsi, inEvidenza, ultime, record, impianti, storia
   sfetch<any>(storiaQuery, {}, null),
   sfetch<any[]>(albumListQuery, {}, []),
   sfetch<any[]>(titoliQuery, {}, []),
+  sfetch<any>(openDayQuery, {}, null),
 ]);
 const nome = settings?.nome ?? 'Atletica Daini';
 
-const giovanili = corsi.filter((c) => c.giovanile !== false);
+// Tutti i corsi, dai più piccoli al gruppo agonistico: anche chi è già grande
+// deve trovare subito il suo
 // L'elenco "ultime news" non ripete quella già in evidenza
 const notizie = ultime.filter((n) => n._id !== inEvidenza?._id).slice(0, 3);
 
@@ -50,7 +52,7 @@ const albumStorici = album.filter((a) => a.storico).slice(0, 3);
 const albumHome = (albumStorici.length ? albumStorici : album).slice(0, 3);
 ---
 <Layout>
-  <Apertura iscrizioni={iscrizioni} nome={nome} anno={settings?.annoFondazione} foto={settings?.slider} />
+  <Apertura iscrizioni={iscrizioni} nome={nome} anno={settings?.annoFondazione} foto={settings?.slider} openDay={openDay?.attivo === true} />
 
   {/* 1. News subito dopo l'apertura: è la parte che cambia più spesso */}
   {(inEvidenza || notizie.length > 0) && (
@@ -70,19 +72,19 @@ const albumHome = (albumStorici.length ? albumStorici : album).slice(0, 3);
     </section>
   )}
 
-  {/* 2. Corsi: la prima cosa che cerca un genitore */}
-  {giovanili.length > 0 && (
+  {/* 2. Corsi: la prima cosa che cerca chi vuole iscriversi */}
+  {corsi.length > 0 && (
     <section class="section" id="corsi">
       <div class="container">
         <div class="section-head between">
           <div>
-            <span class="eyebrow">Settore giovanile{iscrizioni?.stagione ? ` · ${iscrizioni.stagione}` : ''}</span>
+            <span class="eyebrow">{iscrizioni?.stagione ? `Stagione ${iscrizioni.stagione}` : 'Per ogni età'}</span>
             <h2>Corsi e orari</h2>
           </div>
           <a class="btn primary" href="/settore-giovanile/">Quote e iscrizioni</a>
         </div>
-        <div class:list={['grid', giovanili.length >= 3 ? 'cols-3' : 'cols-2']}>
-          {giovanili.map((c) => <SchedaCorso c={c} />)}
+        <div class:list={['grid', corsi.length >= 3 ? 'cols-3' : 'cols-2']}>
+          {corsi.map((c) => <SchedaCorso c={c} />)}
         </div>
       </div>
     </section>
@@ -102,8 +104,8 @@ const albumHome = (albumStorici.length ? albumStorici : album).slice(0, 3);
     </section>
   )}
 
-  {/* 4. Record: i primati di chi è passato dai Daini (più versioni in prova) */}
-  <RecordHome record={record} titoli={titoli} variante="attuale" />
+  {/* 4. Record: contatori e i primati più importanti, su fondo verde */}
+  <RecordHome record={record} titoli={titoli} />
 
   {/* 5. Impianto: dove trovarci */}
   {impianto && (

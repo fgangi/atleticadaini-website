@@ -14,9 +14,13 @@ export const titolo = defineType({
     defineField({ name: 'tipo', title: 'Tipo', type: 'string', options: { list: TIPI_TITOLO, layout: 'radio' }, initialValue: 'campione', validation: (r) => r.required() }),
     defineField({ name: 'atleta', title: 'Atleta', type: 'string', validation: (r) => r.required() }),
     defineField({ name: 'anno', title: 'Anno', type: 'number', validation: (r) => r.required() }),
-    defineField({ name: 'descrizione', title: 'Titolo / manifestazione', type: 'string', description: 'Es. "Campione italiano · Campionati Italiani Allievi, Molfetta · 400 m".' }),
+    // Tre campi separati invece di una riga con separatori: il sito li mostra su righe diverse
+    defineField({ name: 'risultato', title: 'Risultato', type: 'string', description: 'Es. "Campione italiano", "8° classificato".' }),
+    defineField({ name: 'gara', title: 'Gara', type: 'string', description: 'Es. "400 m", "10 km di marcia".' }),
+    defineField({ name: 'manifestazione', title: 'Manifestazione e luogo', type: 'string', description: 'Es. "Campionati Italiani Allievi, Molfetta".' }),
+    defineField({ name: 'nota', title: 'Nota (facoltativa)', type: 'string', description: 'Es. "Record d\'Europa 6h18\'24"".' }),
   ],
   orderings: [{ title: 'Anno', name: 'annoDesc', by: [{ field: 'anno', direction: 'desc' }] }],
-  preview: { select: { title: 'atleta', subtitle: 'descrizione', anno: 'anno' },
-    prepare: ({ title, subtitle, anno }) => ({ title: `${title} (${anno ?? ''})`, subtitle }) },
+  preview: { select: { title: 'atleta', risultato: 'risultato', gara: 'gara', anno: 'anno' },
+    prepare: ({ title, risultato, gara, anno }) => ({ title: `${title} (${anno ?? ''})`, subtitle: [risultato, gara].filter(Boolean).join(', ') }) },
 });

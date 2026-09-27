@@ -84,6 +84,9 @@ main { display: block; min-height: 60vh; }
 .fascia-chiara + .section, .section + .fascia-chiara { padding-top: clamp(44px, 7vw, 88px); }
 .fascia-tenue { background: var(--surface); }
 .fascia-tenue + .section, .section + .fascia-tenue { padding-top: clamp(44px, 7vw, 88px); }
+/* Stessa cosa per le fasce verdi (record, invito agli open days, chiusure):
+   senza, la sezione dopo una fascia colorata restava attaccata al suo bordo */
+.section.sfondo-scuro, .section.sfondo-scuro + .section { padding-top: clamp(44px, 7vw, 88px); }
 
 /* --- tipografia ---
    Convenzione: ciò che è MAIUSCOLO usa il condensato (titoli, occhielli,

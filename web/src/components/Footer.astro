@@ -7,7 +7,7 @@ import Indirizzo from './Indirizzo.astro';
 interface Props {
   settings: any;
   impianto?: { nome?: string; indirizzo?: string; ingresso?: string } | null;
-  presenze: { album: number; record: number; team: number; storia: number; privacy: number; safeguarding: number };
+  presenze: { album: number; record: number; team: number; storia: number; privacy: number; safeguarding: number; openDay?: boolean };
 }
 const { settings, impianto, presenze: p } = Astro.props;
 const s = settings ?? {};
@@ -39,7 +39,7 @@ const identificativi = [
   s.codiceFiscale ? `C.F. ${s.codiceFiscale}` : null,
   s.partitaIva ? `P. IVA ${s.partitaIva}` : null,
   s.codiceFidal ? `Cod. FIDAL ${s.codiceFidal}` : null,
-].filter(Boolean).join(' · ');
+].filter(Boolean) as string[];
 ---
 <footer class="site-footer sfondo-scuro">
   <div class="container">
@@ -77,6 +77,7 @@ const identificativi = [
           {p.storia > 0 && <li><a href="/societa/storia/">Storia</a></li>}
           {p.team > 0 && <li><a href="/societa/team/">Team</a></li>}
           <li><a href="/settore-giovanile/">Settore giovanile</a></li>
+          {p.openDay && <li><a href="/open-days/">Open days</a></li>}
           {p.record > 0 && <li><a href="/record/">Record</a></li>}
           <li><a href="/impianto/">Impianto</a></li>
           <li><a href="/news/">News</a></li>
@@ -117,7 +118,7 @@ const identificativi = [
           {sede && <>Sede sociale: <Indirizzo testo={sede} /></>}
         </span>
       )}
-      {identificativi && <span>{identificativi}</span>}
+      {identificativi.map((x) => <span>{x}</span>)}
     </div>
 
     <div class="foot-bottom">

@@ -1,4 +1,5 @@
 import { defineType, defineField } from 'sanity';
+import { foto } from './foto';
 
 /**
  * Corso / gruppo di allenamento. Gli orari si scrivono solo qui: home e
@@ -25,7 +26,7 @@ export const corso = defineType({
     }),
     defineField({ name: 'luogo', title: 'Dove', type: 'reference', to: [{ type: 'impianto' }],
       description: 'Se vuoto si intende l\'impianto principale.' }),
-    defineField({ name: 'foto', title: 'Foto', type: 'image', options: { hotspot: true } }),
+    defineField({ name: 'foto', title: 'Foto', ...foto('corso') }),
     defineField({ name: 'giovanile', title: 'Settore giovanile', type: 'boolean', initialValue: true,
       description: 'Spento per i gruppi agonistici (Allievi e oltre): compaiono a parte.' }),
     defineField({ name: 'ordine', title: 'Ordine', type: 'number', description: 'Numero più basso = prima.' }),

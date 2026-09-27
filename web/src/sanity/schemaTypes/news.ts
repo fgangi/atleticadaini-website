@@ -1,4 +1,5 @@
 import { defineType, defineField } from 'sanity';
+import { foto } from './foto';
 import { InEvidenzaUnica } from '../components/InEvidenzaUnica';
 
 export const SEZIONI_NEWS = [
@@ -37,13 +38,8 @@ export const news = defineType({
       initialValue: 'societa',
       validation: (r) => r.required(),
     }),
-    defineField({ name: 'copertina', title: 'Immagine di copertina', type: 'image', options: { hotspot: true } }),
-    defineField({
-      name: 'posizioneAnteprima',
-      title: 'Inquadratura dell\'anteprima',
-      type: 'posizioneAnteprima',
-      description: 'Trascina l\'immagine per scegliere cosa si vede nelle anteprime. Nella pagina dell\'articolo la foto resta intera.',
-    }),
+    defineField({ name: 'copertina', title: 'Immagine di copertina', ...foto('news'),
+      description: 'Nella pagina dell\'articolo la foto resta intera; nelle anteprime si ritaglia attorno al punto scelto.' }),
     defineField({
       name: 'estratto',
       title: 'Estratto',

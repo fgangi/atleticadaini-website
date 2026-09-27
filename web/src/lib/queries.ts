@@ -10,7 +10,12 @@ export const settingsQuery = groq`*[_id == "siteSettings"][0]{
 // Documento unico delle iscrizioni; i moduli arrivano già con l'indirizzo del file
 export const iscrizioniQuery = groq`*[_id == "iscrizioni"][0]{
   aperte, stagione, occhiello, titolo, testo, immagine, linkModulo, periodi, lezioneProva,
-  tariffe, noteQuote, pagamento, requisiti,
+  tariffe, abbigliamento, noteQuote, pagamento, requisiti,
+  "documenti": documenti[]->{ _id, titolo, descrizione, "url": file.asset->url, "est": file.asset->extension }
+}`;
+
+export const openDayQuery = groq`*[_id == "openDay"][0]{
+  attivo, occhiello, titolo, testo, immagine, date, tuttoAnno, whatsapp, referente, messaggio, cosaPortare, faq,
   "documenti": documenti[]->{ _id, titolo, descrizione, "url": file.asset->url, "est": file.asset->extension }
 }`;
 
@@ -32,14 +37,14 @@ export const storiaQuery = groq`*[_id == "storia"][0]{
 }`;
 
 export const recordQuery = groq`*[_type == "record"] | order(ordine asc, specialita asc){
-  _id, specialita, categoria, sesso, sezione, prestazione, atleta, staffetta, annoNascita, eta, anno, data, luogo
+  _id, specialita, categoria, sesso, sezione, prestazione, atleta, staffetta, annoNascita, eta, anno, data, luogo, inEvidenza
 }`;
 
 export const titoliQuery = groq`*[_type == "titolo"] | order(anno desc, atleta asc){
-  _id, tipo, atleta, anno, descrizione
+  _id, tipo, atleta, anno, risultato, gara, manifestazione, nota
 }`;
 
-const campiNews = groq`_id, titolo, "slug": slug.current, data, sezione, estratto, copertina, posizioneAnteprima, inEvidenza`;
+const campiNews = groq`_id, titolo, "slug": slug.current, data, sezione, estratto, copertina, inEvidenza`;
 
 export const newsUltimeQuery = groq`*[_type == "news" && defined(slug.current)] | order(data desc)[0...$limit]{ ${campiNews} }`;
 
@@ -77,5 +82,6 @@ export const presenzeQuery = groq`{
   "privacy": count(*[_id == "siteSettings" && count(privacy) > 0]),
   "safeguarding": count(*[_id == "siteSettings" && count(safeguarding) > 0]),
   "iscrizioniAperte": *[_id == "iscrizioni"][0].aperte == true,
+  "openDay": *[_id == "openDay"][0].attivo == true,
   "linkModulo": *[_id == "iscrizioni"][0].linkModulo
 }`;

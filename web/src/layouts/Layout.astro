@@ -25,6 +25,7 @@ const p = {
   album: presenze.album ?? 0, record: presenze.record ?? 0, team: presenze.team ?? 0, storia: presenze.storia ?? 0,
   corsi: presenze.corsi ?? 0, quote: presenze.quote ?? 0, privacy: presenze.privacy ?? 0, safeguarding: presenze.safeguarding ?? 0,
   iscrizioniAperte: presenze.iscrizioniAperte === true,
+  openDay: presenze.openDay === true,
 };
 const [impianto] = await sfetch<any[]>(impiantiQuery, {}, []);
 
@@ -89,6 +90,7 @@ const datiStrutturati = home ? JSON.stringify({
     <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3" />
     {/* Transizioni fluide fra le pagine invece del ricaricamento secco */}
     <ClientRouter />
+    <slot name="head" />
   </head>
   <body>
     <a class="salta" href="#contenuto">Vai al contenuto</a>

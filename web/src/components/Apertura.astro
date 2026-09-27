@@ -1,5 +1,6 @@
 ---
-import { img, urlFor } from '../lib/sanity';
+import { img, ritaglio, conPunto } from '../lib/sanity';
+import { APERTURA } from '../lib/formati';
 
 /**
  * Apertura della home. Il testo ha due versioni, decise dall'interruttore
@@ -15,25 +16,26 @@ import { img, urlFor } from '../lib/sanity';
  * foto restano ferme sulla prima; lo scorrimento si ferma anche col mouse
  * sopra o con la tastiera sui comandi (WCAG 2.2.2).
  */
-interface Props { iscrizioni: any; nome: string; anno?: number | null; foto?: any[] | null; }
-const { iscrizioni: i, nome, anno, foto = [] } = Astro.props;
+interface Props { iscrizioni: any; nome: string; anno?: number | null; foto?: any[] | null; openDay?: boolean }
+const { iscrizioni: i, nome, anno, foto = [], openDay = false } = Astro.props;
 const aperte = i?.aperte === true;
 const annoFondazione = anno ?? 1945;
 const mostraAperte = aperte || import.meta.env.DEV;
 const mostraChiuse = !aperte || import.meta.env.DEV;
 
-// Il punto focale scelto nel pannello tiene il soggetto in vista a ogni formato
-const fuoco = (f: any) => f?.hotspot ? `${Math.round(f.hotspot.x * 100)}% ${Math.round(f.hotspot.y * 100)}%` : '50% 50%';
+// Ogni foto arriva già ritagliata nella forma dell'apertura per telefono,
+// tablet e PC, centrata sul punto importante scelto nel pannello (sul
+// telefono, se c'è, sul punto apposito). Il telefono scarica solo il suo ritaglio.
 const slide = (foto ?? []).filter((f) => f?.asset).map((f) => ({
-  src: img(f, 1600),
-  srcset: [800, 1200, 1600, 2400].map((w) => `${urlFor(f).width(w).auto('format').fit('max').url()} ${w}w`).join(', '),
+  pc: ritaglio(f, APERTURA.pc, [1200, 1600, 2400, 3200])!,
+  tablet: ritaglio(f, APERTURA.tablet, [800, 1200, 1600])!,
+  telefono: ritaglio(conPunto(f, f.telefono), APERTURA.telefono, [500, 800, 1200])!,
   alt: f.alt ?? '',
   didascalia: f.didascalia ?? '',
-  pos: fuoco(f),
 }));
-// Senza foto a scorrimento: la foto della campagna, come prima
-const sfondo = slide.length ? null : img(i?.immagine, 2000);
-const sfondoPiccolo = slide.length ? null : img(i?.immagine, 1000);
+// Senza foto a scorrimento: la foto della campagna, ritagliata allo stesso modo
+const sfondo = slide.length ? null : img(i?.immagine, 2000, 1000);
+const sfondoPiccolo = slide.length ? null : img(i?.immagine, 900, Math.round(900 / APERTURA.telefono));
 const stile = sfondo ? `--foto:url('${sfondo}');--foto-piccola:url('${sfondoPiccolo}')` : undefined;
 ---
 <section class:list={['apertura', 'sfondo-scuro', { 'con-foto': !!sfondo, 'con-slider': slide.length > 0 }]} style={stile}
@@ -41,9 +43,12 @@ const stile = sfondo ? `--foto:url('${sfondo}');--foto-piccola:url('${sfondoPicc
   {slide.length > 0 && (
     <div class="slides" aria-hidden={slide.every((s) => !s.alt) ? 'true' : undefined}>
       {slide.map((s, n) => (
-        <img class="slide" data-attiva={n === 0 ? 'true' : 'false'} src={s.src} srcset={s.srcset} sizes="100vw"
-          alt={s.alt} style={`object-position:${s.pos}`} loading={n === 0 ? 'eager' : 'lazy'}
-          fetchpriority={n === 0 ? 'high' : undefined} data-didascalia={s.didascalia} />
+        <picture>
+          <source media="(max-width: 639px)" srcset={s.telefono.srcset} sizes="100vw" />
+          <source media="(max-width: 1023px)" srcset={s.tablet.srcset} sizes="100vw" />
+          <img class="slide" data-attiva={n === 0 ? 'true' : 'false'} src={s.pc.src} srcset={s.pc.srcset} sizes="100vw"
+            alt={s.alt} loading={n === 0 ? 'eager' : 'lazy'} fetchpriority={n === 0 ? 'high' : undefined} data-didascalia={s.didascalia} />
+        </picture>
       ))}
       <div class="velo"></div>
     </div>
@@ -58,18 +63,21 @@ const stile = sfondo ? `--foto:url('${sfondo}');--foto-piccola:url('${sfondoPicc
         <a class="btn cta grande" href="/settore-giovanile/#iscrizioni">Iscriviti</a>
         <a class="btn chiaro grande" href="/settore-giovanile/#corsi">Scopri i corsi</a>
       </div>
-      {i?.lezioneProva?.attiva && <p class="prova"><span class="pill">Lezione di prova</span> Vieni a provare prima di iscriverti.</p>}
+      {openDay
+        ? <p class="prova"><a href="/open-days/"><span class="pill">Open days</span> Vieni a provare prima di iscriverti →</a></p>
+        : i?.lezioneProva?.attiva && <p class="prova"><span class="pill">Lezione di prova</span> Vieni a provare prima di iscriverti.</p>}
     </div>
   )}
   {mostraChiuse && (
     <div class="container ap-testo" data-sim-iscrizioni="chiuse" hidden={aperte}>
-      <span class="eyebrow">Carate Brianza · dal {annoFondazione}</span>
+      <span class="eyebrow">Carate Brianza, dal {annoFondazione}</span>
       <h1>{nome}</h1>
-      <p class="lead">Atletica leggera per ragazze e ragazzi dai 4 anni, fino al settore agonistico.</p>
+      <p class="lead">Atletica leggera dai 4 anni in su: corsi per bambini e ragazzi, gruppo agonistico e master.</p>
       <div class="azioni">
         <a class="btn cta grande" href="/settore-giovanile/">Scopri i corsi</a>
         <a class="btn chiaro grande" href="/societa/">Chi siamo</a>
       </div>
+      {openDay && <p class="prova"><a href="/open-days/"><span class="pill">Open days</span> Vieni a provare l'atletica →</a></p>}
     </div>
   )}
 
@@ -126,6 +134,9 @@ const stile = sfondo ? `--foto:url('${sfondo}');--foto-piccola:url('${sfondoPicc
   .btn.grande { min-height: 52px; padding: 0 1.5rem; font-size: 1.2rem; }
   .prova { margin-top: 18px; color: #E3EAE1; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .prova .pill { background: rgba(244, 246, 173, .16); color: var(--giallo-chiaro); }
+  .prova a { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; color: #fff; font-weight: 600; }
+  .prova a:hover { color: var(--giallo); }
+  .prova a .pill { background: var(--giallo); color: var(--verde-scuro); }
   @media (max-width: 639px) {
     .azioni { width: 100%; }
     .azioni .btn { flex: 1 1 100%; }

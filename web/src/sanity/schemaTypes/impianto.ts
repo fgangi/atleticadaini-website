@@ -1,4 +1,5 @@
 import { defineType, defineField } from 'sanity';
+import { foto } from './foto';
 
 /** Luogo di allenamento. Oggi è uno solo; l'elenco permette di aggiungerne altri. */
 export const impianto = defineType({
@@ -15,8 +16,8 @@ export const impianto = defineType({
     defineField({ name: 'comeArrivare', title: 'Come arrivare', type: 'text', rows: 3, description: 'Parcheggio, mezzi pubblici, bici.' }),
     defineField({ name: 'mappa', title: 'Posizione sulla mappa', type: 'text', rows: 2,
       description: 'Incolla il codice "Incorpora una mappa" di Google Maps, oppure scrivi coordinate o indirizzo.' }),
-    defineField({ name: 'foto', title: 'Foto', type: 'array', of: [{ type: 'image', options: { hotspot: true },
-      fields: [{ name: 'alt', type: 'string', title: 'Didascalia' }] }], options: { layout: 'grid' } }),
+    defineField({ name: 'foto', title: 'Foto', type: 'array', options: { layout: 'grid' },
+      of: [foto('impianto', { fields: [{ name: 'alt', type: 'string', title: 'Didascalia' }] })] }),
     defineField({ name: 'ordine', title: 'Ordine', type: 'number', description: 'Il primo è l\'impianto principale (in home).' }),
   ],
   orderings: [{ title: 'Ordine', name: 'ordine', by: [{ field: 'ordine', direction: 'asc' }] }],

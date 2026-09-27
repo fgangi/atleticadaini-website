@@ -1,6 +1,7 @@
 import { sanityClient } from 'sanity:client';
 import { createImageUrlBuilder } from '@sanity/image-url';
 import { toHTML } from '@portabletext/to-html';
+import { dimensioni } from './formati';
 
 const client = sanityClient;
 const builder = createImageUrlBuilder(client);
@@ -99,13 +100,26 @@ export function indicazioniUrl(destinazione?: string | null): string | null {
 }
 
 /**
- * Converte l'inquadratura scelta nel pannello in `object-position` CSS:
- * il ritaglio avviene nel browser, esattamente come nell'anteprima del pannello.
+ * Foto già ritagliata sul server nella forma del riquadro, centrata sul punto
+ * importante scelto nel pannello (senza punto, sulla parte con più dettagli).
+ * Restituisce src e srcset: il browser scarica solo la misura che gli serve.
+ * Le larghezze oltre la risoluzione della foto si scartano: sarebbero solo
+ * ingrandite, più pesanti e non più nitide.
  */
-export function posizione(p?: { x?: number; y?: number } | null): string {
-  const x = typeof p?.x === 'number' ? p.x : 50;
-  const y = typeof p?.y === 'number' ? p.y : 50;
-  return `${x}% ${y}%`;
+export function ritaglio(source: any, ratio: number, larghezze: number[]): { src: string; srcset: string } | null {
+  if (!source?.asset) return null;
+  const d = dimensioni(source.asset._ref);
+  const massimo = d ? Math.min(d.w, d.h * ratio) : Infinity;
+  const utili = larghezze.filter((w) => w <= massimo);
+  const misure = utili.length ? utili : [Math.min(larghezze[0], Math.floor(massimo))];
+  const url = (w: number) => img(source, w, Math.round(w / ratio))!;
+  return { src: url(misure[Math.floor((misure.length - 1) / 2)]), srcset: misure.map((w) => `${url(w)} ${w}w`).join(', ') };
+}
+
+/** La stessa foto con un altro punto importante (es. quello solo per il telefono). */
+export function conPunto(source: any, p?: { x?: number; y?: number } | null): any {
+  if (typeof p?.x !== 'number' || typeof p?.y !== 'number') return source;
+  return { ...source, hotspot: { width: 0.3, height: 0.3, ...source.hotspot, x: p.x, y: p.y } };
 }
 
 /**
@@ -134,6 +148,9 @@ function cifreItaliane(n: string): string {
   return c;
 }
 export const telHref = (n: string) => 'tel:' + cifreItaliane(n);
+/** Link a una chat WhatsApp con il messaggio già scritto. */
+export const whatsappHref = (n: string, testo?: string) =>
+  `https://wa.me/${cifreItaliane(n).replace('+', '')}${testo ? `?text=${encodeURIComponent(testo)}` : ''}`;
 /** Forma leggibile: "+39 339 350 7848" (cellulari a gruppi 3-3-4). */
 export function formatTel(n: string): string {
   const c = cifreItaliane(n);

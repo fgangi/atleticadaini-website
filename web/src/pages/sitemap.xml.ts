@@ -19,6 +19,7 @@ export const GET: APIRoute = async ({ site }) => {
     ...(p?.storia ? ['/societa/storia/'] : []),
     ...(p?.team ? ['/societa/team/'] : []),
     ...(p?.record ? ['/record/'] : []),
+    ...(p?.openDay ? ['/open-days/'] : []),
     ...(p?.privacy ? ['/privacy/'] : []),
     ...(p?.safeguarding ? ['/safeguarding/'] : []),
     ...(album.length ? ['/gallery/'] : []),

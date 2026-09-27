@@ -39,6 +39,7 @@ const foto = (a.foto ?? []).map((f: any) => ({
   <dialog class="visore" data-visore aria-label="Foto a schermo intero">
     <img data-visore-img alt="" />
     <p class="v-didascalia" data-visore-testo></p>
+    <p class="v-numero tabnums" data-visore-n></p>
     <button type="button" class="v-btn v-chiudi" data-visore-chiudi aria-label="Chiudi">✕</button>
     <button type="button" class="v-btn v-prec" data-visore-prec aria-label="Foto precedente">‹</button>
     <button type="button" class="v-btn v-succ" data-visore-succ aria-label="Foto successiva">›</button>
@@ -58,7 +59,9 @@ const foto = (a.foto ?? []).map((f: any) => ({
   .visore[open] { display: grid; place-items: center; }
   .visore::backdrop { background: rgba(0, 0, 0, .6); }
   .visore img { max-width: 94vw; max-height: 84dvh; object-fit: contain; }
-  .v-didascalia { position: absolute; bottom: 16px; left: 70px; right: 70px; text-align: center; color: #E3EAE1; font-size: .95rem; }
+  .v-didascalia { position: absolute; bottom: 16px; left: 70px; right: 130px; color: #E3EAE1; font-size: .95rem; }
+  .v-numero { position: absolute; bottom: 16px; right: 70px; color: #E3EAE1; font-size: .95rem; margin: 0; }
+  @media (max-width: 639px) { .v-didascalia { left: 16px; right: 16px; bottom: 70px; } .v-numero { right: auto; left: 50%; transform: translateX(-50%); bottom: 26px; } }
   .v-btn { position: absolute; width: 48px; height: 48px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .3);
     background: rgba(0, 0, 0, .35); color: #fff; font-size: 1.6rem; line-height: 1; cursor: pointer; display: grid; place-items: center; }
   .v-btn:hover { background: rgba(255, 255, 255, .15); }
@@ -76,12 +79,14 @@ const foto = (a.foto ?? []).map((f: any) => ({
     const link = Array.from(album.querySelectorAll<HTMLAnchorElement>('a[data-indice]'));
     const im = dlg.querySelector<HTMLImageElement>('[data-visore-img]')!;
     const testo = dlg.querySelector('[data-visore-testo]')!;
+    const numero = dlg.querySelector('[data-visore-n]')!;
     let i = 0;
     const mostra = (n: number) => {
       i = (n + link.length) % link.length;
       im.src = link[i].href;
       im.alt = link[i].dataset.alt || `Foto ${i + 1} di ${link.length}`;
-      testo.textContent = `${link[i].dataset.alt ? link[i].dataset.alt + ' · ' : ''}${i + 1} / ${link.length}`;
+      testo.textContent = link[i].dataset.alt ?? '';
+      numero.textContent = `${i + 1} di ${link.length}`;
     };
     link.forEach((a, n) => a.addEventListener('click', (e) => { e.preventDefault(); mostra(n); dlg.showModal(); }));
     dlg.querySelector('[data-visore-chiudi]')!.addEventListener('click', () => dlg.close());

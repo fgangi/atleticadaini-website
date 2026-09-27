@@ -1,9 +1,7 @@
 /* ============================================================
    Caratteri del sito: si cambiano solo qui.
    File serviti dal sito stesso (nessuna chiamata a server esterni).
-   Scelta attuale: abbinamento A, Barlow Condensed (titoli) + Barlow (testo).
-   Riserva: abbinamento B, Oswald + Source Sans 3 (provabile in sviluppo
-   dalla barra "Anteprima stati", senza pesare sul sito pubblicato).
+   Barlow Condensed per i titoli, Barlow per il testo.
    ============================================================ */
 @import '@fontsource/barlow/400.css';
 @import '@fontsource/barlow/400-italic.css';

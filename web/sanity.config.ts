@@ -15,6 +15,7 @@ const structure = (S: any) => {
     .items([
       S.documentTypeListItem('news').title('Notizie'),
       singolo('iscrizioni', 'Iscrizioni'),
+      singolo('openDay', 'Open days'),
       S.documentTypeListItem('corso').title('Corsi e orari'),
       S.divider(),
       S.documentTypeListItem('record').title('Record sociali'),

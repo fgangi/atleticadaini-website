@@ -14,7 +14,7 @@ const foto = completa ? img(c.foto, 720, 450) : null;
   <div class="corso-corpo">
     <div class="corso-testa">
       <h3>{c.nome}</h3>
-      {c.eta && <span class="pill">{c.eta}</span>}
+      {c.eta && <span class:list={['pill', { agonistico: c.giovanile === false }]}>{c.eta}</span>}
     </div>
     {c.sottotitolo && <p class="corso-sotto">{c.sottotitolo}</p>}
     {completa && c.descrizione && <p class="corso-desc">{c.descrizione}</p>}
@@ -32,6 +32,8 @@ const foto = completa ? img(c.foto, 720, 450) : null;
   </div>
 </article>
 <style>
+  /* Il gruppo agonistico si riconosce dall'etichetta dell'età in verde */
+  .pill.agonistico { background: var(--verde); color: #fff; }
   /* Barra verticale a sinistra, come le schede orari del volantino */
   .corso { display: flex; flex-direction: column; border-left: 5px solid var(--giallo); height: 100%; }
   .corso-foto { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; }

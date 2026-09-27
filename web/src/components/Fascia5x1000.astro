@@ -2,15 +2,13 @@
 /**
  * Fascia del 5×1000, accesa dal pannello nel periodo delle dichiarazioni.
  * Il codice fiscale si copia con un tocco: è l'unica cosa che serve davvero.
- * In sviluppo esiste sempre (nascosta se spenta) per la barra "Anteprima stati".
  */
 interface Props { dati?: any; codiceFiscale?: string | null; nome: string }
 const { dati, codiceFiscale, nome } = Astro.props;
 const attiva = dati?.attiva === true && !!codiceFiscale;
-const esiste = attiva || (import.meta.env.DEV && !!codiceFiscale);
 ---
-{esiste && (
-  <section class="cinque sfondo-scuro" data-sim-cinque="accesa" hidden={!attiva} aria-labelledby="titolo-5x1000">
+{attiva && (
+  <section class="cinque sfondo-scuro" aria-labelledby="titolo-5x1000">
     <div class="container c-griglia">
       <div>
         <span class="eyebrow">Sostieni i {nome.split(' ').at(-1)}</span>

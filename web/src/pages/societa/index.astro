@@ -28,7 +28,7 @@ const porte = [
 ].filter(Boolean) as { href: string; titolo: string; testo: string }[];
 ---
 <Layout title="Chi siamo" description={`${s?.denominazione ?? nome}: atletica leggera a Carate Brianza dal ${anno}.`}>
-  <PageHero eyebrow={`Carate Brianza · dal ${anno}`} title="Chi siamo" lead={primo || null} />
+  <PageHero eyebrow={`Carate Brianza, dal ${anno}`} title="Chi siamo" lead={primo || null} />
 
   {storia?.riconoscimenti?.length > 0 && (
     <section class="section">

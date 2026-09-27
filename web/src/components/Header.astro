@@ -1,13 +1,13 @@
 ---
 import SocialIcons from './SocialIcons.astro';
 
-type Voce = { href: string; label: string; children?: { href: string; label: string }[] };
+type Voce = { href: string; label: string; risalto?: boolean; children?: { href: string; label: string }[] };
 interface Props {
   nome: string;
   logoUrl?: string | null;
   social?: Record<string, string> | null;
   /** Sezioni che compaiono solo quando hanno contenuto: la voce le segue */
-  presenze: { album: number; record: number; team: number; storia: number; corsi: number; quote: number; iscrizioniAperte: boolean };
+  presenze: { album: number; record: number; team: number; storia: number; corsi: number; quote: number; iscrizioniAperte: boolean; openDay: boolean };
 }
 const { nome, logoUrl, social, presenze: p } = Astro.props;
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
@@ -32,6 +32,8 @@ const nav: Voce[] = [
       { href: '/settore-giovanile/#iscrizioni', label: 'Come iscriversi' },
     ],
   },
+  // Open days: voce propria, messa in risalto, finché è accesa nel pannello
+  ...(p.openDay ? [{ href: '/open-days/', label: 'Open days', risalto: true }] : []),
   ...(p.record ? [{ href: '/record/', label: 'Record' }] : []),
   { href: '/impianto/', label: 'Impianto' },
   { href: '/news/', label: 'News' },
@@ -89,7 +91,7 @@ const conSocial = Object.values(social ?? {}).some((u) => typeof u === 'string' 
           </div>
         </div>
       ) : (
-        <a class="mainnav-link" href={v.href} aria-current={attiva(v.href) ? 'page' : undefined}>{v.label}</a>
+        <a class:list={['mainnav-link', { risalto: v.risalto }]} href={v.href} aria-current={attiva(v.href) ? 'page' : undefined}>{v.label}</a>
       ))}
       {/* Il pulsante segue l'interruttore "Iscrizioni aperte" del pannello.
           In sviluppo esiste sempre: la barra "Anteprima stati" lo mostra o lo nasconde. */}
@@ -135,6 +137,9 @@ const conSocial = Object.values(social ?? {}).some((u) => typeof u === 'string' 
   .mainnav-link:hover { background: rgba(255, 255, 255, .1); }
   /* Pagina corrente: filetto giallo sotto, come la barra del volantino */
   .mainnav-link[aria-current='page'], .mainnav-link[data-active='true'] { box-shadow: inset 0 -3px 0 var(--giallo); border-radius: 0; }
+  /* Open days: stessa voce del menu, ma in giallo chiaro per farsi notare */
+  .mainnav-link.risalto { color: var(--giallo); }
+  .mainnav-link.risalto:hover { color: var(--giallo-chiaro); }
   .caret { opacity: .8; transition: transform .15s ease; flex: none; }
   .mainnav-item { position: relative; }
   .mainnav-item[data-open='true'] .caret { transform: rotate(180deg); }
@@ -143,6 +148,13 @@ const conSocial = Object.values(social ?? {}).some((u) => typeof u === 'string' 
   .nav-cta { margin-left: 10px; }
   .nav-toggle { display: none; }
 
+  /* PC stretti (1024–1279px): 9 voci più "Iscriviti" stanno su una riga solo
+     stringendo un po' spaziatura e carattere */
+  @media (min-width: 1024px) and (max-width: 1279px) {
+    .mainnav-link { padding: 0 .48rem; font-size: 1.02rem; }
+    .nav-cta { margin-left: 6px; padding: 0 1rem; }
+    .brand-logo { max-width: 150px; }
+  }
   @media (min-width: 1024px) {
     .submenu {
       position: absolute; top: 100%; left: 0; min-width: 220px; z-index: 1001;

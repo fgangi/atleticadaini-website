@@ -1,16 +1,15 @@
 ---
-import { img, formatData, posizione } from '../lib/sanity';
+import { ritaglio, formatData } from '../lib/sanity';
 import { SEZIONI_NEWS } from '../sanity/schemaTypes/news';
 interface Props { item: any; }
 const { item } = Astro.props;
-// Immagine intera: il ritaglio lo fa il CSS, seguendo l'inquadratura scelta nel pannello
-const cover = img(item.copertina, 700);
-const pos = posizione(item.posizioneAnteprima);
+// Ritagliata a 16:10 attorno al punto importante scelto nel pannello
+const cover = ritaglio(item.copertina, 16 / 10, [400, 700, 1000]);
 const sezione = SEZIONI_NEWS.find((s) => s.value === item.sezione)?.title;
 ---
 <a class="card news-card" href={`/news/${item.slug}/`} data-sezione={item.sezione}>
   <div class="thumb">
-    {cover ? <img src={cover} alt="" loading="lazy" style={`object-position:${pos}`} /> : <div class="thumb-ph" aria-hidden="true"></div>}
+    {cover ? <img src={cover.src} srcset={cover.srcset} sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 380px" alt="" loading="lazy" /> : <div class="thumb-ph" aria-hidden="true"></div>}
     {sezione && item.sezione !== 'societa' && <span class="pill on-thumb">{sezione}</span>}
   </div>
   <div class="body">

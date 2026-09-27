@@ -90,5 +90,6 @@ const orariDi = (nome: string, primo: boolean) => corsi.filter((c) => c.orari?.l
   .quando ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
   .quando li { color: var(--ink-soft); }
   .quando strong { color: var(--verde); margin-right: 6px; }
-  .quando .o + .o::before { content: ' · '; }
+  /* Un orario per riga: niente separatori fra un giorno e l'altro */
+  .quando .o { display: block; }
 </style>

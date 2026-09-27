@@ -31,7 +31,7 @@ npm run dev              # sito su http://localhost:4321, pannello su /admin
 `npm run build` genera il sito in `web/dist`, `npm run preview` lo mostra.
 
 In sviluppo, in basso a destra, la barra **Anteprima stati** simula iscrizioni
-aperte o chiuse, la fascia del 5×1000 e l'abbinamento di caratteri di riserva.
+aperte o chiuse. È pensata per aggiungere altre anteprime quando serviranno.
 
 ## Configurazione (nessun dato di account nel codice)
 

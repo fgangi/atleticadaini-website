@@ -3,9 +3,9 @@
  * Barra di anteprima — SOLO IN SVILUPPO (esclusa dalla build pubblicata).
  *
  * Mostra come apparirà il sito in situazioni che nel pannello non sono ancora
- * vere: iscrizioni aperte o chiuse, fascia del 5×1000 accesa, e l'abbinamento
- * di caratteri di riserva (B). Non tocca i dati: cambia solo ciò che si vede
- * in questo browser.
+ * vere: per ora iscrizioni aperte o chiuse. Non tocca i dati: cambia solo ciò
+ * che si vede in questo browser. Per un'anteprima nuova basta una riga con
+ * data-gruppo e, negli elementi interessati, data-sim-<gruppo>="<valore>".
  */
 ---
 <div class="anteprima" data-anteprima>
@@ -18,24 +18,6 @@
       <button type="button" data-v="reale" aria-pressed="true">Reale</button>
       <button type="button" data-v="aperte" aria-pressed="false">Aperte</button>
       <button type="button" data-v="chiuse" aria-pressed="false">Chiuse</button>
-    </div>
-    <div class="ap-riga" data-gruppo="cinque">
-      <span class="ap-tit">Fascia 5×1000 (home)</span>
-      <button type="button" data-v="reale" aria-pressed="true">Reale</button>
-      <button type="button" data-v="accesa" aria-pressed="false">Accesa</button>
-      <button type="button" data-v="spenta" aria-pressed="false">Spenta</button>
-    </div>
-    <div class="ap-riga" data-gruppo="record" data-solo="/">
-      <span class="ap-tit">Record in home</span>
-      <button type="button" data-v="reale" aria-pressed="true">Attuale</button>
-      <button type="button" data-v="tabellone" aria-pressed="false">A · Tabellone</button>
-      <button type="button" data-v="numeri" aria-pressed="false">B+C · Numeri e storie</button>
-      <button type="button" data-v="campioni" aria-pressed="false">D · Campioni</button>
-    </div>
-    <div class="ap-riga" data-gruppo="font">
-      <span class="ap-tit">Caratteri</span>
-      <button type="button" data-v="reale" aria-pressed="true">A · Barlow</button>
-      <button type="button" data-v="b" aria-pressed="false">B · Oswald + Source Sans</button>
     </div>
     <p class="ap-nota">Solo in sviluppo: i dati del pannello non vengono modificati.</p>
   </div>
@@ -62,22 +44,6 @@
 
 <script is:inline>
   (() => {
-    // I caratteri B si caricano dal dev server solo quando servono:
-    // nel sito pubblicato non esistono e non pesano
-    const caricaFontB = () => {
-      if (document.querySelector('[data-font-b]')) return;
-      for (const pkg of ['oswald', 'source-sans-3']) {
-        const l = document.createElement('link');
-        l.rel = 'stylesheet'; l.dataset.fontB = '1';
-        l.href = `/node_modules/@fontsource-variable/${pkg}/index.css`;
-        document.head.append(l);
-      }
-      // Abbinamento B: stesse variabili, altri caratteri
-      const st = document.createElement('style');
-      st.dataset.fontB = '1';
-      st.textContent = ":root[data-ap-font='b']{--font-display:'Oswald Variable','Arial Narrow',sans-serif;--font-body:'Source Sans 3 Variable',system-ui,sans-serif}";
-      document.head.append(st);
-    };
     const avvia = () => {
       const box = document.querySelector('[data-anteprima]');
       if (!box || box.dataset.pronto) return;
@@ -106,10 +72,7 @@
       const applica = (gruppo, v) => {
         scrivi('ap_' + gruppo, v);
         box.querySelectorAll(`[data-gruppo="${gruppo}"] button`).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
-        if (gruppo === 'font') {
-          if (v === 'b') { caricaFontB(); document.documentElement.dataset.apFont = 'b'; }
-          else delete document.documentElement.dataset.apFont;
-        } else applicaVarianti(gruppo, v);
+        applicaVarianti(gruppo, v);
       };
 
       box.querySelectorAll('[data-solo]').forEach((r) => { r.hidden = location.pathname !== r.dataset.solo; });

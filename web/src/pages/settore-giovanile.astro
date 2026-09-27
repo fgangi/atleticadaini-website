@@ -3,48 +3,63 @@ import Layout from '../layouts/Layout.astro';
 import PageHero from '../components/PageHero.astro';
 import SchedaCorso from '../components/SchedaCorso.astro';
 import { sfetch, richText, telHref, formatTel } from '../lib/sanity';
-import { settingsQuery, iscrizioniQuery, corsiQuery } from '../lib/queries';
+import { settingsQuery, iscrizioniQuery, corsiQuery, openDayQuery } from '../lib/queries';
 
 /**
  * Pagina per chi vuole iscriversi, nell'ordine in cui un genitore si fa le
  * domande: che corsi ci sono e quando → quanto costa → come ci si iscrive →
  * a chi chiedere. Ogni blocco compare solo se nel pannello ci sono i dati.
  */
-const [settings, i, corsi] = await Promise.all([
+const [settings, i, corsi, od] = await Promise.all([
   sfetch<any>(settingsQuery, {}, null),
   sfetch<any>(iscrizioniQuery, {}, null),
   sfetch<any[]>(corsiQuery, {}, []),
+  sfetch<any>(openDayQuery, {}, null),
 ]);
-const giovanili = corsi.filter((c) => c.giovanile !== false);
-const agonisti = corsi.filter((c) => c.giovanile === false);
 const aperte = i?.aperte === true;
-const euro = (n?: number | null) => (typeof n === 'number' ? n.toLocaleString('it-IT', { style: 'currency', currency: 'EUR' }) : '–');
+const euro = (n?: number | null) => (typeof n === 'number' ? n.toLocaleString('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: n % 1 ? 2 : 0 }) : '–');
 const pagamento = richText(i?.pagamento);
+// Una scheda per tipologia: le righe Base e Plus della stessa tipologia si
+// affiancano, così il prezzo si confronta a colpo d'occhio
+const gruppiQuote = (i?.tariffe ?? []).reduce((acc: any[], t: any) => {
+  const g = acc.find((x) => x.tipologia === t.tipologia) ?? acc[acc.push({ tipologia: t.tipologia, righe: [] }) - 1];
+  g.righe.push(t);
+  return acc;
+}, []);
+const nomePacchetto = (t: any) => (t.pacchetto === 'plus' ? 'Plus' : 'Base');
 const telefoni: any[] = settings?.telefoni ?? [];
 const documenti = (i?.documenti ?? []).filter((d: any) => d?.url);
 ---
 <Layout title="Settore giovanile" description="Corsi di atletica leggera a Carate Brianza per ragazze e ragazzi dai 4 anni: orari, quote, moduli e come iscriversi.">
   <PageHero eyebrow={i?.stagione ? `Stagione ${i.stagione}` : 'Scuola di atletica'} title="Settore giovanile"
-    lead="Corsi di avviamento all'atletica leggera per ragazze e ragazzi, con istruttori federali e laureati in scienze motorie.">
+    lead="Corsi di atletica leggera dai 4 anni in su, fino al gruppo agonistico e ai master, con istruttori federali e laureati in scienze motorie.">
     <div class="azioni hero-azioni">
       <a class="btn cta" href="#iscrizioni">{aperte ? 'Iscriviti' : 'Come iscriversi'}</a>
-      {giovanili.length > 0 && <a class="btn chiaro" href="#corsi">Corsi e orari</a>}
+      {corsi.length > 0 && <a class="btn chiaro" href="#corsi">Corsi e orari</a>}
     </div>
   </PageHero>
 
-  {giovanili.length > 0 && (
+  {corsi.length > 0 && (
     <section class="section">
       <div class="container">
         <div class="section-head" id="corsi"><span class="eyebrow">Per età</span><h2>Corsi e orari</h2></div>
-        <div class:list={['grid', giovanili.length >= 3 ? 'cols-3' : 'cols-2']}>
-          {giovanili.map((c) => <SchedaCorso c={c} completa />)}
+        <div class:list={['grid', corsi.length >= 3 ? 'cols-3' : 'cols-2']}>
+          {corsi.map((c) => <SchedaCorso c={c} completa />)}
         </div>
-        {agonisti.length > 0 && (
-          <div class="agonisti">
-            <h3>E dopo? Il gruppo agonistico</h3>
-            <div class="grid cols-2">{agonisti.map((c) => <SchedaCorso c={c} completa />)}</div>
-          </div>
-        )}
+      </div>
+    </section>
+  )}
+
+  {/* Open days: invito a provare prima di iscriversi, dopo corsi e orari */}
+  {od?.attivo === true && (
+    <section class="section open-day-invito sfondo-scuro">
+      <div class="container od-riga">
+        <div>
+          <span class="eyebrow">{od.occhiello || 'Open days'}</span>
+          <h2>{od.titolo || "Vieni a provare l'atletica"}</h2>
+          {od.testo && <p>{od.testo}</p>}
+        </div>
+        <a class="btn cta grande" href="/open-days/">Scopri gli open days</a>
       </div>
     </section>
   )}
@@ -53,19 +68,29 @@ const documenti = (i?.documenti ?? []).filter((d: any) => d?.url);
     <section class="section fascia-tenue">
       <div class="container">
         <div class="section-head" id="quote"><span class="eyebrow">Quote associative{i?.stagione ? ` ${i.stagione}` : ''}</span><h2>Quanto costa</h2></div>
-        <table class="tabella card-tab">
-          <thead><tr><th>Tipologia</th><th>Abbigliamento incluso</th><th class="num">Nuovi iscritti</th><th class="num">Rinnovi</th></tr></thead>
-          <tbody>
-            {i.tariffe.map((t: any) => (
-              <tr>
-                <td class="titolo-riga forte">{t.tipologia}</td>
-                <td data-label="Include">{t.fornitura}</td>
-                <td class="num forte" data-label="Nuovi iscritti">{euro(t.nuovi)}</td>
-                <td class="num" data-label="Rinnovi">{euro(t.rinnovi)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {i?.abbigliamento?.plus && <p class="intro-quote">Base e Plus cambiano solo per l'abbigliamento compreso nel prezzo.</p>}
+        <ul class="quote">
+          {gruppiQuote.map((g: any) => (
+            <li class="quota">
+              <h3>{g.tipologia}</h3>
+              <div class:list={['prezzi', { singolo: g.righe.length === 1 }]}>
+                {g.righe.map((t: any) => (
+                  <div class="prezzo">
+                    {/* Cosa comprende il pacchetto scritto sotto il nome: niente legenda da andare a cercare */}
+                    <p class="p-pacchetto">
+                      <span class:list={['pacchetto', { plus: t.pacchetto === 'plus' }]}>{nomePacchetto(t)}</span>
+                      {i?.abbigliamento?.[t.pacchetto ?? 'base'] && <span class="p-include">{i.abbigliamento[t.pacchetto ?? 'base']}</span>}
+                    </p>
+                    <dl class="p-cifre">
+                      <div><dt>Prima iscrizione</dt><dd class="p-nuovi tabnums">{euro(t.nuovi)}</dd></div>
+                      {typeof t.rinnovi === 'number' && <div><dt>Già iscritti l'anno scorso</dt><dd class="p-rinnovi tabnums">{euro(t.rinnovi)}</dd></div>}
+                    </dl>
+                  </div>
+                ))}
+              </div>
+            </li>
+          ))}
+        </ul>
         {i?.noteQuote && <p class="nota-quote">{i.noteQuote}</p>}
         {pagamento && <div class="prose pagamento"><h3>Come pagare</h3><div set:html={pagamento} /></div>}
       </div>
@@ -129,10 +154,36 @@ const documenti = (i?.documenti ?? []).filter((d: any) => d?.url);
 
 <style>
   .hero-azioni { margin-top: 22px; }
-  .agonisti { margin-top: clamp(32px, 5vw, 56px); }
-  .agonisti h3 { font-family: var(--font-display); text-transform: uppercase; font-size: 1.6rem; font-weight: 800; color: var(--verde); margin-bottom: 16px; }
+  .open-day-invito { background: var(--sfondo-scuro); color: #fff; }
+  .od-riga { display: flex; align-items: center; justify-content: space-between; gap: 20px 40px; flex-wrap: wrap; }
+  .od-riga h2 { color: #fff; }
+  .od-riga .eyebrow { color: var(--giallo); }
+  .od-riga p { color: #E3EAE1; margin-top: 10px; max-width: 56ch; }
+  .open-day-invito .btn.grande { min-height: 52px; font-size: 1.15rem; }
 
-  .card-tab { background: var(--ground); border-radius: var(--radius); }
+  .intro-quote { margin: -6px 0 18px; font-size: 1.05rem; color: var(--ink); max-width: 60ch; }
+  .pacchetto { display: inline-block; align-self: flex-start; font-family: var(--font-display); font-weight: 800; text-transform: uppercase; letter-spacing: .06em;
+    font-size: .95rem; line-height: 1; padding: .4rem .7rem; border-radius: 999px; background: var(--tinta); color: var(--verde); }
+  .pacchetto.plus { background: var(--verde); color: var(--giallo); }
+
+  /* Schede delle quote a righe flessibili: con 5 tipologie l'ultima riga
+     si allarga invece di lasciare una scheda sola in un angolo */
+  .quote { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 16px; }
+  .quota { flex: 1 1 300px; display: flex; flex-direction: column; background: var(--ground); border-radius: var(--radius); border-top: 5px solid var(--verde); padding: 18px 18px 20px; }
+  .quota h3 { font-size: 1.25rem; line-height: 1.2; color: var(--verde); margin-bottom: 14px; }
+  /* Sottogriglia: i prezzi di Base e Plus stanno alla stessa altezza anche
+     se "cosa comprende" va a capo su più righe in una sola colonna */
+  .prezzi { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; column-gap: 14px; }
+  .prezzi.singolo { grid-template-columns: 1fr; }
+  .prezzo { display: grid; grid-row: span 2; grid-template-rows: subgrid; row-gap: 12px; }
+  .prezzo + .prezzo { border-left: 1px solid var(--filetto); padding-left: 14px; }
+  .p-pacchetto { display: flex; flex-direction: column; gap: 6px; margin: 0; }
+  .p-include { font-size: 1rem; line-height: 1.35; color: var(--ink); }
+  .p-cifre { margin: 0; display: flex; flex-direction: column; gap: 10px; padding-top: 10px; border-top: 1px solid var(--filetto); }
+  .p-cifre dt { font-size: .95rem; line-height: 1.3; color: var(--ink-soft); }
+  .p-cifre dd { margin: 2px 0 0; font-family: var(--font-display); font-weight: 800; line-height: 1; color: var(--ink); }
+  .p-nuovi { font-size: 2rem; }
+  .p-rinnovi { font-size: 1.5rem; }
   .nota-quote { margin-top: 14px; font-weight: 600; color: var(--verde); }
   .pagamento { margin-top: 26px; max-width: 70ch; }
   .pagamento h3 { font-size: 1.25rem; }

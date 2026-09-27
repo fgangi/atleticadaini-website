@@ -1,15 +1,14 @@
 ---
-import { img, formatData, posizione } from '../lib/sanity';
+import { ritaglio, formatData } from '../lib/sanity';
 
 /** Scheda grande dell'articolo in evidenza, usata in home. */
 interface Props { item: any; }
 const { item } = Astro.props;
-const cover = img(item.copertina, 1100);
-const pos = posizione(item.posizioneAnteprima);
+const cover = ritaglio(item.copertina, 16 / 10, [600, 900, 1300]);
 ---
 <a class="featured card" href={`/news/${item.slug}/`}>
   <div class="f-media">
-    {cover ? <img src={cover} alt="" style={`object-position:${pos}`} /> : <div class="thumb-ph" aria-hidden="true"></div>}
+    {cover ? <img src={cover.src} srcset={cover.srcset} sizes="(max-width: 767px) 100vw, 620px" alt="" /> : <div class="thumb-ph" aria-hidden="true"></div>}
   </div>
   <div class="f-body">
     <span class="pill">In evidenza</span>

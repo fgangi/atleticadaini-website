@@ -1,0 +1,225 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PageHero from '../components/PageHero.astro';
+import SchedaCorso from '../components/SchedaCorso.astro';
+import Indirizzo from '../components/Indirizzo.astro';
+import { sfetch, img, whatsappHref, formatTel, indicazioniUrl, FUSO } from '../lib/sanity';
+import { openDayQuery, settingsQuery, corsiQuery, impiantiQuery } from '../lib/queries';
+
+/**
+ * Open days e lezioni di prova: la pagina che promuove i corsi, pensata anche
+ * come indirizzo corto per i QR code sui volantini.
+ * Si prenota con WhatsApp (messaggio già scritto): la società usa già i gruppi
+ * WhatsApp e non ci sono moduli da gestire.
+ * Spenta dal pannello, la pagina rimanda al settore giovanile.
+ */
+const [od, s, corsi, impianti] = await Promise.all([
+  sfetch<any>(openDayQuery, {}, null),
+  sfetch<any>(settingsQuery, {}, null),
+  sfetch<any[]>(corsiQuery, {}, []),
+  sfetch<any[]>(impiantiQuery, {}, []),
+]);
+if (od?.attivo !== true) return Astro.redirect('/settore-giovanile/');
+
+const numero = od.whatsapp || s?.telefoni?.[0]?.numero;
+const referente = od.whatsapp ? od.referente : (od.referente ?? s?.telefoni?.[0]?.nome);
+const messaggio = od.messaggio || "Ciao! Vorrei provare l'atletica (per me / per mio figlio o mia figlia). Età: …";
+const prenota = numero ? whatsappHref(numero, messaggio) : null;
+
+// Date future (a partire da oggi); in pagina uno script nasconde anche quelle
+// passate dopo la pubblicazione, perché il sito non si rigenera ogni giorno
+const oggi = new Date().toLocaleDateString('sv-SE', { timeZone: FUSO });
+const date = (od.date ?? []).filter((d: any) => d?.giorno && d.giorno >= oggi)
+  .sort((a: any, b: any) => a.giorno.localeCompare(b.giorno));
+const giornoLungo = (g: string) => new Date(`${g}T12:00:00`).toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', timeZone: FUSO });
+// Tutti i corsi: si può provare anche da adulti, nel gruppo agonistico
+const campo = impianti[0];
+const naviga = indicazioniUrl(campo?.indirizzo);
+const foto = img(od.immagine, 1200, 630);
+const documenti = (od.documenti ?? []).filter((d: any) => d?.url);
+
+// Dati strutturati "Evento" per ogni data: Google può mostrarli nei risultati
+const eventi = date.length && campo ? JSON.stringify(date.map((d: any) => ({
+  '@context': 'https://schema.org', '@type': 'Event',
+  name: `${od.occhiello || 'Open days'} ${s?.nome ?? 'Atletica Daini'}`,
+  startDate: d.giorno, eventStatus: 'https://schema.org/EventScheduled',
+  eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+  location: { '@type': 'Place', name: campo.nome, address: String(campo.indirizzo ?? '').replace(/\s*\n\s*/g, ', ') },
+  organizer: { '@type': 'SportsOrganization', name: s?.denominazione ?? s?.nome, url: new URL('/', Astro.site).href },
+  ...(d.perChi ? { description: d.perChi } : {}),
+}))) : null;
+---
+<Layout title={od.occhiello || 'Open days'} description={od.testo ?? 'Vieni a provare l\'atletica con i Daini a Carate Brianza: corsi per ragazze e ragazzi dai 4 anni.'} immagine={foto}>
+  {eventi && <script type="application/ld+json" set:html={eventi} slot="head" />}
+  <PageHero eyebrow={od.occhiello || 'Open days'} title={od.titolo || "Vieni a provare l'atletica"} lead={od.testo}>
+    <p class="hero-sempre" data-sempre hidden={date.length > 0}>
+      {od.tuttoAnno || "Si può venire a provare in ogni periodo dell'anno, a qualsiasi età: scrivici e ti diciamo il corso e il giorno giusto."}
+    </p>
+    <div class="azioni hero-azioni">
+      {prenota && <a class="btn cta grande" href={prenota} target="_blank" rel="noopener">Prenota su WhatsApp</a>}
+      <a class="btn chiaro grande" href="#corsi">Corsi e orari</a>
+    </div>
+    {referente && numero && <p class="hero-ref">Ti risponde {referente} al <span class="tabnums">{formatTel(numero)}</span></p>}
+  </PageHero>
+
+  {/* Date: la sezione esiste solo se ci sono giorni in programma. Senza date
+      la frase "tutto l'anno" sta nell'apertura: un riquadro a parte ripeteva
+      soltanto il pulsante WhatsApp dell'apertura. */}
+  {date.length > 0 && (
+    <section class="section" data-sezione-date>
+      <div class="container">
+        <div class="section-head"><span class="eyebrow">Prenota la prova</span><h2>Le prossime date</h2></div>
+        <ul class="date" data-date>
+          {date.map((d: any) => (
+            <li class="card data" data-giorno={d.giorno}>
+              <span class="d-giorno">{giornoLungo(d.giorno)}</span>
+              {d.orario && <span class="d-orario tabnums">{d.orario}</span>}
+              {d.perChi && <p class="d-chi">{d.perChi}</p>}
+              {d.nota && <p class="d-nota">{d.nota}</p>}
+              {numero && <a class="btn primary" href={whatsappHref(numero, `${messaggio} Vorrei venire ${giornoLungo(d.giorno)}.`)} target="_blank" rel="noopener">Prenota questa data</a>}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  {/* Come funziona: tre passi */}
+  <section class="section fascia-chiara">
+    <div class="container">
+      <div class="section-head"><span class="eyebrow">Come funziona</span><h2>Tre passi</h2></div>
+      <ol class="passi">
+        <li><span class="p-n">1</span><h3>Scrivici</h3><p>Su WhatsApp, dicendoci l'età di chi vuole provare, tua o di tuo figlio: ti diciamo quale corso e quale giorno.</p></li>
+        <li><span class="p-n">2</span><h3>Vieni al campo</h3><p>{campo ? <>Al {campo.nome}{campo.ingresso ? <>. <strong>{campo.ingresso}</strong>.</> : '.'}</> : 'Al campo di allenamento.'}</p></li>
+        <li><span class="p-n">3</span><h3>Prova con gli istruttori</h3><p>Un allenamento vero, insieme al gruppo della propria età. Poi, se piace, ti spieghiamo come iscriversi.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  {corsi.length > 0 && (
+    <section class="section">
+      <div class="container">
+        <div class="section-head between" id="corsi">
+          <div><span class="eyebrow">Per età</span><h2>Corsi e orari</h2></div>
+          <a class="btn" href="/settore-giovanile/#quote">Quote e iscrizioni</a>
+        </div>
+        <div class:list={['grid', corsi.length >= 3 ? 'cols-3' : 'cols-2']}>{corsi.map((c) => <SchedaCorso c={c} />)}</div>
+      </div>
+    </section>
+  )}
+
+  <section class="section fascia-tenue">
+    <div class="container info">
+      {od.cosaPortare?.length > 0 && (
+        <div class="card blocco">
+          <h2 class="blocco-titolo">Cosa portare</h2>
+          <ul class="portare">{od.cosaPortare.map((x: string) => <li>{x}</li>)}</ul>
+          {documenti.length > 0 && (
+            <ul class="documenti">
+              {documenti.map((d: any) => (
+                <li><a href={`${d.url}?dl=`} download><span class="doc-ico" aria-hidden="true">{(d.est ?? 'pdf').toUpperCase()}</span><span>{d.titolo}</span></a></li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+      {campo && (
+        <div class="card blocco">
+          <h2 class="blocco-titolo">Dove siamo</h2>
+          <p class="dove-nome">{campo.nome}</p>
+          {campo.indirizzo && <p><Indirizzo testo={campo.indirizzo} /></p>}
+          {campo.ingresso && <p class="ingresso"><strong>{campo.ingresso}</strong></p>}
+          <div class="azioni">
+            {naviga && <a class="btn primary" href={naviga} target="_blank" rel="noopener">Apri il navigatore</a>}
+            <a class="btn" href="/impianto/">L'impianto</a>
+          </div>
+        </div>
+      )}
+    </div>
+  </section>
+
+  {od.faq?.length > 0 && (
+    <section class="section">
+      <div class="container narrow">
+        <div class="section-head"><span class="eyebrow">Domande</span><h2>Domande frequenti</h2></div>
+        <div class="faq">
+          {od.faq.map((f: any) => (
+            <details><summary>{f.domanda}</summary><p>{f.risposta}</p></details>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {prenota && (
+    <section class="section chiusura sfondo-scuro">
+      <div class="container">
+        <h2>Ti aspettiamo in pista</h2>
+        <a class="btn cta grande" href={prenota} target="_blank" rel="noopener">Prenota su WhatsApp</a>
+      </div>
+    </section>
+  )}
+</Layout>
+
+<style>
+  .hero-azioni { margin-top: 22px; }
+  .hero-sempre { margin-top: 14px; max-width: 60ch; color: #fff; font-weight: 600; padding-left: 14px; border-left: 4px solid var(--giallo); }
+  .btn.grande { min-height: 52px; padding: 0 1.5rem; font-size: 1.15rem; }
+  .hero-ref { margin-top: 12px; color: #E3EAE1; }
+
+  .date { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+  .data { padding: 18px 20px; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; border-top: 5px solid var(--giallo); }
+  .d-giorno { font-family: var(--font-display); text-transform: uppercase; font-weight: 800; font-size: 1.45rem; color: var(--verde); line-height: 1.1; }
+  .d-orario { font-family: var(--font-display); font-weight: 800; font-size: 1.8rem; color: var(--ink); line-height: 1; }
+  .d-nota { font-size: .95rem; }
+  .data .btn { margin-top: auto; }
+
+  .passi { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 28px; counter-reset: none; }
+  @media (max-width: 1023px) { .passi { grid-template-columns: minmax(0, 1fr); } }
+  .passi li { display: flex; flex-direction: column; gap: 6px; }
+  .p-n { width: 48px; height: 48px; border-radius: 50%; background: var(--verde); color: var(--giallo); display: grid; place-items: center;
+    font-family: var(--font-display); font-weight: 800; font-size: 1.6rem; }
+  .passi h3 { font-family: var(--font-display); text-transform: uppercase; font-size: 1.5rem; font-weight: 800; color: var(--verde); margin-top: 6px; }
+
+  .info { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(14px, 2.4vw, 22px); align-items: start; }
+  @media (max-width: 1023px) { .info { grid-template-columns: minmax(0, 1fr); } }
+  .blocco { padding: clamp(20px, 3vw, 30px); display: flex; flex-direction: column; gap: 10px; }
+  .blocco-titolo { font-size: clamp(1.5rem, 2.4vw, 1.8rem); margin-bottom: 6px; }
+  .portare { margin: 0; padding-left: 1.2rem; display: flex; flex-direction: column; gap: 6px; color: var(--ink-soft); }
+  .documenti { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .documenti a { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; font-weight: 600; }
+  .doc-ico { flex: none; width: 40px; height: 40px; border-radius: 8px; background: var(--verde); color: var(--giallo-chiaro); display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; font-size: .9rem; }
+  .dove-nome { font-family: var(--font-display); text-transform: uppercase; font-size: 1.4rem; font-weight: 800; color: var(--verde); }
+  .ingresso { padding: 8px 12px; border-left: 4px solid var(--giallo); background: var(--tinta); color: var(--verde-scuro); }
+  .blocco .azioni { margin-top: 6px; }
+
+  .faq { display: flex; flex-direction: column; gap: 10px; }
+  .faq details { border: 1px solid var(--line); border-radius: 12px; background: var(--ground); }
+  .faq summary { cursor: pointer; min-height: 52px; padding: 12px 16px; display: flex; align-items: center; font-weight: 700; color: var(--ink); list-style: none; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: '+'; margin-left: auto; font-size: 1.4rem; color: var(--verde); }
+  .faq details[open] summary::after { content: '–'; }
+  .faq details p { padding: 0 16px 16px; }
+
+  .chiusura { background: var(--sfondo-scuro); text-align: center; }
+  .chiusura .container { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+  .chiusura h2 { color: #fff; }
+</style>
+
+<script is:inline>
+  // Le date passate spariscono anche fra una pubblicazione e l'altra
+  (() => {
+    const avvia = () => {
+      const lista = document.querySelector('[data-date]');
+      if (!lista) return;
+      const oggi = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Rome' });
+      lista.querySelectorAll('[data-giorno]').forEach((d) => { if (d.dataset.giorno < oggi) d.hidden = true; });
+      if (!lista.querySelector('[data-giorno]:not([hidden])')) {
+        const sez = document.querySelector('[data-sezione-date]'); if (sez) sez.hidden = true;
+        const s = document.querySelector('[data-sempre]'); if (s) s.hidden = false;
+      }
+    };
+    avvia();
+    document.addEventListener('astro:page-load', avvia);
+  })();
+</script>

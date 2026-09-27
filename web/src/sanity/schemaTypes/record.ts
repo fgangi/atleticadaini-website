@@ -35,6 +35,8 @@ export const record = defineType({
     defineField({ name: 'anno', title: 'Anno del record', type: 'number', validation: (r) => r.required().min(1945).max(2100) }),
     defineField({ name: 'data', title: 'Data esatta (se nota)', type: 'date' }),
     defineField({ name: 'luogo', title: 'Luogo', type: 'string' }),
+    defineField({ name: 'inEvidenza', title: 'In evidenza in home', type: 'boolean', initialValue: false,
+      description: 'Compare fra le schede "I nostri primati" in home. Il record più recente e il più longevo ci sono sempre; meglio non più di 8-10 in tutto.' }),
     defineField({ name: 'ordine', title: 'Ordine nella tabella', type: 'number', description: 'Dalle distanze corte alle lunghe, poi concorsi, prove multiple e staffette.' }),
   ],
   orderings: [{ title: 'Categoria e ordine', name: 'catOrdine', by: [{ field: 'categoria', direction: 'asc' }, { field: 'sesso', direction: 'asc' }, { field: 'sezione', direction: 'asc' }, { field: 'ordine', direction: 'asc' }] }],
