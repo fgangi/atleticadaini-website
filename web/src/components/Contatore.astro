@@ -1,0 +1,42 @@
+---
+/**
+ * Numero che sale da 0 al valore vero quando entra nello schermo.
+ * - Nell'HTML c'è già il valore finale: Google, chi non ha JavaScript e i
+ *   lettori di schermo (testo nascosto accanto) leggono il numero giusto.
+ * - Con "riduci movimento" attivo il numero resta fermo sul valore finale.
+ * - Larghezza fissa (cifre tabellari, tante quante il numero finale): mentre
+ *   conta il testo intorno non si sposta.
+ */
+interface Props { valore: number }
+const { valore } = Astro.props;
+const cifre = String(valore).length;
+---
+<span class="contatore"><span class="sr-only">{valore}</span><span aria-hidden="true" class="c-cifre tabnums" data-conta={valore} style={`min-width:${cifre}ch`}>{valore}</span></span>
+<style>
+  .c-cifre { display: inline-block; text-align: right; font-variant-numeric: tabular-nums; }
+</style>
+<script>
+  function initContatori() {
+    const numeri = [...document.querySelectorAll<HTMLElement>('[data-conta]:not([data-contato])')];
+    if (!numeri.length) return;
+    const fermo = matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window);
+    if (fermo) { numeri.forEach((n) => (n.dataset.contato = '1')); return; }
+    const anima = (n: HTMLElement) => {
+      const fine = Number(n.dataset.conta) || 0;
+      const durata = 1400, inizio = performance.now();
+      const passo = (t: number) => {
+        const p = Math.min(1, (t - inizio) / durata);
+        // Rallenta verso la fine: l'occhio legge il numero mentre si ferma
+        n.textContent = String(Math.round(fine * (1 - Math.pow(1 - p, 3))));
+        if (p < 1) requestAnimationFrame(passo);
+      };
+      requestAnimationFrame(passo);
+    };
+    const oss = new IntersectionObserver((voci) => {
+      voci.forEach((v) => { if (v.isIntersecting) { oss.unobserve(v.target); anima(v.target as HTMLElement); } });
+    }, { threshold: 0.6 });
+    numeri.forEach((n) => { n.dataset.contato = '1'; n.textContent = '0'; oss.observe(n); });
+  }
+  initContatori();
+  document.addEventListener('astro:page-load', initContatori);
+</script>

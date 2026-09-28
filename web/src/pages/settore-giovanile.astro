@@ -20,6 +20,12 @@ const [settings, i, corsi, od] = await Promise.all([
 const aperte = i?.aperte === true;
 const euro = (n?: number | null) => (typeof n === 'number' ? n.toLocaleString('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: n % 1 ? 2 : 0 }) : '–');
 const pagamento = richText(i?.pagamento);
+// "Periodo di validità": una riga per informazione. "Titolo: testo" diventa un
+// riquadro con l'etichetta in evidenza; le righe senza titolo restano note
+const info = String(i?.periodi ?? '').split('\n').map((r) => r.trim()).filter(Boolean).map((r) => {
+  const m = r.match(/^([^:]{2,40}):\s*(.+)$/);
+  return m ? { titolo: m[1], testo: m[2].charAt(0).toUpperCase() + m[2].slice(1) } : { titolo: null, testo: r };
+});
 // Una scheda per tipologia: le righe Base e Plus della stessa tipologia si
 // affiancano, così il prezzo si confronta a colpo d'occhio
 const gruppiQuote = (i?.tariffe ?? []).reduce((acc: any[], t: any) => {
@@ -105,7 +111,16 @@ const documenti = (i?.documenti ?? []).filter((d: any) => d?.url);
           <span class="eyebrow">{aperte ? 'Iscrizioni aperte' : 'Iscrizioni'}</span>
           <h2>Come iscriversi</h2>
         </div>
-        {i?.periodi && <p class="periodi">{i.periodi}</p>}
+        {info.length > 0 && (
+          <ul class="info-iscr">
+            {info.map((x) => (
+              <li class:list={{ senza: !x.titolo }}>
+                {x.titolo && <span class="info-tit">{x.titolo}</span>}
+                <span class="info-testo">{x.testo}</span>
+              </li>
+            ))}
+          </ul>
+        )}
         {i?.lezioneProva?.attiva && (
           <div class="prova"><strong>Lezione di prova</strong><p>{i.lezioneProva.testo || 'Prima di iscriverti puoi venire a provare: contattaci per concordare il giorno.'}</p></div>
         )}
@@ -116,7 +131,7 @@ const documenti = (i?.documenti ?? []).filter((d: any) => d?.url);
           </>
         )}
         {i?.linkModulo && aperte && <a class="btn cta grande" href={i.linkModulo} target="_blank" rel="noopener">Compila l'iscrizione online</a>}
-        {!i?.periodi && !i?.requisiti?.length && (
+        {!info.length && !i?.requisiti?.length && (
           <p>Per informazioni su corsi e iscrizioni vieni al campo prima o dopo gli allenamenti, oppure contattaci.</p>
         )}
       </div>
@@ -200,7 +215,12 @@ const documenti = (i?.documenti ?? []).filter((d: any) => d?.url);
   @media (max-width: 1023px) { .iscr { grid-template-columns: minmax(0, 1fr); } }
   .iscr-principale { display: flex; flex-direction: column; align-items: flex-start; gap: 16px; }
   .iscr-principale .section-head { margin-bottom: 4px; }
-  .periodi { white-space: pre-line; color: var(--ink); }
+  /* Informazioni sull'iscrizione a riquadri: etichetta in alto, testo sotto */
+  .info-iscr { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 12px; }
+  .info-iscr li { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; background: var(--tinta); border-left: 4px solid var(--verde); border-radius: 0 10px 10px 0; }
+  .info-tit { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .05em; font-weight: 700; font-size: .95rem; color: var(--verde); }
+  .info-testo { color: var(--ink); font-weight: 600; line-height: 1.45; }
+  .info-iscr li.senza .info-testo { font-weight: 400; color: var(--ink-soft); }
   .prova { border-left: 4px solid var(--giallo); background: var(--tinta); padding: 12px 16px; border-radius: 0 10px 10px 0; }
   .prova strong { color: var(--verde); }
   .sotto { margin-top: 8px; }

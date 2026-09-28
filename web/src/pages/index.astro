@@ -5,6 +5,8 @@ import SchedaCorso from '../components/SchedaCorso.astro';
 import NewsCard from '../components/NewsCard.astro';
 import NewsInEvidenza from '../components/NewsInEvidenza.astro';
 import Carousel from '../components/Carousel.astro';
+import Contatore from '../components/Contatore.astro';
+import { tesserati as contaTesserati } from '../lib/tesserati';
 import RecordHome from '../components/RecordHome.astro';
 import Mappa from '../components/Mappa.astro';
 import Fascia5x1000 from '../components/Fascia5x1000.astro';
@@ -50,6 +52,7 @@ const introStoria = storia?.introduzione ? testoSemplice(storia.introduzione) : 
 const incipit = introStoria.length > 320 ? introStoria.slice(0, introStoria.lastIndexOf(' ', 300)) + '…' : introStoria;
 const albumStorici = album.filter((a) => a.storico).slice(0, 3);
 const albumHome = (albumStorici.length ? albumStorici : album).slice(0, 3);
+const tesserati = await contaTesserati(settings);
 ---
 <Layout>
   <Apertura iscrizioni={iscrizioni} nome={nome} anno={settings?.annoFondazione} foto={settings?.slider} openDay={openDay?.attivo === true} />
@@ -94,7 +97,15 @@ const albumHome = (albumStorici.length ? albumStorici : album).slice(0, 3);
   {settings?.puntiForza?.length > 0 && (
     <section class="section fascia-chiara">
       <div class="container">
-        <div class="section-head"><span class="eyebrow">Perché i Daini</span><h2>Atletica a Carate dal {settings?.annoFondazione ?? 1945}</h2></div>
+        <div class="section-head between perche-testa">
+          <div><span class="eyebrow">Perché i Daini</span><h2>Atletica a Carate dal {settings?.annoFondazione ?? 1945}</h2></div>
+          {tesserati && (
+            <p class="tesserati">
+              <strong><Contatore valore={tesserati.numero} /></strong>
+              <span>{tesserati.dicitura}</span>
+            </p>
+          )}
+        </div>
         <ul class="punti">
           {settings.puntiForza.map((pf: any) => (
             <li><strong>{pf.titolo}</strong>{pf.testo && <span>{pf.testo}</span>}</li>
@@ -163,6 +174,11 @@ const albumHome = (albumStorici.length ? albumStorici : album).slice(0, 3);
 <style>
   .evidenza { margin-bottom: clamp(14px, 2.4vw, 22px); }
 
+  .perche-testa { align-items: flex-end; gap: 12px 32px; flex-wrap: wrap; }
+  .tesserati { display: flex; flex-direction: column; align-items: flex-end; text-align: right; }
+  .tesserati strong { font-family: var(--font-display); font-weight: 800; font-size: clamp(2.8rem, 6vw, 4.2rem); line-height: .95; color: var(--verde); }
+  .tesserati span { color: var(--ink-soft); }
+  @media (max-width: 639px) { .tesserati { align-items: flex-start; text-align: left; } }
   .punti { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px 28px; }
   @media (max-width: 1023px) { .punti { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   .punti li { display: flex; flex-direction: column; gap: 4px; border-top: 3px solid var(--verde); padding-top: 12px; }

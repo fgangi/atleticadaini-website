@@ -27,7 +27,7 @@ export const iscrizioni = defineType({
     defineField({ name: 'linkModulo', title: 'Link al modulo online (facoltativo)', type: 'url', group: 'campagna',
       description: 'Se l\'iscrizione si fa online. Altrimenti "Iscriviti" porta alla sezione iscrizioni del sito.' }),
     defineField({ name: 'periodi', title: 'Periodo di validità', type: 'text', rows: 4, group: 'campagna',
-      description: 'Es. "Iscrizione annuale: dal 15 settembre al 15 giugno." Una riga per ogni informazione.' }),
+      description: 'Una riga per ogni informazione, nella forma "Titolo: testo", es. "Iscrizione annuale: dal 15 settembre al 15 giugno". Sul sito ogni riga diventa un riquadro con il titolo in evidenza.' }),
     defineField({
       name: 'lezioneProva',
       title: 'Lezione di prova',

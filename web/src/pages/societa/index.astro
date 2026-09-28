@@ -3,6 +3,8 @@ import Layout from '../../layouts/Layout.astro';
 import PageHero from '../../components/PageHero.astro';
 import { membriDirettivo } from '../../lib/team';
 import ElencoDirettivo from '../../components/ElencoDirettivo.astro';
+import Contatore from '../../components/Contatore.astro';
+import { tesserati as contaTesserati } from '../../lib/tesserati';
 import { sfetch, testoSemplice } from '../../lib/sanity';
 import { settingsQuery, storiaQuery, teamQuery, presenzeQuery } from '../../lib/queries';
 
@@ -21,6 +23,9 @@ const anno = s?.annoFondazione ?? 1945;
 // Il primo paragrafo della storia fa da presentazione
 const primo = testoSemplice(storia?.introduzione).split('\n\n')[0] ?? '';
 const direttivo = membriDirettivo(team);
+// La società in numeri: tesserati dal pannello, allenatori contati dal Team
+const tesserati = await contaTesserati(s);
+const nAllenatori = team.filter((m) => (m.area ?? 'tecnici') === 'tecnici').length;
 const porte = [
   presenze?.storia ? { href: '/societa/storia/', titolo: 'La storia', testo: `Dal ${anno} a oggi, decennio per decennio.` } : null,
   presenze?.team ? { href: '/societa/team/', titolo: 'Il team', testo: 'Allenatori, istruttori e chi manda avanti la società.' } : null,
@@ -32,6 +37,17 @@ const porte = [
 ---
 <Layout title="Chi siamo" description={`${s?.denominazione ?? nome}: atletica leggera a Carate Brianza dal ${anno}.`}>
   <PageHero eyebrow={`Carate Brianza, dal ${anno}`} title="Chi siamo" lead={primo || null} />
+
+  <section class="section numeri-sez">
+    <div class="container">
+      <h2 class="sr-only">La società in numeri</h2>
+      <ul class="numeri">
+        <li><strong class="tabnums">{anno}</strong><span>anno di fondazione</span></li>
+        {tesserati && <li><strong><Contatore valore={tesserati.numero} /></strong><span>{tesserati.dicitura}</span></li>}
+        {nAllenatori > 0 && <li><strong><Contatore valore={nAllenatori} /></strong><span>allenatori e istruttori</span></li>}
+      </ul>
+    </div>
+  </section>
 
   {storia?.riconoscimenti?.length > 0 && (
     <section class="section">
@@ -67,6 +83,13 @@ const porte = [
   </section>
 </Layout>
 <style>
+  /* Stessi numeri grandi di "Perché i Daini" in home */
+  .numeri { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 28px; }
+  @media (max-width: 639px) { .numeri { grid-template-columns: minmax(0, 1fr); } }
+  .numeri li { display: flex; flex-direction: column; gap: 4px; border-top: 3px solid var(--verde); padding-top: 12px; }
+  .numeri strong { font-family: var(--font-display); font-size: clamp(2.2rem, 4vw, 3rem); font-weight: 800; line-height: 1; color: var(--verde); }
+  .numeri span { color: var(--ink-soft); }
+
   .ricon { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
   .ricon li { padding: 18px 20px; display: flex; flex-direction: column; gap: 4px; border-top: 5px solid var(--giallo); }
   .r-anno { font-family: var(--font-display); font-size: 2.2rem; font-weight: 800; color: var(--verde); line-height: 1; }

@@ -1,5 +1,6 @@
 ---
 import Carousel from './Carousel.astro';
+import Contatore from './Contatore.astro';
 
 /**
  * Sezione record della home: fondo verde del "tabellone", tre contatori e uno
@@ -39,9 +40,9 @@ const primati = [piuRecente, piuLongevo, ...inEvidenza]
         <a class="btn cta" href="/societa/record/">Tutti i record</a>
       </div>
       <ul class="pr-contatori">
-        <li><strong class="tabnums">{nRecord}</strong><span>record sociali</span></li>
-        <li><strong class="tabnums">{nCampioni}</strong><span>titoli conquistati</span></li>
-        <li><strong class="tabnums">{nAzzurri}</strong><span>presenze in maglia azzurra</span></li>
+        <li><strong><Contatore valore={nRecord} /></strong><span>record sociali</span></li>
+        <li><strong><Contatore valore={nCampioni} /></strong><span>titoli conquistati</span></li>
+        <li><strong><Contatore valore={nAzzurri} /></strong><span>presenze in maglia azzurra</span></li>
       </ul>
       <Carousel etichetta="Primati più importanti" allinea="stretch" larghezza="260px" larghezzaTablet="250px" larghezzaMobile="72vw">
         {primati.map((r: any) => (

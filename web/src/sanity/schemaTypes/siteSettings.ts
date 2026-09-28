@@ -25,6 +25,18 @@ export const siteSettings = defineType({
       validation: (r) => r.max(160).warning('Oltre i 160 caratteri Google la taglia.') }),
     defineField({ name: 'fraseFooter', title: 'Frase del footer', type: 'string', group: 'societa',
       description: 'Una riga sulla società, sotto il logo in fondo a ogni pagina.' }),
+    defineField({
+      name: 'tesserati',
+      title: 'Atleti tesserati',
+      type: 'object',
+      group: 'societa',
+      description: 'Contatore in home e in "Chi siamo". Se il numero è vuoto, il sito lo prende da solo dalla pagina FIDAL della società (codice FIDAL qui sopra), a ogni pubblicazione.',
+      fields: [
+        { name: 'numero', type: 'number', title: 'Numero scritto a mano (facoltativo)', validation: (r: any) => r.min(0).integer(),
+          description: 'Solo se il numero FIDAL non va bene, per esempio per contare anche chi non compare sul sito FIDAL.' },
+        { name: 'stagione', type: 'string', title: 'Stagione', description: 'Es. "2026/2027": sul sito si legge "nella stagione 2026/2027", così si vede quando va aggiornato.' },
+      ],
+    }),
     defineField({ name: 'annoFondazione', title: 'Anno di fondazione', type: 'number', group: 'societa', initialValue: 1945 }),
     defineField({ name: 'logo', title: 'Logo (per fondi chiari)', type: 'image', group: 'societa',
       description: DESCRIZIONE_LOGO, validation: validaLogo }),
