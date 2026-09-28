@@ -73,7 +73,7 @@ export const albumSlugsQuery = groq`*[_type == "galleryAlbum" && defined(slug.cu
  * voce in meno.
  */
 export const collaborazioniQuery = groq`*[_type == "collaborazione"] | order(ordine asc, nome asc){
-  _id, tipo, nome, professione, foto, logo, descrizione, punti, indirizzo, telefono, link, instagram
+  _id, tipo, nome, professione, foto, logo, descrizione, punti, indirizzo, luogo, telefono, link, instagram
 }`;
 
 export const presenzeQuery = groq`{

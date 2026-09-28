@@ -154,13 +154,18 @@ export const nomeRuolo = (t: { nome?: string; ruolo?: string }) =>
 /** Link a una chat WhatsApp con il messaggio già scritto. */
 export const whatsappHref = (n: string, testo?: string) =>
   `https://wa.me/${cifreItaliane(n).replace('+', '')}${testo ? `?text=${encodeURIComponent(testo)}` : ''}`;
-/** Forma leggibile: "+39 339 350 7848" (cellulari a gruppi 3-3-4). */
+/**
+ * Forma leggibile: "+39 339 350 7848" (cellulari a gruppi 3-3-4). I fissi
+ * hanno prefissi di lunghezza diversa: si tengono gli spazi scritti nel
+ * pannello ("0341 220541" → "+39 0341 220541").
+ */
 export function formatTel(n: string): string {
   const c = cifreItaliane(n);
   if (!c.startsWith('+39')) return c;
   const resto = c.slice(3);
-  const gruppi = /^3\d{9}$/.test(resto) ? [resto.slice(0, 3), resto.slice(3, 6), resto.slice(6)] : [resto];
-  return ['+39', ...gruppi].join(' ');
+  if (/^3\d{9}$/.test(resto)) return ['+39', resto.slice(0, 3), resto.slice(3, 6), resto.slice(6)].join(' ');
+  const scritto = n.trim().replace(/^(\+|00)39\s*/, '').replace(/[^\d ]/g, ' ').replace(/\s+/g, ' ').trim();
+  return `+39 ${scritto.replace(/ /g, '') === resto ? scritto : resto}`;
 }
 
 /** Testo semplice da un testo ricco (per estratti e descrizioni). */

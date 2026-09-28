@@ -27,7 +27,7 @@ const iniziali = String(c.nome ?? '').split(/\s+/).map((w: string) => w[0]).join
         {/* Come negli altri indirizzi del sito: etichetta nel carattere dei titoli, poi l'indirizzo */}
         {c.indirizzo && (
           <p class="c-indirizzo">
-            <span class="c-etichetta">{c.tipo === 'sponsor' ? 'Sede' : 'Studio'}</span>
+            <span class="c-etichetta">{c.luogo || (c.tipo === 'sponsor' ? 'Sede' : 'Studio')}</span>
             <Indirizzo testo={c.indirizzo} />
           </p>
         )}
@@ -65,6 +65,7 @@ const iniziali = String(c.nome ?? '').split(/\s+/).map((w: string) => w[0]).join
     .collab { grid-template-columns: 84px minmax(0, 1fr); align-items: center; }
     .c-media { grid-row: auto; width: 84px; border-radius: 50%; }
     .c-media.logo { border-radius: 12px; }
+    .c-media.logo img { padding: 6px; }
     .c-iniziali { font-size: 1.6rem; }
     .c-corpo { grid-column: 1 / -1; }
     .c-azioni .btn { flex: 1 1 auto; }
