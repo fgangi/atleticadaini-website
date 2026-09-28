@@ -59,7 +59,7 @@ const eventi = date.length && campo ? JSON.stringify(date.map((d: any) => ({
       {prenota && <a class="btn cta grande" href={prenota} target="_blank" rel="noopener">Prenota su WhatsApp</a>}
       <a class="btn chiaro grande" href="#corsi">Corsi e orari</a>
     </div>
-    {referente && numero && <p class="hero-ref">Ti risponde {referente} al <span class="tabnums">{formatTel(numero)}</span></p>}
+    {numero && <p class="hero-ref">{referente ? `Ti risponde ${referente} al` : 'Scrivici su WhatsApp al'} <span class="tabnums">{formatTel(numero)}</span></p>}
   </PageHero>
 
   {/* Date: la sezione esiste solo se ci sono giorni in programma. Senza date
@@ -110,10 +110,17 @@ const eventi = date.length && campo ? JSON.stringify(date.map((d: any) => ({
 
   <section class="section fascia-tenue">
     <div class="container info">
-      {od.cosaPortare?.length > 0 && (
+      {(od.cosaPortare?.length > 0 || od.cosaPortareInverno?.length > 0) && (
         <div class="card blocco">
           <h2 class="blocco-titolo">Cosa portare</h2>
-          <ul class="portare">{od.cosaPortare.map((x: string) => <li>{x}</li>)}</ul>
+          {od.cosaPortare?.length > 0 && <ul class="portare">{od.cosaPortare.map((x: string) => <li>{x}</li>)}</ul>}
+          {/* Elenco a parte: il genitore lo usa come lista da spuntare prima di uscire */}
+          {od.cosaPortareInverno?.length > 0 && (
+            <>
+              <h3 class="portare-titolo">D'inverno aggiungi</h3>
+              <ul class="portare">{od.cosaPortareInverno.map((x: string) => <li>{x}</li>)}</ul>
+            </>
+          )}
           {documenti.length > 0 && (
             <ul class="documenti">
               {documenti.map((d: any) => (
@@ -185,6 +192,7 @@ const eventi = date.length && campo ? JSON.stringify(date.map((d: any) => ({
   @media (max-width: 1023px) { .info { grid-template-columns: minmax(0, 1fr); } }
   .blocco { padding: clamp(20px, 3vw, 30px); display: flex; flex-direction: column; gap: 10px; }
   .blocco-titolo { font-size: clamp(1.5rem, 2.4vw, 1.8rem); margin-bottom: 6px; }
+  .portare-titolo { font-size: 1.1rem; margin-top: 8px; color: var(--verde); }
   .portare { margin: 0; padding-left: 1.2rem; display: flex; flex-direction: column; gap: 6px; color: var(--ink-soft); }
   .documenti { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
   .documenti a { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; font-weight: 600; }

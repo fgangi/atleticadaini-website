@@ -1,5 +1,6 @@
 ---
-import { img, telHref, formatTel } from '../lib/sanity';
+import { img, telHref, formatTel, whatsappHref } from '../lib/sanity';
+import IconaWhatsApp from './IconaWhatsApp.astro';
 import { logoRifilato, misuraLogo } from '../lib/loghi';
 import SocialIcons from './SocialIcons.astro';
 import Indirizzo from './Indirizzo.astro';
@@ -14,7 +15,10 @@ const s = settings ?? {};
 const nome = s.nome ?? 'Atletica Daini';
 const logoUrl = img(s.logoChiaro, 360);
 const anno = new Date().getFullYear();
-const telefoni: { nome?: string; ruolo?: string; numero: string }[] = s.telefoni ?? [];
+const tuttiTelefoni: { nome?: string; ruolo?: string; numero: string; principale?: boolean }[] = s.telefoni ?? [];
+// Il numero della società sta sopra, in giallo e con WhatsApp; i referenti sotto
+const principali = tuttiTelefoni.filter((t) => t.principale);
+const telefoni = tuttiTelefoni.filter((t) => !t.principale);
 const sede = s.sede ? String(s.sede).replace(/\s*\n\s*/g, ', ') : null;
 
 // Loghi istituzionali: margini vuoti tolti e stessa altezza per tutti,
@@ -89,6 +93,13 @@ const identificativi = [
       <div>
         <h4>Contatti</h4>
         {/* Tre gruppi: telefoni vicini fra loro, poi l'email, poi il rimando alla pagina */}
+        {principali.length > 0 && (
+          <ul class="fnav contatti">
+            {principali.map((t) => (
+              <li><a class="tel-principale" href={whatsappHref(t.numero)} target="_blank" rel="noopener"><IconaWhatsApp size={18} /><span class="tabnums">{formatTel(t.numero)}</span><span class="tel-nome">{t.nome || 'WhatsApp'}</span></a></li>
+            ))}
+          </ul>
+        )}
         {telefoni.length > 0 && (
           <ul class="fnav contatti">
             {telefoni.map((t) => (
@@ -181,6 +192,8 @@ const identificativi = [
   .nota { opacity: .7; }
   /* Numero in bianco e nome in grigio: bastano colore e spazio a separarli */
   .tel-nome { margin-left: .7em; color: #B9C4B8; }
+  .fnav.contatti a.tel-principale { gap: 8px; color: var(--giallo); font-weight: 700; }
+  .tel-principale .tel-nome { margin-left: 0; font-weight: 500; }
   .dove { margin-top: 18px; }
   .dove p { color: #E8EDE6; font-size: 1rem; line-height: 1.5; }
   .dove .nota { font-size: .92rem; margin-top: 4px; }

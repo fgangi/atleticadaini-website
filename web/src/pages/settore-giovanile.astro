@@ -2,7 +2,8 @@
 import Layout from '../layouts/Layout.astro';
 import PageHero from '../components/PageHero.astro';
 import SchedaCorso from '../components/SchedaCorso.astro';
-import { sfetch, richText, telHref, formatTel } from '../lib/sanity';
+import IconaWhatsApp from '../components/IconaWhatsApp.astro';
+import { sfetch, richText, telHref, formatTel, whatsappHref } from '../lib/sanity';
 import { settingsQuery, iscrizioniQuery, corsiQuery, openDayQuery } from '../lib/queries';
 
 /**
@@ -141,9 +142,11 @@ const documenti = (i?.documenti ?? []).filter((d: any) => d?.url);
             <h3>Hai domande?</h3>
             <ul class="referenti">
               {telefoni.map((t) => (
-                <li><a class="btn" href={telHref(t.numero)}><span class="tabnums">{formatTel(t.numero)}</span>{t.nome && <span class="tel-nome">{t.nome}</span>}</a></li>
+                <li>{t.principale
+                  ? <a class="btn primary" href={whatsappHref(t.numero)} target="_blank" rel="noopener"><span class="tabnums">{formatTel(t.numero)}</span><span class="tel-nome"><span class="solo-largo">Scrivici su </span>WhatsApp</span><IconaWhatsApp /></a>
+                  : <a class="btn" href={telHref(t.numero)}><span class="tabnums">{formatTel(t.numero)}</span>{t.nome && <span class="tel-nome">{t.nome}</span>}</a>}</li>
               ))}
-              {settings?.email && <li><a class="btn" href={`mailto:${settings.email}`}>{settings.email}</a></li>}
+              {settings?.email && <li><a class="btn cta" href={`mailto:${settings.email}`}>{settings.email}</a></li>}
             </ul>
           </div>
         )}
@@ -212,4 +215,10 @@ const documenti = (i?.documenti ?? []).filter((d: any) => d?.url);
   .doc-desc { display: block; font-size: .92rem; color: var(--ink-faint); }
   .tel-nome { margin-left: .6em; color: var(--ink-faint); font-weight: 500; }
   .referenti .btn { width: 100%; justify-content: flex-start; text-transform: none; font-family: var(--font-body); font-weight: 600; font-size: 1rem; letter-spacing: 0; }
+  /* Pulsante del numero della società: numero chiaro, leggibile sul verde */
+  /* Numero a sinistra come negli altri pulsanti; l'icona chiude la riga a destra */
+  /* Stessa spaziatura delle altre righe: numeri e nomi restano in colonna */
+  .referenti .btn.primary .tel-nome { color: #DCE6D8; }
+  /* Sul telefono la riga è stretta: resta "WhatsApp", senza andare a capo */
+  @media (max-width: 479px) { .referenti .solo-largo { display: none; } }
 </style>

@@ -15,7 +15,7 @@ export const iscrizioniQuery = groq`*[_id == "iscrizioni"][0]{
 }`;
 
 export const openDayQuery = groq`*[_id == "openDay"][0]{
-  attivo, occhiello, titolo, testo, immagine, date, tuttoAnno, whatsapp, referente, messaggio, cosaPortare, faq,
+  attivo, occhiello, titolo, testo, immagine, date, tuttoAnno, whatsapp, referente, messaggio, cosaPortare, cosaPortareInverno, faq,
   "documenti": documenti[]->{ _id, titolo, descrizione, "url": file.asset->url, "est": file.asset->extension }
 }`;
 

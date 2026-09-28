@@ -3,7 +3,8 @@ import Layout from '../layouts/Layout.astro';
 import PageHero from '../components/PageHero.astro';
 import Indirizzo from '../components/Indirizzo.astro';
 import SocialIcons from '../components/SocialIcons.astro';
-import { sfetch, telHref, formatTel, indicazioniUrl } from '../lib/sanity';
+import IconaWhatsApp from '../components/IconaWhatsApp.astro';
+import { sfetch, telHref, formatTel, indicazioniUrl, whatsappHref } from '../lib/sanity';
 import { settingsQuery, impiantiQuery } from '../lib/queries';
 
 /**
@@ -15,7 +16,9 @@ import { settingsQuery, impiantiQuery } from '../lib/queries';
  * Ogni voce compare solo se il dato c'è nel pannello: niente righe vuote.
  */
 const [s, impianti] = await Promise.all([sfetch<any>(settingsQuery, {}, null), sfetch<any[]>(impiantiQuery, {}, [])]);
-const telefoni: any[] = s?.telefoni ?? [];
+// Il numero della società (WhatsApp) va in evidenza, i referenti sotto
+const principali: any[] = (s?.telefoni ?? []).filter((t: any) => t.principale);
+const telefoni: any[] = (s?.telefoni ?? []).filter((t: any) => !t.principale);
 const campo = impianti[0];
 const sede = s?.sede ? String(s.sede).replace(/\s*\n\s*/g, ', ') : null;
 const conSocial = Object.values(s?.social ?? {}).some((u) => typeof u === 'string' && u.startsWith('http'));
@@ -32,9 +35,19 @@ const dati = [
 
   <section class="section">
     <div class="container contatti">
-      {(telefoni.length > 0 || s?.email) && (
+      {(principali.length > 0 || telefoni.length > 0 || s?.email) && (
         <div class="card blocco">
           <h2 class="blocco-titolo">Chiamaci o scrivici</h2>
+          {principali.map((t) => (
+            <div class="principale">
+              <p class="pr-nome">{t.nome || 'Atletica Daini'}{t.ruolo && <span>{t.ruolo}</span>}</p>
+              <p class="pr-numero tabnums">{formatTel(t.numero)}</p>
+              <div class="pr-azioni">
+                <a class="btn primary" href={whatsappHref(t.numero)} target="_blank" rel="noopener"><IconaWhatsApp /> Scrivici su WhatsApp</a>
+                <a class="btn" href={telHref(t.numero)}>Chiama</a>
+              </div>
+            </div>
+          ))}
           <div class="azioni-contatto">
             {telefoni.map((t) => (
               <a class="contatto" href={telHref(t.numero)}>
@@ -60,7 +73,7 @@ const dati = [
               <div>
                 <dt>Campo di allenamento</dt>
                 <dd><strong>{campo.nome}</strong>{campo.indirizzo && <><br /><Indirizzo testo={campo.indirizzo} /></>}</dd>
-                {campo.ingresso && <dd class="ingresso">{campo.ingresso}</dd>}
+                {campo.ingresso && <dd class="ingresso"><strong>{campo.ingresso}</strong></dd>}
                 <dd class="link-luogo">
                   <a class="btn primary" href="/impianto/">Come arrivare</a>
                   {indicazioniUrl(campo.indirizzo) && <a class="btn" href={indicazioniUrl(campo.indirizzo)} target="_blank" rel="noopener">Navigatore</a>}
@@ -109,6 +122,13 @@ const dati = [
   .blocco-titolo { font-size: clamp(1.5rem, 2.4vw, 1.8rem); margin: 0 0 18px; }
   .blocco-titolo.piccolo { font-size: 1.3rem; margin-bottom: 14px; }
 
+  /* Numero della società: fondo giallo chiaro e pulsanti, il resto è elenco */
+  .principale { background: var(--giallo-chiaro); border-left: 5px solid var(--verde); border-radius: 12px; padding: 16px 18px 18px; margin-bottom: 14px; }
+  .pr-nome { margin: 0; font-family: var(--font-display); text-transform: uppercase; letter-spacing: .04em; font-weight: 800; font-size: 1.1rem; color: var(--verde); display: flex; flex-direction: column; }
+  .pr-nome span { font-family: var(--font-body); text-transform: none; letter-spacing: 0; font-weight: 600; font-size: 1rem; color: var(--ink); }
+  .pr-numero { margin: 6px 0 12px; font-family: var(--font-display); font-weight: 800; font-size: clamp(1.7rem, 4vw, 2rem); line-height: 1; color: var(--ink); }
+  .pr-azioni { display: flex; flex-wrap: wrap; gap: 10px; }
+  .pr-azioni .btn { gap: 8px; min-height: 48px; }
   .azioni-contatto { display: flex; flex-direction: column; gap: 10px; }
   .contatto { display: flex; align-items: center; gap: 14px; min-height: 64px; padding: 12px 16px;
     border: 1px solid var(--line); border-radius: 12px; color: var(--ink); transition: border-color .12s ease, transform .12s ease; }

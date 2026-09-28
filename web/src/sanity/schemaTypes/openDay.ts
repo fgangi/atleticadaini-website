@@ -42,11 +42,15 @@ export const openDay = defineType({
 
     defineField({ name: 'whatsapp', title: 'Numero WhatsApp per prenotare', type: 'string', group: 'info',
       description: 'Anche senza +39. Se vuoto si usa il primo telefono delle impostazioni.' }),
-    defineField({ name: 'referente', title: 'Nome del referente', type: 'string', group: 'info', description: 'Es. "Angelo".' }),
+    defineField({ name: 'referente', title: 'Nome del referente (facoltativo)', type: 'string', group: 'info',
+      description: 'Se c\'è, sotto il pulsante compare "Ti risponde … al numero". Vuoto: "Scrivici su WhatsApp al numero".' }),
     defineField({ name: 'messaggio', title: 'Messaggio WhatsApp già scritto', type: 'string', group: 'info',
       initialValue: 'Ciao! Vorrei far provare l\'atletica a mio figlio/mia figlia. Ha … anni.',
       description: 'Chi tocca "Prenota" trova questo testo pronto da inviare; per una data precisa il sito aggiunge il giorno.' }),
-    defineField({ name: 'cosaPortare', title: 'Cosa portare', type: 'array', of: [{ type: 'string' }], group: 'info' }),
+    defineField({ name: 'cosaPortare', title: 'Cosa portare', type: 'array', of: [{ type: 'string' }], group: 'info',
+      description: 'Una cosa per riga, valida tutto l\'anno.' }),
+    defineField({ name: 'cosaPortareInverno', title: 'Cosa portare: in più d\'inverno', type: 'array', of: [{ type: 'string' }], group: 'info',
+      description: 'Compare sotto "Cosa portare" con il titolo "D\'inverno aggiungi". Es. "Guanti".' }),
     defineField({ name: 'documenti', title: 'Moduli per la prova', type: 'array', group: 'info',
       of: [{ type: 'reference', to: [{ type: 'documento' }] }], description: 'Es. la liberatoria per la lezione di prova.' }),
     defineField({
