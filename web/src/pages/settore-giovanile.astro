@@ -169,10 +169,15 @@ const documenti = (i?.documenti ?? []).filter((d: any) => d?.url);
     font-size: .95rem; line-height: 1; padding: .4rem .7rem; border-radius: 999px; background: var(--tinta); color: var(--verde); }
   .pacchetto.plus { background: var(--verde); color: var(--giallo); }
 
-  /* Schede delle quote a righe flessibili: con 5 tipologie l'ultima riga
-     si allarga invece di lasciare una scheda sola in un angolo */
-  .quote { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 16px; }
-  .quota { flex: 1 1 300px; display: flex; flex-direction: column; background: var(--ground); border-radius: var(--radius); border-top: 5px solid var(--verde); padding: 18px 18px 20px; }
+  /* Schede delle quote: una colonna su telefono, due da tablet in su.
+     Se le schede sono dispari, l'ultima occupa tutta la riga invece di
+     restare sola a metà */
+  .quote { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+  @media (min-width: 640px) {
+    .quote { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .quota:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  }
+  .quota { display: flex; flex-direction: column; background: var(--ground); border-radius: var(--radius); border-top: 5px solid var(--verde); padding: 18px 18px 20px; }
   .quota h3 { font-size: 1.25rem; line-height: 1.2; color: var(--verde); margin-bottom: 14px; }
   /* Sottogriglia: i prezzi di Base e Plus stanno alla stessa altezza anche
      se "cosa comprende" va a capo su più righe in una sola colonna */

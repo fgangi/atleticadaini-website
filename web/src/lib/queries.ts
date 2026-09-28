@@ -24,7 +24,7 @@ export const corsiQuery = groq`*[_type == "corso"] | order(ordine asc, nome asc)
 }`;
 
 export const teamQuery = groq`*[_type == "membroTeam"] | order(ordine asc, nome asc){
-  _id, nome, ruolo, area, qualifica, specialita, foto
+  _id, nome, ruolo, area, qualifica, specialita, telefono, foto
 }`;
 
 export const impiantiQuery = groq`*[_type == "impianto"] | order(ordine asc, nome asc){

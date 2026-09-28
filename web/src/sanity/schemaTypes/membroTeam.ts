@@ -19,6 +19,8 @@ export const membroTeam = defineType({
       initialValue: 'tecnici', validation: (r) => r.required() }),
     defineField({ name: 'qualifica', title: 'Qualifica', type: 'string', description: 'Es. "Istruttore FIDAL", "Laurea in Scienze motorie".' }),
     defineField({ name: 'specialita', title: 'Specialità seguite', type: 'string', description: 'Es. "Velocità e ostacoli".' }),
+    defineField({ name: 'telefono', title: 'Telefono (facoltativo)', type: 'string',
+      description: 'Compare nella scheda con il pulsante per chiamare: serve per le gare e l\'organizzazione. Anche senza +39.' }),
     defineField({ name: 'foto', title: 'Foto', ...foto('persona') }),
     defineField({ name: 'ordine', title: 'Ordine', type: 'number', description: 'Numero più basso = prima.' }),
   ],
