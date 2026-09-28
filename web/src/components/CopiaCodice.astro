@@ -1,0 +1,33 @@
+---
+/**
+ * Pulsanti "Copia" per il codice fiscale (promemoria in alto e footer):
+ * [data-copia] contiene il testo, l'esito va nel [data-copia-esito] del
+ * contenitore [data-copia-box]. Un solo script per tutto il sito.
+ */
+---
+<script>
+  function initCopia() {
+    document.querySelectorAll<HTMLButtonElement>('[data-copia]').forEach((b) => {
+      if (b.dataset.bound) return;
+      b.dataset.bound = '1';
+      b.addEventListener('click', async () => {
+        const esito = b.closest('[data-copia-box]')?.querySelector('[data-copia-esito]');
+        // Dove c'è poco spazio (footer) la conferma è la scritta del pulsante stesso
+        const etichetta = b.querySelector('[data-copia-etichetta]');
+        try {
+          await navigator.clipboard.writeText(b.dataset.copia ?? '');
+          if (esito) esito.textContent = 'Codice copiato.';
+          if (etichetta) {
+            const originale = (etichetta as HTMLElement).dataset.originale ??= etichetta.textContent ?? '';
+            etichetta.textContent = 'Copiato';
+            setTimeout(() => { etichetta.textContent = originale; }, 2000);
+          }
+        } catch {
+          if (esito) esito.textContent = 'Non riesco a copiarlo: selezionalo e copialo a mano.';
+        }
+      });
+    });
+  }
+  initCopia();
+  document.addEventListener('astro:page-load', initCopia);
+</script>

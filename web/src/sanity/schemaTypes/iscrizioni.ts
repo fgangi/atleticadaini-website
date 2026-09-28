@@ -47,8 +47,8 @@ export const iscrizioni = defineType({
       group: 'quote',
       description: 'Scritto una volta sola: sul sito compare come legenda sopra le quote.',
       fields: [
-        { name: 'base', type: 'string', title: 'Base', description: 'Es. "Maglietta e pantaloncino".' },
-        { name: 'plus', type: 'string', title: 'Plus', description: 'Es. "Maglietta, pantaloncino e tuta".' },
+        { name: 'base', type: 'string', title: 'Base', description: 'Es. "Divisa".' },
+        { name: 'plus', type: 'string', title: 'Plus', description: 'Es. "Divisa e tuta".' },
       ],
     }),
     defineField({

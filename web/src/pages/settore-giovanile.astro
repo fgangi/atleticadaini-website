@@ -3,7 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import PageHero from '../components/PageHero.astro';
 import SchedaCorso from '../components/SchedaCorso.astro';
 import IconaWhatsApp from '../components/IconaWhatsApp.astro';
-import { sfetch, richText, telHref, formatTel, whatsappHref } from '../lib/sanity';
+import { sfetch, richText, telHref, formatTel, whatsappHref, nomeRuolo } from '../lib/sanity';
 import { settingsQuery, iscrizioniQuery, corsiQuery, openDayQuery } from '../lib/queries';
 
 /**
@@ -144,7 +144,7 @@ const documenti = (i?.documenti ?? []).filter((d: any) => d?.url);
               {telefoni.map((t) => (
                 <li>{t.principale
                   ? <a class="btn primary" href={whatsappHref(t.numero)} target="_blank" rel="noopener"><span class="tabnums">{formatTel(t.numero)}</span><span class="tel-nome"><span class="solo-largo">Scrivici su </span>WhatsApp</span><IconaWhatsApp /></a>
-                  : <a class="btn" href={telHref(t.numero)}><span class="tabnums">{formatTel(t.numero)}</span>{t.nome && <span class="tel-nome">{t.nome}</span>}</a>}</li>
+                  : <a class="btn" href={telHref(t.numero)}><span class="tabnums">{formatTel(t.numero)}</span>{t.nome && <span class="tel-nome">{nomeRuolo(t)}</span>}</a>}</li>
               ))}
               {settings?.email && <li><a class="btn cta" href={`mailto:${settings.email}`}>{settings.email}</a></li>}
             </ul>

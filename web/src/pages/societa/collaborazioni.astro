@@ -1,0 +1,69 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import PageHero from '../../components/PageHero.astro';
+import IconaWhatsApp from '../../components/IconaWhatsApp.astro';
+import SchedaCollaborazione from '../../components/SchedaCollaborazione.astro';
+import { sfetch, whatsappHref } from '../../lib/sanity';
+import { collaborazioniQuery, settingsQuery } from '../../lib/queries';
+
+/**
+ * Collaborazioni: professionisti e realtà che lavorano con la società.
+ * Una scheda larga per ciascuno (foto, cosa fa per gli atleti, come
+ * contattarlo): a un genitore un logo senza spiegazione non dice niente.
+ * Gli sponsor, se ci sono, stanno in cima in un blocco a parte.
+ */
+const [tutte, s] = await Promise.all([sfetch<any[]>(collaborazioniQuery, {}, []), sfetch<any>(settingsQuery, {}, null)]);
+const sponsor = tutte.filter((c) => c.tipo === 'sponsor');
+const collaborazioni = tutte.filter((c) => c.tipo !== 'sponsor');
+const numero = (s?.telefoni ?? []).find((t: any) => t.principale)?.numero;
+const email = s?.email;
+---
+<Layout title="Collaborazioni" description="Professionisti e realtà che collaborano con l'Atletica Daini per la salute e la crescita dei nostri atleti.">
+  <PageHero eyebrow="La società" title="Collaborazioni" lead="Professionisti e realtà che lavorano con noi per la salute e la crescita dei nostri atleti." />
+
+  {sponsor.length > 0 && (
+    <section class="section">
+      <div class="container">
+        <div class="section-head"><h2>Sponsor</h2></div>
+        <ul class="schede">{sponsor.map((c) => <li><SchedaCollaborazione c={c} /></li>)}</ul>
+      </div>
+    </section>
+  )}
+
+  {collaborazioni.length > 0 ? (
+    <section class="section">
+      <div class="container">
+        {sponsor.length > 0 && <div class="section-head"><h2>Collaborazioni</h2></div>}
+        <ul class="schede">
+          {collaborazioni.map((c) => <li><SchedaCollaborazione c={c} /></li>)}
+        </ul>
+      </div>
+    </section>
+  ) : sponsor.length === 0 && (
+    <section class="section"><div class="container"><div class="empty"><strong>Nessuna collaborazione inserita</strong>Si aggiungono nel pannello, alla voce "Collaborazioni".</div></div></section>
+  )}
+
+  {(numero || email) && (
+    <section class="section fascia-tenue">
+      <div class="container invito">
+        <div>
+          <h2>Vuoi collaborare con noi?</h2>
+          <p>Sei un professionista o un'azienda e vuoi sostenere i nostri atleti? Scrivici.</p>
+        </div>
+        <div class="invito-azioni">
+          {numero && <a class="btn primary grande" href={whatsappHref(numero, 'Ciao! Vorrei proporvi una collaborazione.')} target="_blank" rel="noopener"><IconaWhatsApp /> Scrivici su WhatsApp</a>}
+          {email && <a class="btn grande" href={`mailto:${email}?subject=${encodeURIComponent('Proposta di collaborazione')}`}>Mandaci una mail</a>}
+        </div>
+      </div>
+    </section>
+  )}
+</Layout>
+
+<style>
+  .schede { list-style: none; margin: 0; padding: 0; display: grid; gap: 18px; }
+  .invito { display: flex; align-items: center; justify-content: space-between; gap: 20px 40px; flex-wrap: wrap; }
+  .invito p { margin-top: 8px; color: var(--ink-soft); max-width: 56ch; }
+  .invito-azioni { display: flex; flex-wrap: wrap; gap: 10px; }
+  .invito-azioni .btn { gap: 10px; }
+  @media (max-width: 639px) { .invito-azioni, .invito-azioni .btn { width: 100%; } }
+</style>

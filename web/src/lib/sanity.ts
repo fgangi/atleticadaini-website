@@ -148,6 +148,9 @@ function cifreItaliane(n: string): string {
   return c;
 }
 export const telHref = (n: string) => 'tel:' + cifreItaliane(n);
+/** Nome con il ruolo tra parentesi, es. "Angelo (vicepresidente)": stesso stile delle quote. */
+export const nomeRuolo = (t: { nome?: string; ruolo?: string }) =>
+  [t.nome, t.ruolo ? `(${t.ruolo.toLowerCase()})` : null].filter(Boolean).join(' ');
 /** Link a una chat WhatsApp con il messaggio già scritto. */
 export const whatsappHref = (n: string, testo?: string) =>
   `https://wa.me/${cifreItaliane(n).replace('+', '')}${testo ? `?text=${encodeURIComponent(testo)}` : ''}`;

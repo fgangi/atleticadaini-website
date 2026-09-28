@@ -2,14 +2,31 @@
 import Layout from '../../layouts/Layout.astro';
 import PageHero from '../../components/PageHero.astro';
 import SchedaPersona from '../../components/SchedaPersona.astro';
-import { sfetch } from '../../lib/sanity';
-import { teamQuery } from '../../lib/queries';
+import ElencoDirettivo from '../../components/ElencoDirettivo.astro';
+import IconaWhatsApp from '../../components/IconaWhatsApp.astro';
+import { sfetch, whatsappHref } from '../../lib/sanity';
+import { teamQuery, corsiQuery, settingsQuery } from '../../lib/queries';
 import { AREE_TEAM } from '../../sanity/schemaTypes/membroTeam';
+import { membriDirettivo } from '../../lib/team';
 
-const team = await sfetch<any[]>(teamQuery, {}, []);
+const [team, corsi, s] = await Promise.all([sfetch<any[]>(teamQuery, {}, []), sfetch<any[]>(corsiQuery, {}, []), sfetch<any>(settingsQuery, {}, null)]);
+
+// Fascia "Cerchiamo allenatori": WhatsApp della società e una mail con
+// l'oggetto già scritto, comoda per mandare il curriculum
+const rec = s?.reclutamento;
+const numero = (s?.telefoni ?? []).find((t: any) => t.principale)?.numero ?? s?.telefoni?.[0]?.numero;
+const email = s?.email;
+const paragrafi = String(rec?.testo ?? '').split(/\n+/).map((x) => x.trim()).filter(Boolean);
+
 // Gruppi nell'ordine del pannello; quelli vuoti non compaiono
-const gruppi = AREE_TEAM.map((a) => ({ ...a, membri: team.filter((m) => (m.area ?? 'tecnici') === a.value) }))
+const gruppi = AREE_TEAM.map((a) => ({ ...a, membri: a.value === 'direttivo' ? membriDirettivo(team) : team.filter((m) => (m.area ?? 'tecnici') === a.value) }))
   .filter((g) => g.membri.length > 0);
+// Allenatori in una sola griglia, in ordine di gruppo (Esordienti, poi
+// Ragazzi e Cadetti…): ogni scheda porta le etichette dei gruppi che allena,
+// così nessuno compare due volte e non restano righe con una scheda sola
+const ordineCorso = (m: any) => Math.min(...(m.corsi ?? []).map((id: string) => corsi.findIndex((c) => c._id === id)).filter((i: number) => i >= 0), 99);
+const nomiGruppi = (m: any) => corsi.filter((c) => m.corsi?.includes(c._id)).map((c) => c.nome);
+const inOrdine = (membri: any[]) => [...membri].sort((a, b) => ordineCorso(a) - ordineCorso(b) || (a.ordine ?? 99) - (b.ordine ?? 99));
 ---
 <Layout title="Team" description="Allenatori, istruttori e collaboratori dell'Atletica Daini.">
   <PageHero eyebrow="La società" title="Il team" lead="Le persone che seguono ragazzi e atleti in pista, e quelle che fanno funzionare la società." />
@@ -17,14 +34,43 @@ const gruppi = AREE_TEAM.map((a) => ({ ...a, membri: team.filter((m) => (m.area 
     <section class="section">
       <div class="container">
         <div class="section-head" id={g.value}><h2>{g.title}</h2></div>
-        <div class="grid cols-4 team">{g.membri.map((m) => <SchedaPersona m={m} />)}</div>
+        {g.value === 'tecnici'
+          ? <div class="grid cols-4 team">{inOrdine(g.membri).map((m) => <SchedaPersona m={m} gruppi={nomiGruppi(m)} />)}</div>
+          : g.value === 'direttivo'
+            ? <ElencoDirettivo membri={g.membri} />
+            : <div class="grid cols-4 team">{g.membri.map((m) => <SchedaPersona m={m} />)}</div>}
       </div>
     </section>
   )) : (
     <section class="section"><div class="container"><div class="empty"><strong>Team non ancora inserito</strong>Si compila nel pannello, alla voce "Team".</div></div></section>
   )}
+
+  {rec?.attivo && rec?.titolo && (numero || email) && (
+    <section class="section sfondo-scuro reclutamento" id="unisciti" aria-labelledby="titolo-unisciti">
+      <div class="container rec-riga">
+        <div class="rec-testo">
+          {rec.occhiello && <span class="eyebrow">{rec.occhiello}</span>}
+          <h2 id="titolo-unisciti">{rec.titolo}</h2>
+          {paragrafi.map((x) => <p>{x}</p>)}
+        </div>
+        <div class="rec-azioni">
+          {numero && <a class="btn cta grande" href={whatsappHref(numero, rec.messaggio || undefined)} target="_blank" rel="noopener"><IconaWhatsApp /> Scrivici su WhatsApp</a>}
+          {email && <a class="btn chiaro grande" href={`mailto:${email}?subject=${encodeURIComponent(rec.oggetto || 'Candidatura come allenatore')}`}>Mandaci una mail</a>}
+        </div>
+      </div>
+    </section>
+  )}
 </Layout>
 <style>
+  .reclutamento { background: var(--sfondo-scuro); color: #fff; }
+  .rec-riga { display: flex; align-items: center; justify-content: space-between; gap: 24px 48px; flex-wrap: wrap; }
+  .rec-testo { max-width: 60ch; }
+  .reclutamento .eyebrow { color: var(--giallo); }
+  .reclutamento h2 { color: var(--giallo-chiaro); }
+  .rec-testo p { color: #E3EAE1; margin-top: 12px; font-size: 1.1rem; }
+  .rec-azioni { display: flex; flex-direction: column; gap: 10px; }
+  .rec-azioni .btn { gap: 10px; min-height: 52px; }
+  @media (max-width: 639px) { .rec-azioni { width: 100%; } .rec-azioni .btn { width: 100%; } }
   /* Telefono: due colonne, le schede sono piccole e una sola sarebbe enorme */
   @media (max-width: 639px) { .team { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 </style>

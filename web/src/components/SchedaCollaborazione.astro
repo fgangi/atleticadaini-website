@@ -1,0 +1,73 @@
+---
+import Indirizzo from './Indirizzo.astro';
+import { img, telHref, formatTel, indicazioniUrl } from '../lib/sanity';
+
+/** Scheda di una collaborazione o di uno sponsor: foto (o logo), chi è, cosa fa, contatti. */
+interface Props { c: any }
+const { c } = Astro.props;
+const foto = c.logo ? null : img(c.foto, 480, 480);
+const logo = c.logo ? img(c.logo, 480) : null;
+const iniziali = String(c.nome ?? '').split(/\s+/).map((w: string) => w[0]).join('').slice(0, 2).toUpperCase();
+---
+<article class="collab card">
+  <div class:list={['c-media', { logo: !!logo }]}>
+    {logo ? <img src={logo} alt={`Logo ${c.nome}`} loading="lazy" />
+      : foto ? <img src={foto} alt="" loading="lazy" />
+      : <span class="c-iniziali" aria-hidden="true">{iniziali}</span>}
+  </div>
+  <div class="c-testa">
+    <h2>{c.nome}</h2>
+    {c.professione && <p class="c-prof">{c.professione}</p>}
+  </div>
+  <div class="c-corpo">
+    {c.descrizione && <p class="c-descr">{c.descrizione}</p>}
+    {c.punti?.length > 0 && <ul class="c-punti">{c.punti.map((x: string) => <li>{x}</li>)}</ul>}
+    {(c.indirizzo || c.telefono || c.link || c.instagram) && (
+      <div class="c-contatti">
+        {/* Come negli altri indirizzi del sito: etichetta nel carattere dei titoli, poi l'indirizzo */}
+        {c.indirizzo && (
+          <p class="c-indirizzo">
+            <span class="c-etichetta">{c.tipo === 'sponsor' ? 'Sede' : 'Studio'}</span>
+            <Indirizzo testo={c.indirizzo} />
+          </p>
+        )}
+        <div class="c-azioni">
+          {c.telefono && <a class="btn" href={telHref(c.telefono)}><span class="tabnums">{formatTel(c.telefono)}</span></a>}
+          {c.indirizzo && <a class="btn" href={indicazioniUrl(c.indirizzo)} target="_blank" rel="noopener">Come arrivare</a>}
+          {c.link && <a class="btn" href={c.link} target="_blank" rel="noopener">Sito web</a>}
+          {c.instagram && <a class="btn" href={c.instagram} target="_blank" rel="noopener">Instagram</a>}
+        </div>
+      </div>
+    )}
+  </div>
+</article>
+<style>
+  /* Scheda larga: foto a sinistra, testo a destra; su telefono la foto
+     piccola sta accanto al nome e il resto va sotto */
+  .collab { display: grid; grid-template-columns: 220px minmax(0, 1fr); grid-template-rows: auto 1fr; column-gap: clamp(18px, 3vw, 32px);
+    padding: clamp(16px, 2.4vw, 24px); }
+  .c-media { grid-row: 1 / 3; width: 220px; aspect-ratio: 1; border-radius: 12px; overflow: hidden; background: var(--sfondo-scuro); display: grid; place-items: center; }
+  .c-media img { width: 100%; height: 100%; object-fit: cover; }
+  .c-media.logo { background: #fff; border: 1px solid var(--line); }
+  .c-media.logo img { object-fit: contain; padding: 18px; }
+  .c-iniziali { font-family: var(--font-display); font-size: 3rem; font-weight: 800; color: var(--giallo-chiaro); }
+  .c-testa h2 { font-size: clamp(1.5rem, 2.6vw, 1.9rem); line-height: 1.1; }
+  .c-prof { margin-top: 4px; font-family: var(--font-display); text-transform: uppercase; letter-spacing: .04em; font-weight: 700; color: var(--verde); font-size: 1.05rem; }
+  .c-corpo { margin-top: 12px; display: flex; flex-direction: column; gap: 12px; }
+  .c-descr { color: var(--ink); max-width: 62ch; }
+  .c-punti { margin: 0; padding-left: 1.2rem; display: grid; gap: 4px; color: var(--ink-soft); }
+  .c-contatti { margin-top: auto; display: flex; flex-direction: column; gap: 8px; }
+  .c-indirizzo { display: flex; flex-direction: column; color: var(--ink); line-height: 1.4; }
+  .c-etichetta { line-height: 1.15; font-family: var(--font-display); text-transform: uppercase; letter-spacing: .04em; font-weight: 700; color: var(--grigio-verde); }
+  .c-azioni { display: flex; flex-wrap: wrap; gap: 8px; }
+  .c-azioni .btn { text-transform: none; font-family: var(--font-body); font-weight: 600; font-size: 1rem; letter-spacing: 0; }
+  @media (max-width: 639px) {
+    .collab { grid-template-columns: 84px minmax(0, 1fr); align-items: center; }
+    .c-media { grid-row: auto; width: 84px; border-radius: 50%; }
+    .c-media.logo { border-radius: 12px; }
+    .c-iniziali { font-size: 1.6rem; }
+    .c-corpo { grid-column: 1 / -1; }
+    .c-azioni .btn { flex: 1 1 auto; }
+  }
+
+</style>

@@ -1,7 +1,8 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import PageHero from '../../components/PageHero.astro';
-import SchedaPersona from '../../components/SchedaPersona.astro';
+import { membriDirettivo } from '../../lib/team';
+import ElencoDirettivo from '../../components/ElencoDirettivo.astro';
 import { sfetch, testoSemplice } from '../../lib/sanity';
 import { settingsQuery, storiaQuery, teamQuery, presenzeQuery } from '../../lib/queries';
 
@@ -19,10 +20,12 @@ const nome = s?.nome ?? 'Atletica Daini';
 const anno = s?.annoFondazione ?? 1945;
 // Il primo paragrafo della storia fa da presentazione
 const primo = testoSemplice(storia?.introduzione).split('\n\n')[0] ?? '';
-const direttivo = team.filter((m) => m.area === 'direttivo');
+const direttivo = membriDirettivo(team);
 const porte = [
   presenze?.storia ? { href: '/societa/storia/', titolo: 'La storia', testo: `Dal ${anno} a oggi, decennio per decennio.` } : null,
   presenze?.team ? { href: '/societa/team/', titolo: 'Il team', testo: 'Allenatori, istruttori e chi manda avanti la società.' } : null,
+  presenze?.record ? { href: '/societa/record/', titolo: 'Record e campioni', testo: 'Primati sociali, titoli e maglie azzurre.' } : null,
+  presenze?.collaborazioni ? { href: '/societa/collaborazioni/', titolo: 'Collaborazioni', testo: 'Professionisti che lavorano con i nostri atleti.' } : null,
   { href: '/impianto/', titolo: 'L\'impianto', testo: 'Dove ci alleniamo e come arrivare.' },
   presenze?.album ? { href: '/gallery/', titolo: 'Gallery', testo: 'Foto di ieri e di oggi.' } : null,
 ].filter(Boolean) as { href: string; titolo: string; testo: string }[];
@@ -47,7 +50,7 @@ const porte = [
     <section class="section">
       <div class="container">
         <div class="section-head"><span class="eyebrow">La società</span><h2>Consiglio direttivo</h2></div>
-        <div class="grid cols-4">{direttivo.map((m) => <SchedaPersona m={m} />)}</div>
+        <ElencoDirettivo membri={direttivo} />
       </div>
     </section>
   )}

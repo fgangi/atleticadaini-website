@@ -2,6 +2,7 @@
 import '../styles/font.css';
 import '../styles/global.css';
 import { ClientRouter } from 'astro:transitions';
+import CopiaCodice from '../components/CopiaCodice.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { sfetch, img } from '../lib/sanity';
@@ -22,7 +23,7 @@ const { title, description, immagine, noindex = false } = Astro.props;
 const settings = await sfetch<any>(settingsQuery, {}, null);
 const presenze = await sfetch<any>(presenzeQuery, {}, null) ?? {};
 const p = {
-  album: presenze.album ?? 0, record: presenze.record ?? 0, team: presenze.team ?? 0, storia: presenze.storia ?? 0,
+  album: presenze.album ?? 0, record: presenze.record ?? 0, team: presenze.team ?? 0, collaborazioni: presenze.collaborazioni ?? 0, storia: presenze.storia ?? 0,
   corsi: presenze.corsi ?? 0, quote: presenze.quote ?? 0, privacy: presenze.privacy ?? 0, safeguarding: presenze.safeguarding ?? 0,
   iscrizioniAperte: presenze.iscrizioniAperte === true,
   openDay: presenze.openDay === true,
@@ -94,7 +95,9 @@ const datiStrutturati = home ? JSON.stringify({
   </head>
   <body>
     <a class="salta" href="#contenuto">Vai al contenuto</a>
-    <Header nome={nome} logoUrl={img(settings?.logoChiaro, 440)} social={settings?.social} presenze={p} />
+    <Header nome={nome} logoUrl={img(settings?.logoChiaro, 440)} social={settings?.social} presenze={p}
+      cinque={settings?.cinquePerMille?.promemoria && settings?.codiceFiscale ? { cf: settings.codiceFiscale, testo: settings.cinquePerMille.testo } : null} />
+    <CopiaCodice />
     <main id="contenuto">
       <slot />
     </main>

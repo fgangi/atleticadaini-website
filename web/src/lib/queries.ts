@@ -3,7 +3,7 @@ const groq = String.raw;
 
 export const settingsQuery = groq`*[_id == "siteSettings"][0]{
   nome, denominazione, descrizione, fraseFooter, annoFondazione, logo, logoChiaro, codiceFiscale, partitaIva, codiceFidal,
-  enti, email, telefoni, sede, social, linkUtili, puntiForza, cinquePerMille, slider,
+  enti, email, telefoni, sede, social, linkUtili, puntiForza, cinquePerMille, slider, reclutamento,
   "haPrivacy": count(privacy) > 0, "haSafeguarding": count(safeguarding) > 0
 }`;
 
@@ -24,7 +24,7 @@ export const corsiQuery = groq`*[_type == "corso"] | order(ordine asc, nome asc)
 }`;
 
 export const teamQuery = groq`*[_type == "membroTeam"] | order(ordine asc, nome asc){
-  _id, nome, ruolo, area, qualifica, specialita, telefono, foto
+  _id, nome, ruolo, carica, area, telefono, foto, "corsi": corsi[]._ref
 }`;
 
 export const impiantiQuery = groq`*[_type == "impianto"] | order(ordine asc, nome asc){
@@ -72,10 +72,15 @@ export const albumSlugsQuery = groq`*[_type == "galleryAlbum" && defined(slug.cu
  * pagina ha contenuto. Una voce che porta a una pagina vuota è peggio di una
  * voce in meno.
  */
+export const collaborazioniQuery = groq`*[_type == "collaborazione"] | order(ordine asc, nome asc){
+  _id, tipo, nome, professione, foto, logo, descrizione, punti, indirizzo, telefono, link, instagram
+}`;
+
 export const presenzeQuery = groq`{
   "album": count(*[_type == "galleryAlbum" && defined(slug.current)]),
   "record": count(*[_type == "record"]) + count(*[_type == "titolo"]),
   "team": count(*[_type == "membroTeam"]),
+  "collaborazioni": count(*[_type == "collaborazione"]),
   "corsi": count(*[_type == "corso"]),
   "quote": count(*[_id == "iscrizioni"][0].tariffe),
   "storia": count(*[_id == "storia" && (count(introduzione) > 0 || count(capitoli) > 0)]),

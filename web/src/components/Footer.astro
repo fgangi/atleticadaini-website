@@ -1,5 +1,5 @@
 ---
-import { img, telHref, formatTel, whatsappHref } from '../lib/sanity';
+import { img, telHref, formatTel, whatsappHref, nomeRuolo } from '../lib/sanity';
 import IconaWhatsApp from './IconaWhatsApp.astro';
 import { logoRifilato, misuraLogo } from '../lib/loghi';
 import SocialIcons from './SocialIcons.astro';
@@ -8,7 +8,7 @@ import Indirizzo from './Indirizzo.astro';
 interface Props {
   settings: any;
   impianto?: { nome?: string; indirizzo?: string; ingresso?: string } | null;
-  presenze: { album: number; record: number; team: number; storia: number; privacy: number; safeguarding: number; openDay?: boolean };
+  presenze: { album: number; record: number; team: number; collaborazioni?: number; storia: number; privacy: number; safeguarding: number; openDay?: boolean };
 }
 const { settings, impianto, presenze: p } = Astro.props;
 const s = settings ?? {};
@@ -80,9 +80,10 @@ const identificativi = [
           <li><a href="/societa/">Chi siamo</a></li>
           {p.storia > 0 && <li><a href="/societa/storia/">Storia</a></li>}
           {p.team > 0 && <li><a href="/societa/team/">Team</a></li>}
+          {p.collaborazioni > 0 && <li><a href="/societa/collaborazioni/">Collaborazioni</a></li>}
+          {p.record > 0 && <li><a href="/societa/record/">Record</a></li>}
           <li><a href="/settore-giovanile/">Settore giovanile</a></li>
           {p.openDay && <li><a href="/open-days/">Open days</a></li>}
-          {p.record > 0 && <li><a href="/record/">Record</a></li>}
           <li><a href="/impianto/">Impianto</a></li>
           <li><a href="/news/">News</a></li>
           {p.album > 0 && <li><a href="/gallery/">Gallery</a></li>}
@@ -103,7 +104,7 @@ const identificativi = [
         {telefoni.length > 0 && (
           <ul class="fnav contatti">
             {telefoni.map((t) => (
-              <li><a href={telHref(t.numero)}><span class="tabnums">{formatTel(t.numero)}</span>{t.nome && <span class="tel-nome">{t.nome}</span>}</a></li>
+              <li><a href={telHref(t.numero)}><span class="tabnums">{formatTel(t.numero)}</span>{t.nome && <span class="tel-nome">{nomeRuolo(t)}</span>}</a></li>
             ))}
           </ul>
         )}
@@ -120,6 +121,24 @@ const identificativi = [
       </div>
     </div>
 
+    {/* 5×1000 tutto l'anno: striscia discreta sopra i dati legali, con il
+        codice da copiare (la fascia grande in home si accende solo in stagione) */}
+    {s.codiceFiscale && s.cinquePerMille?.striscia !== false && (
+      <div class="f-cinque" data-copia-box>
+        <div class="f5-testo">
+          <span class="f5-tit">5×1000</span>
+          <p>Sostieni i Daini: nella dichiarazione dei redditi scrivi il nostro codice fiscale.</p>
+        </div>
+        <div class="f5-codice">
+          <span class="f5-numero tabnums">{s.codiceFiscale}</span>
+          <button type="button" class="btn chiaro f5-copia" data-copia={s.codiceFiscale} aria-label={`Copia il codice fiscale ${s.codiceFiscale}`}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>
+            <span data-copia-etichetta>Copia</span>
+          </button>
+          <span class="sr-only" data-copia-esito role="status" aria-live="polite"></span>
+        </div>
+      </div>
+    )}
 
     <div class="foot-legale">
       {(s.denominazione || sede) && (
@@ -206,6 +225,21 @@ const identificativi = [
   .foot-legale { border-top: 1px solid rgba(255, 255, 255, .14); padding: 16px 0 4px;
     display: flex; flex-direction: column; gap: 4px; font-size: .88rem; color: #B9C4B8; line-height: 1.5; }
   .foot-legale strong { font-weight: 600; color: #E8EDE6; }
+  /* Stesso riquadro della fascia 5×1000 in home, in piccolo */
+  .f-cinque { margin: 8px 0 20px; padding: 14px 20px; border-radius: var(--radius);
+    background: rgba(244, 246, 173, .08); border: 1px solid rgba(244, 246, 173, .25);
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px 28px; }
+  .f5-testo { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 14px; min-width: 0; }
+  .f5-tit { font-family: var(--font-display); font-weight: 800; font-size: 1.35rem; letter-spacing: .02em; color: var(--giallo); }
+  .f5-testo p { color: #D5DED3; font-size: .98rem; }
+  .f5-codice { display: flex; align-items: center; gap: 14px; }
+  .f5-numero { font-family: var(--font-display); font-weight: 800; font-size: 1.5rem; letter-spacing: .05em; color: #fff; }
+  /* Larghezza fissa: passando da "Copia" a "Copiato" il pulsante non cambia misura */
+  .f5-copia { min-height: 44px; min-width: 7.5rem; padding: 0 1rem; gap: 6px; font-size: .95rem; }
+  @media (max-width: 639px) {
+    .f-cinque { padding: 14px 16px; }
+    .f5-codice { width: 100%; justify-content: space-between; }
+  }
   .foot-bottom { padding: 8px 0 20px; font-size: .88rem; color: #B9C4B8; display: flex; align-items: center;
     justify-content: space-between; flex-wrap: wrap; gap: 4px 16px; }
   .foot-link { display: flex; flex-wrap: wrap; gap: 0 18px; }

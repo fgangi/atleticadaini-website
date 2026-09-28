@@ -11,13 +11,14 @@ import { record } from './record';
 import { titolo } from './titolo';
 import { galleryAlbum } from './galleryAlbum';
 import { documento } from './documento';
+import { collaborazione } from './collaborazione';
 
 /** Documenti unici: nel pannello si aprono direttamente, non si creano. */
 export const SINGOLI = ['siteSettings', 'iscrizioni', 'openDay', 'storia'];
 
 export const schemaTypes = [
   siteSettings, iscrizioni, openDay, storia,
-  news, corso, membroTeam, impianto, record, titolo, galleryAlbum, documento,
+  news, corso, membroTeam, collaborazione, impianto, record, titolo, galleryAlbum, documento,
   // Oggetti riutilizzabili
   blockContent,
 ];

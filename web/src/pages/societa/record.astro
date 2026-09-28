@@ -1,16 +1,16 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import PageHero from '../components/PageHero.astro';
-import { sfetch } from '../lib/sanity';
-import { recordQuery, titoliQuery } from '../lib/queries';
-import { CATEGORIE_RECORD, SEZIONI_RECORD } from '../sanity/schemaTypes/record';
-import { TIPI_TITOLO } from '../sanity/schemaTypes/titolo';
+import Layout from '../../layouts/Layout.astro';
+import PageHero from '../../components/PageHero.astro';
+import { sfetch } from '../../lib/sanity';
+import { recordQuery, titoliQuery } from '../../lib/queries';
+import { CATEGORIE_RECORD, SEZIONI_RECORD } from '../../sanity/schemaTypes/record';
+import { TIPI_TITOLO } from '../../sanity/schemaTypes/titolo';
 
 /**
  * Record sociali per categoria, poi campioni italiani e maglie azzurre.
  * Senza JavaScript tutte le categorie sono una sotto l'altra; con JavaScript
  * i pulsanti in alto ne mostrano una alla volta (l'indirizzo resta
- * condivisibile: /record/?categoria=allievi).
+ * condivisibile: /societa/record/?categoria=allievi).
  */
 const [record, titoli] = await Promise.all([
   sfetch<any[]>(recordQuery, {}, []),

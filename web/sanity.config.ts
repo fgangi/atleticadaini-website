@@ -23,6 +23,7 @@ const structure = (S: any) => {
       S.divider(),
       singolo('storia', 'Storia'),
       S.documentTypeListItem('membroTeam').title('Team'),
+      S.documentTypeListItem('collaborazione').title('Collaborazioni'),
       S.documentTypeListItem('impianto').title('Impianti'),
       S.documentTypeListItem('galleryAlbum').title('Gallery'),
       S.documentTypeListItem('documento').title('Documenti da scaricare'),

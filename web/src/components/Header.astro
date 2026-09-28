@@ -1,15 +1,18 @@
 ---
 import SocialIcons from './SocialIcons.astro';
+import CinqueMini from './CinqueMini.astro';
 
 type Voce = { href: string; label: string; risalto?: boolean; children?: { href: string; label: string }[] };
 interface Props {
   nome: string;
   logoUrl?: string | null;
   social?: Record<string, string> | null;
+  /** Promemoria del 5×1000 nella striscia in alto (acceso dal pannello) */
+  cinque?: { cf: string; testo?: string | null } | null;
   /** Sezioni che compaiono solo quando hanno contenuto: la voce le segue */
-  presenze: { album: number; record: number; team: number; storia: number; corsi: number; quote: number; iscrizioniAperte: boolean; openDay: boolean };
+  presenze: { album: number; record: number; team: number; collaborazioni?: number; storia: number; corsi: number; quote: number; iscrizioniAperte: boolean; openDay: boolean };
 }
-const { nome, logoUrl, social, presenze: p } = Astro.props;
+const { nome, logoUrl, social, cinque, presenze: p } = Astro.props;
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 
 const nav: Voce[] = [
@@ -21,7 +24,9 @@ const nav: Voce[] = [
       { href: '/societa/', label: 'Chi siamo' },
       ...(p.storia ? [{ href: '/societa/storia/', label: 'Storia' }] : []),
       ...(p.team ? [{ href: '/societa/team/', label: 'Team' }] : []),
-      ...(p.album ? [{ href: '/gallery/', label: 'Gallery' }] : []),
+      ...(p.collaborazioni ? [{ href: '/societa/collaborazioni/', label: 'Collaborazioni' }] : []),
+      // Record: storia sportiva della società, consultata di rado dai genitori
+      ...(p.record ? [{ href: '/societa/record/', label: 'Record' }] : []),
     ],
   },
   {
@@ -34,9 +39,10 @@ const nav: Voce[] = [
   },
   // Open days: voce propria, messa in risalto, finché è accesa nel pannello
   ...(p.openDay ? [{ href: '/open-days/', label: 'Open days', risalto: true }] : []),
-  ...(p.record ? [{ href: '/record/', label: 'Record' }] : []),
   { href: '/impianto/', label: 'Impianto' },
   { href: '/news/', label: 'News' },
+  // Gallery in vista: le foto delle gare sono tra le pagine più cercate dalle famiglie
+  ...(p.album ? [{ href: '/gallery/', label: 'Gallery' }] : []),
   { href: '/contatti/', label: 'Contatti' },
 ];
 // Con una sola voce la tendina non serve: resta un link diretto
@@ -55,14 +61,17 @@ const correnteEsatta = (href: string) => {
   const pulito = href.replace(/\/$/, '') || '/';
   return pulito === '/gallery' ? path.startsWith('/gallery') : path === pulito;
 };
-// "Società" è attiva anche in Gallery, che sta nella sua tendina
+// "Società" è attiva anche nelle pagine della sua tendina (es. Record)
 const attivaVoce = (v: Voce) => attiva(v.href) || !!v.children?.some((c) => attiva(c.href));
 const conSocial = Object.values(social ?? {}).some((u) => typeof u === 'string' && u.startsWith('http'));
 ---
-<header class:list={['site-header', 'sfondo-scuro', { 'senza-striscia': !conSocial }]}>
-  {conSocial && (
+<header class:list={['site-header', 'sfondo-scuro', { 'senza-striscia': !conSocial && !cinque }]}>
+  {(conSocial || cinque) && (
     <div class="topbar">
-      <div class="container"><SocialIcons social={social} /></div>
+      <div class="container">
+        {cinque ? <CinqueMini cf={cinque.cf} testo={cinque.testo} /> : <span></span>}
+        {conSocial && <SocialIcons social={social} />}
+      </div>
     </div>
   )}
 
@@ -114,7 +123,7 @@ const conSocial = Object.values(social ?? {}).some((u) => typeof u === 'string' 
   }
   .site-header.senza-striscia { top: 0; }
   .topbar { height: var(--altezza-striscia); background: var(--verde-scuro); }
-  .topbar .container { display: flex; justify-content: flex-end; align-items: center; height: 100%; }
+  .topbar .container { display: flex; justify-content: space-between; align-items: center; height: 100%; }
   /* Icone nude nella striscia, ma con bersaglio di tocco pieno da 44px */
   .topbar :global(.social-icons) { margin: 0; gap: 0; }
   .topbar :global(.social-icons a) { width: 44px; height: 44px; border: 0; border-radius: 8px; opacity: .88; }

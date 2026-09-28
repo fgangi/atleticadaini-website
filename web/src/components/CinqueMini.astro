@@ -1,0 +1,53 @@
+---
+/**
+ * Promemoria piccolo del 5×1000 nella striscia in alto, a sinistra dei social.
+ * Toccandolo si apre un riquadro con il codice fiscale e il pulsante "Copia":
+ * per il 5×1000 serve solo quello, ed è lì che chi lo scrive a mano sbaglia.
+ * Si accende dal pannello, separato dalla fascia grande della home.
+ */
+interface Props { cf: string; testo?: string | null }
+const { cf, testo } = Astro.props;
+---
+<details class="cinque-mini" data-cinque-mini>
+  <summary><span class="cm-pill">Dona il 5×1000</span></summary>
+  <div class="cm-pannello" data-copia-box>
+    <p class="cm-tit">Il tuo 5×1000 ai Daini</p>
+    <p class="cm-testo">{testo || 'Nella dichiarazione dei redditi, firma nel riquadro delle associazioni sportive dilettantistiche e scrivi il nostro codice fiscale. A te non costa nulla.'}</p>
+    <span class="cm-etichetta">Codice fiscale</span>
+    <span class="cm-codice tabnums">{cf}</span>
+    <button type="button" class="btn cta cm-copia" data-copia={cf}><span data-copia-etichetta>Copia il codice</span></button>
+    <span class="sr-only" data-copia-esito role="status" aria-live="polite"></span>
+  </div>
+</details>
+<style>
+  .cinque-mini { position: relative; }
+  .cinque-mini summary { list-style: none; cursor: pointer; min-height: 44px; display: flex; align-items: center; }
+  .cinque-mini summary::-webkit-details-marker { display: none; }
+  .cm-pill { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .05em; font-weight: 700; font-size: .85rem;
+    line-height: 1; padding: .45rem .75rem; border-radius: 999px; background: var(--giallo); color: var(--verde-scuro); }
+  .cinque-mini summary:hover .cm-pill, .cinque-mini[open] .cm-pill { background: var(--giallo-chiaro); }
+  .cm-pannello { position: absolute; left: 0; top: calc(100% + 4px); z-index: 1100; width: min(330px, calc(100vw - 32px));
+    background: var(--ground); color: var(--ink); border-radius: var(--radius); box-shadow: 0 12px 40px rgba(0, 0, 0, .3);
+    padding: 18px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+  .cm-tit { font-family: var(--font-display); text-transform: uppercase; font-weight: 800; font-size: 1.25rem; color: var(--verde); line-height: 1.1; }
+  .cm-testo { font-size: .95rem; line-height: 1.45; color: var(--ink-soft); }
+  .cm-etichetta { margin-top: 4px; font-family: var(--font-display); text-transform: uppercase; letter-spacing: .06em; font-weight: 700; color: var(--grigio-verde); font-size: .9rem; }
+  .cm-codice { font-family: var(--font-display); font-size: 1.9rem; font-weight: 800; letter-spacing: .05em; line-height: 1; color: var(--ink); }
+  /* Larghezza fissa: passando a "Copiato" il pulsante non cambia misura */
+  .cm-copia { margin-top: 4px; min-width: 11rem; }
+  /* Su telefono il riquadro prende tutta la larghezza, con margini uguali ai due lati */
+  @media (max-width: 639px) { .cm-pannello { width: calc(100vw - 32px); } .cm-pannello .btn { width: 100%; } }
+</style>
+<script>
+  // Chiusura del riquadro: tocco fuori o tasto Esc, come ci si aspetta da un menu
+  function initMini() {
+    document.querySelectorAll<HTMLDetailsElement>('[data-cinque-mini]').forEach((d) => {
+      if (d.dataset.bound) return;
+      d.dataset.bound = '1';
+      document.addEventListener('click', (e) => { if (d.open && !d.contains(e.target as Node)) d.open = false; });
+      d.addEventListener('keydown', (e) => { if (e.key === 'Escape') { d.open = false; d.querySelector('summary')?.focus(); } });
+    });
+  }
+  initMini();
+  document.addEventListener('astro:page-load', initMini);
+</script>

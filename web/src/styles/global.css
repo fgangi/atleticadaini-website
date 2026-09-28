@@ -217,3 +217,7 @@ a.card:active { transform: scale(.985); }
   .tabella td.titolo-riga::before { content: none; }
   .tabella td:empty { display: none; }
 }
+
+/* Schede del team: su PC piccoli (1024–1279) tre per riga, a quattro il
+   numero di telefono non entra nella scheda compatta */
+@media (min-width: 1024px) and (max-width: 1279px) { .grid.team { grid-template-columns: repeat(3, minmax(0, 1fr)); } }

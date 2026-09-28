@@ -13,8 +13,8 @@
 /notizie-news/ /news/  301
 /storia /societa/storia/  301
 /storia/ /societa/storia/  301
-/primati-campioni /record/  301
-/primati-campioni/ /record/  301
+/primati-campioni /societa/record/  301
+/primati-campioni/ /societa/record/  301
 /info-contatti /contatti/  301
 /info-contatti/ /contatti/  301
 /link-utili /contatti/#link-utili  301
@@ -54,10 +54,10 @@
 /wp-content/uploads/2026/09/Tipologia-Iscrizioni-2027.pdf /settore-giovanile/#moduli  302
 /wp-content/uploads/2026/09/vademecum_atletica_daini_v3_exact.pdf /settore-giovanile/#moduli  302
 /wp-content/uploads/2025/09/Informativa-sulla-protezione-dei-dati-personali.pdf /settore-giovanile/#moduli  302
-/wp-content/uploads/2026/07/RecordsSocialiMaschili2026.pdf /record/  301
-/wp-content/uploads/2026/06/CampioniNew.pdf /record/#campione  301
-/wp-content/uploads/2026/06/Le-maglie-azzurreNew.pdf /record/#azzurro  301
-/wp-content/uploads/2019/06/* /record/  301
+/wp-content/uploads/2026/07/RecordsSocialiMaschili2026.pdf /societa/record/  301
+/wp-content/uploads/2026/06/CampioniNew.pdf /societa/record/#campione  301
+/wp-content/uploads/2026/06/Le-maglie-azzurreNew.pdf /societa/record/#azzurro  301
+/wp-content/uploads/2019/06/* /societa/record/  301
 
 # Archivi di WordPress senza equivalente: all'elenco delle news
 /eventi/* /news/  301
@@ -74,3 +74,8 @@
 # Open days: indirizzo al singolare usato nelle prime prove
 /open-day /open-days/  301
 /open-day/ /open-days/  301
+
+# Record: pagina spostata sotto Società (settembre 2026). Cloudflare conserva
+# la parte dopo "?", quindi anche /record/?categoria=allievi arriva al filtro giusto
+/record /societa/record/  301
+/record/ /societa/record/  301
