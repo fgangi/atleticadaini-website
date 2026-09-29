@@ -18,7 +18,7 @@ export const GET: APIRoute = async ({ site }) => {
     '/', '/societa/', '/settore-giovanile/', '/impianto/', '/news/', '/contatti/',
     ...(p?.storia ? ['/societa/storia/'] : []),
     ...(p?.team ? ['/societa/team/'] : []),
-    ...(p?.collaborazioni ? ['/societa/collaborazioni/'] : []),
+    ...(p?.collaborazioni ? ['/societa/convenzioni/'] : []),
     ...(p?.record ? ['/societa/record/'] : []),
     ...(p?.openDay ? ['/open-days/'] : []),
     ...(p?.privacy ? ['/privacy/'] : []),

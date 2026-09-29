@@ -2,7 +2,11 @@
 import Indirizzo from './Indirizzo.astro';
 import { img, telHref, formatTel, indicazioniUrl } from '../lib/sanity';
 
-/** Scheda di una collaborazione o di uno sponsor: foto (o logo), chi è, cosa fa, contatti. */
+/**
+ * Scheda di una convenzione o di uno sponsor: foto (o logo), chi è, il vantaggio
+ * per i tesserati in evidenza, contatti. Senza vantaggio inserito il riquadro
+ * non compare; in sviluppo resta una cornice che mostra dove andrà.
+ */
 interface Props { c: any }
 const { c } = Astro.props;
 const foto = c.logo ? null : img(c.foto, 480, 480);
@@ -21,6 +25,18 @@ const iniziali = String(c.nome ?? '').split(/\s+/).map((w: string) => w[0]).join
   </div>
   <div class="c-corpo">
     {c.descrizione && <p class="c-descr">{c.descrizione}</p>}
+    {c.sconto ? (
+      <div class="c-sconto">
+        <span class="c-sconto-tit">Per i tesserati Daini</span>
+        <span class="c-sconto-val">{c.sconto}</span>
+        {c.scontoDettaglio && <span class="c-sconto-det">{c.scontoDettaglio}</span>}
+      </div>
+    ) : import.meta.env.DEV && c.tipo !== 'sponsor' && (
+      <div class="c-sconto vuoto">
+        <span class="c-sconto-tit">Per i tesserati Daini</span>
+        <span class="c-sconto-det">Qui comparirà la convenzione (cornice visibile solo in anteprima)</span>
+      </div>
+    )}
     {c.punti?.length > 0 && <ul class="c-punti">{c.punti.map((x: string) => <li>{x}</li>)}</ul>}
     {(c.indirizzo || c.telefono || c.link || c.instagram) && (
       <div class="c-contatti">
@@ -56,6 +72,15 @@ const iniziali = String(c.nome ?? '').split(/\s+/).map((w: string) => w[0]).join
   .c-corpo { margin-top: 12px; display: flex; flex-direction: column; gap: 12px; }
   .c-descr { color: var(--ink); max-width: 62ch; }
   .c-punti { margin: 0; padding-left: 1.2rem; display: grid; gap: 4px; color: var(--ink-soft); }
+  /* Vantaggio per i tesserati: il motivo della scheda, quindi in evidenza */
+  .c-sconto { display: flex; flex-direction: column; gap: 2px; align-self: flex-start; min-width: min(100%, 280px);
+    padding: 12px 16px; background: var(--tinta); border-left: 5px solid var(--verde); border-radius: 0 10px 10px 0; }
+  .c-sconto-tit { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .05em; font-weight: 700; font-size: var(--fs-etichetta); color: var(--verde); }
+  .c-sconto-val { font-family: var(--font-display); font-weight: 800; font-size: var(--fs-numero); line-height: 1.05; color: var(--verde-scuro); }
+  .c-sconto-det { color: var(--ink); font-size: var(--fs-testo-secondario); }
+  .c-sconto.vuoto { background: transparent; border: 2px dashed var(--line); border-left: 5px solid var(--line); }
+  .c-sconto.vuoto .c-sconto-tit { color: var(--ink-faint); }
+  .c-sconto.vuoto .c-sconto-det { color: var(--ink-faint); font-style: italic; }
   .c-contatti { margin-top: auto; display: flex; flex-direction: column; gap: 8px; }
   .c-indirizzo { display: flex; flex-direction: column; color: var(--ink); line-height: 1.4; }
   .c-etichetta { line-height: 1.15; font-family: var(--font-display); text-transform: uppercase; letter-spacing: .04em; font-weight: 700; color: var(--grigio-verde); }

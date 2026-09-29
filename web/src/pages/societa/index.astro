@@ -30,7 +30,7 @@ const porte = [
   presenze?.storia ? { href: '/societa/storia/', titolo: 'La storia', testo: `Dal ${anno} a oggi, decennio per decennio.` } : null,
   presenze?.team ? { href: '/societa/team/', titolo: 'Il team', testo: 'Allenatori, istruttori e chi manda avanti la società.' } : null,
   presenze?.record ? { href: '/societa/record/', titolo: 'Record e campioni', testo: 'Primati sociali, titoli e maglie azzurre.' } : null,
-  presenze?.collaborazioni ? { href: '/societa/collaborazioni/', titolo: 'Collaborazioni', testo: 'Professionisti che lavorano con i nostri atleti.' } : null,
+  presenze?.collaborazioni ? { href: '/societa/convenzioni/', titolo: 'Convenzioni', testo: 'Studi e negozi con vantaggi per i nostri tesserati.' } : null,
   { href: '/impianto/', titolo: 'L\'impianto', testo: 'Dove ci alleniamo e come arrivare.' },
   presenze?.album ? { href: '/gallery/', titolo: 'Gallery', testo: 'Foto di ieri e di oggi.' } : null,
 ].filter(Boolean) as { href: string; titolo: string; testo: string }[];

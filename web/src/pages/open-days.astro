@@ -48,6 +48,15 @@ const eventi = date.length && campo ? JSON.stringify(date.map((d: any) => ({
   organizer: { '@type': 'SportsOrganization', name: s?.denominazione ?? s?.nome, url: new URL('/', Astro.site).href },
   ...(d.perChi ? { description: d.perChi } : {}),
 }))) : null;
+// Risposte delle FAQ: le parole indicate nel pannello diventano un link
+// (se non si trovano nel testo, il link va in fondo alla risposta)
+const rispostaConLink = (f: any): { testo: string; link?: string }[] => {
+  const r = String(f.risposta ?? '');
+  if (!f.link || !f.testoLink) return [{ testo: r }];
+  const i = r.indexOf(f.testoLink);
+  if (i < 0) return [{ testo: r + ' ' }, { testo: f.testoLink, link: f.link }];
+  return [{ testo: r.slice(0, i) }, { testo: f.testoLink, link: f.link }, { testo: r.slice(i + f.testoLink.length) }];
+};
 ---
 <Layout title={od.occhiello || 'Open days'} description={od.testo ?? 'Vieni a provare l\'atletica con i Daini a Carate Brianza: corsi per ragazze e ragazzi dai 4 anni.'} immagine={foto}>
   {eventi && <script type="application/ld+json" set:html={eventi} slot="head" />}
@@ -151,7 +160,7 @@ const eventi = date.length && campo ? JSON.stringify(date.map((d: any) => ({
         <div class="section-head"><span class="eyebrow">Domande</span><h2>Domande frequenti</h2></div>
         <div class="faq">
           {od.faq.map((f: any) => (
-            <details><summary>{f.domanda}</summary><p>{f.risposta}</p></details>
+            <details><summary>{f.domanda}</summary><p>{rispostaConLink(f).map((x) => x.link ? <a href={x.link}>{x.testo}</a> : x.testo)}</p></details>
           ))}
         </div>
       </div>
@@ -208,6 +217,7 @@ const eventi = date.length && campo ? JSON.stringify(date.map((d: any) => ({
   .faq summary::after { content: '+'; margin-left: auto; font-size: 1.4rem; color: var(--verde); }
   .faq details[open] summary::after { content: '–'; }
   .faq details p { padding: 0 16px 16px; }
+  .faq details p a { color: var(--verde); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
 
   .chiusura { background: var(--sfondo-scuro); text-align: center; }
   .chiusura .container { display: flex; flex-direction: column; align-items: center; gap: 20px; }

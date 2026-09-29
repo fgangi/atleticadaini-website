@@ -24,7 +24,7 @@ export const FORMATI: Record<string, Formato[]> = {
   persona: [{ nome: 'Scheda nel team', ratio: 400 / 480 }],
   corso: [{ nome: 'Scheda del corso', ratio: 16 / 10 }],
   impianto: [{ nome: 'Foto dell\'impianto', ratio: 4 / 3 }],
-  collaborazione: [{ nome: 'Scheda della collaborazione', ratio: 1 }],
+  collaborazione: [{ nome: 'Scheda della convenzione', ratio: 1 }],
   condivisione: [{ nome: 'Link condiviso su WhatsApp e social', ratio: 1200 / 630 }],
 };
 

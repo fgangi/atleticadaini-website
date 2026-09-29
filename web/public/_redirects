@@ -79,3 +79,7 @@
 # la parte dopo "?", quindi anche /record/?categoria=allievi arriva al filtro giusto
 /record /societa/record/  301
 /record/ /societa/record/  301
+
+# Collaborazioni diventate Convenzioni (settembre 2026)
+/societa/collaborazioni /societa/convenzioni/  301
+/societa/collaborazioni/ /societa/convenzioni/  301

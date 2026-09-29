@@ -74,12 +74,12 @@ const identificativi = [
       </div>
 
       <!-- 2. Naviga: le stesse voci del menu -->
-      <div>
+      <div class="foot-naviga">
         <h4>Naviga</h4>
         <ul class="fnav">
           <li><a href="/societa/">Chi siamo</a></li>
           {p.team > 0 && <li><a href="/societa/team/">Team</a></li>}
-          {p.collaborazioni > 0 && <li><a href="/societa/collaborazioni/">Collaborazioni</a></li>}
+          {p.collaborazioni > 0 && <li><a href="/societa/convenzioni/">Convenzioni</a></li>}
           <li><a href="/settore-giovanile/">Settore giovanile</a></li>
           {p.openDay && <li><a href="/open-days/">Open days</a></li>}
           <li><a href="/impianto/">Impianto</a></li>
@@ -162,7 +162,10 @@ const identificativi = [
 </footer>
 
 <style>
-  .site-footer { background: var(--sfondo-footer); color: #E8EDE6; margin-top: clamp(40px, 6vw, 72px); }
+  /* Nessun margine sopra: dopo un blocco colorato restava una striscia bianca.
+     Lo stacco lo fa il filetto giallo (come la barra del volantino); dopo un
+     blocco bianco l'aria c'è già, nel margine interno della sezione */
+  .site-footer { background: var(--sfondo-footer); color: #E8EDE6; border-top: 4px solid var(--giallo); }
   .site-footer a { color: #fff; }
   .foot-grid { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, .8fr) minmax(0, 1.1fr); gap: 40px; padding: 56px 0 36px; }
   /* Tablet: il marchio occupa da solo la prima riga, Naviga e Contatti affiancati sotto */
@@ -212,7 +215,14 @@ const identificativi = [
   /* Su PC le voci di "Naviga" hanno righe da 36px: più raccolte, e la prima
      lettera di "Chi siamo" cade alla stessa altezza del numero WhatsApp accanto
      (misurato sui pixel: i due caratteri hanno altezze diverse) */
-  @media (min-width: 1024px) { .fnav:not(.contatti) a { min-height: 36px; } .fnav:not(.contatti) { margin-top: -1px; } }
+  /* Su PC la colonna "Naviga" è alta quanto "Contatti" e le voci si distribuiscono
+     a distanze uguali: la prima cade all'altezza del numero WhatsApp, l'ultima di
+     "Come arrivare" (misurato sui pixel), qualunque sia il numero di voci */
+  @media (min-width: 1024px) {
+    .foot-naviga { display: flex; flex-direction: column; }
+    .fnav:not(.contatti) { flex: 1; justify-content: space-between; margin-top: -1px; padding-bottom: 5px; }
+    .fnav:not(.contatti) a { min-height: 36px; }
+  }
   .nota { opacity: .7; }
   /* Numero in bianco e nome in grigio: bastano colore e spazio a separarli */
   .tel-nome { margin-left: .7em; color: #B9C4B8; }

@@ -61,6 +61,10 @@ export const openDay = defineType({
       of: [{ type: 'object', fields: [
         { name: 'domanda', type: 'string', title: 'Domanda', validation: (r: any) => r.required() },
         { name: 'risposta', type: 'text', rows: 3, title: 'Risposta', validation: (r: any) => r.required() },
+        { name: 'testoLink', type: 'string', title: 'Parole da trasformare in link (facoltativo)',
+          description: 'Scritte identiche a come sono nella risposta, es. "Corsi e orari".' },
+        { name: 'link', type: 'string', title: 'Pagina a cui porta il link',
+          description: 'Es. "/settore-giovanile/#corsi" per una pagina del sito, oppure un indirizzo completo.' },
       ], preview: { select: { title: 'domanda', subtitle: 'risposta' } } }],
     }),
   ],

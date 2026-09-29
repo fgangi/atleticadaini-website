@@ -4,6 +4,7 @@ import PageHero from '../components/PageHero.astro';
 import Indirizzo from '../components/Indirizzo.astro';
 import SocialIcons from '../components/SocialIcons.astro';
 import IconaWhatsApp from '../components/IconaWhatsApp.astro';
+import Mappa from '../components/Mappa.astro';
 import { sfetch, telHref, formatTel, indicazioniUrl, whatsappHref, nomeRuolo } from '../lib/sanity';
 import { settingsQuery, impiantiQuery } from '../lib/queries';
 
@@ -66,7 +67,7 @@ const dati = [
       )}
 
       {(campo || sede) && (
-        <div class="card blocco">
+        <div class="card blocco dove-siamo">
           <h2 class="blocco-titolo">Dove siamo</h2>
           <dl class="luoghi">
             {campo && (
@@ -74,14 +75,19 @@ const dati = [
                 <dt>Campo di allenamento</dt>
                 <dd><strong>{campo.nome}</strong>{campo.indirizzo && <><br /><Indirizzo testo={campo.indirizzo} /></>}</dd>
                 {campo.ingresso && <dd class="ingresso"><strong>{campo.ingresso}</strong></dd>}
-                <dd class="link-luogo">
-                  <a class="btn primary" href="/impianto/">Come arrivare</a>
-                  {indicazioniUrl(campo.indirizzo) && <a class="btn" href={indicazioniUrl(campo.indirizzo)} target="_blank" rel="noopener">Navigatore</a>}
-                </dd>
+                {indicazioniUrl(campo.indirizzo) && (
+                  <dd class="link-luogo"><a class="btn primary" href={indicazioniUrl(campo.indirizzo)} target="_blank" rel="noopener">Indicazioni stradali</a></dd>
+                )}
               </div>
             )}
-            {sede && <div><dt>Sede sociale</dt><dd><Indirizzo testo={sede} /></dd></div>}
+            {/* La sede sociale (uffici) è già nei dati societari qui sotto: qui solo il campo */}
+            {!campo && sede && <div><dt>Sede sociale</dt><dd><Indirizzo testo={sede} /></dd></div>}
           </dl>
+          {/* Mappa del campo: riempie lo spazio che resta, così il riquadro è alto
+              quanto "Chiamaci o scrivici" accanto */}
+          {campo && (campo.mappa || campo.indirizzo) && (
+            <div class="dove-mappa"><Mappa posizione={campo.mappa} indirizzo={campo.indirizzo} titolo={campo.nome} /></div>
+          )}
         </div>
       )}
 
@@ -142,6 +148,13 @@ const dati = [
   .luoghi dt { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .04em; font-weight: 700; color: var(--grigio-verde); }
   .luoghi dd { margin: 4px 0 0; color: var(--ink); }
   .luoghi .ingresso { padding: 8px 12px; border-left: 4px solid var(--giallo); background: var(--tinta); color: var(--verde-scuro); margin-top: 10px; }
+  /* I due riquadri in alto sono alti uguali; in "Dove siamo" la mappa prende il resto */
+  .contatti > .blocco:not(.largo) { align-self: stretch; }
+  .dove-siamo { display: flex; flex-direction: column; }
+  .dove-mappa { flex: 1; display: flex; margin-top: 20px; min-height: 220px; }
+  .dove-mappa :global(.mappa) { flex: 1; min-height: 0; }
+  /* PC: i riquadri sono affiancati, la mappa riempie quanto serve a pareggiarli */
+  @media (min-width: 1024px) { .dove-mappa { min-height: 120px; } }
   .link-luogo { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px !important; }
 
   .link-utili { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
