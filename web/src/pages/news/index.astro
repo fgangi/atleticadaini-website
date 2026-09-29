@@ -37,10 +37,10 @@ const mostraFiltri = filtri.length > 2;
   .filtri { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: clamp(18px, 2.6vw, 30px); }
   .filtro { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 1rem; border-radius: 999px; cursor: pointer;
     border: 1px solid var(--line); background: var(--ground); color: var(--verde);
-    font-family: var(--font-display); text-transform: uppercase; letter-spacing: .04em; font-weight: 700; font-size: 1.05rem; }
+    font-family: var(--font-display); text-transform: uppercase; letter-spacing: .04em; font-weight: 700; font-size: var(--fs-etichetta); }
   .filtro:hover { border-color: var(--verde); }
   .filtro[aria-pressed='true'] { background: var(--verde); color: #fff; border-color: transparent; }
-  .quanti { font-family: var(--font-body); font-size: .8rem; font-variant-numeric: tabular-nums; background: var(--surface-2); color: var(--ink-soft); border-radius: 999px; padding: .1rem .45rem; }
+  .quanti { font-family: var(--font-body); font-size: var(--fs-mini); font-variant-numeric: tabular-nums; background: var(--surface-2); color: var(--ink-soft); border-radius: 999px; padding: .1rem .45rem; }
   .filtro[aria-pressed='true'] .quanti { background: rgba(255, 255, 255, .22); color: #fff; }
 </style>
 <script is:inline>

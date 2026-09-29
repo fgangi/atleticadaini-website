@@ -129,7 +129,7 @@ const tesserati = await contaTesserati(settings);
           {impianto.ingresso && <p class="imp-ingresso"><strong>{impianto.ingresso}</strong></p>}
           <div class="azioni">
             <a class="btn primary" href="/impianto/">Scopri l'impianto</a>
-            {naviga && <a class="btn" href={naviga} target="_blank" rel="noopener">Portami lì</a>}
+            {naviga && <a class="btn" href={naviga} target="_blank" rel="noopener">Indicazioni stradali</a>}
           </div>
         </div>
         {fotoImpianto
@@ -176,20 +176,20 @@ const tesserati = await contaTesserati(settings);
 
   .perche-testa { align-items: flex-end; gap: 12px 32px; flex-wrap: wrap; }
   .tesserati { display: flex; flex-direction: column; align-items: flex-end; text-align: right; }
-  .tesserati strong { font-family: var(--font-display); font-weight: 800; font-size: clamp(2.8rem, 6vw, 4.2rem); line-height: .95; color: var(--verde); }
+  .tesserati strong { font-family: var(--font-display); font-weight: 800; font-size: calc(var(--fs-numero-grande) * 1.1); line-height: .95; color: var(--verde); }
   .tesserati span { color: var(--ink-soft); }
   @media (max-width: 639px) { .tesserati { align-items: flex-start; text-align: left; } }
   .punti { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px 28px; }
   @media (max-width: 1023px) { .punti { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   .punti li { display: flex; flex-direction: column; gap: 4px; border-top: 3px solid var(--verde); padding-top: 12px; }
-  .punti strong { font-family: var(--font-display); text-transform: uppercase; font-size: clamp(1.9rem, 3.4vw, 2.6rem); font-weight: 800; line-height: 1; color: var(--verde); }
+  .punti strong { font-family: var(--font-display); text-transform: uppercase; font-size: var(--fs-titolo-sezione); font-weight: 800; line-height: 1; color: var(--verde); }
   .punti span { color: var(--ink-soft); }
 
   .impianto { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: clamp(22px, 4vw, 48px); align-items: center; }
   @media (max-width: 1023px) { .impianto { grid-template-columns: minmax(0, 1fr); } }
   .imp-testo { display: flex; flex-direction: column; align-items: flex-start; gap: var(--stacco-occhiello); }
   .imp-testo .eyebrow { margin: 0; }
-  .imp-indirizzo { margin-top: 14px; font-size: 1.1rem; color: var(--ink); }
+  .imp-indirizzo { margin-top: 14px; font-size: var(--fs-testo-grande); color: var(--ink); }
   .imp-ingresso { margin: 8px 0 18px; padding: 8px 12px; border-left: 4px solid var(--giallo); background: var(--tinta); color: var(--verde-scuro); }
   .imp-foto { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--radius); }
 
@@ -204,5 +204,5 @@ const tesserati = await contaTesserati(settings);
   .album img, .album-ph { width: 100%; height: 100%; object-fit: cover; display: block; background: var(--sfondo-scuro); }
   .album-titolo { position: absolute; left: 0; right: 0; bottom: 0; padding: 22px 10px 8px; color: #fff;
     background: linear-gradient(transparent, rgba(20, 30, 24, .85));
-    font-family: var(--font-display); text-transform: uppercase; font-weight: 700; letter-spacing: .03em; font-size: 1.05rem; line-height: 1.1; }
+    font-family: var(--font-display); text-transform: uppercase; font-weight: 700; letter-spacing: .03em; font-size: var(--fs-etichetta); line-height: 1.1; }
 </style>

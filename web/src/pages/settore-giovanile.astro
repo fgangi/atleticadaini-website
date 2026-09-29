@@ -177,11 +177,11 @@ const documenti = (i?.documenti ?? []).filter((d: any) => d?.url);
   .od-riga h2 { color: #fff; }
   .od-riga .eyebrow { color: var(--giallo); }
   .od-riga p { color: #E3EAE1; margin-top: 10px; max-width: 56ch; }
-  .open-day-invito .btn.grande { min-height: 52px; font-size: 1.15rem; }
+  .open-day-invito .btn.grande { min-height: 52px; font-size: var(--fs-pulsante-grande); }
 
-  .intro-quote { margin: -6px 0 18px; font-size: 1.05rem; color: var(--ink); max-width: 60ch; }
+  .intro-quote { margin: -6px 0 18px; font-size: var(--fs-testo); color: var(--ink); max-width: 60ch; }
   .pacchetto { display: inline-block; align-self: flex-start; font-family: var(--font-display); font-weight: 800; text-transform: uppercase; letter-spacing: .06em;
-    font-size: .95rem; line-height: 1; padding: .4rem .7rem; border-radius: 999px; background: var(--tinta); color: var(--verde); }
+    font-size: var(--fs-piccolo); line-height: 1; padding: .4rem .7rem; border-radius: 999px; background: var(--tinta); color: var(--verde); }
   .pacchetto.plus { background: var(--verde); color: var(--giallo); }
 
   /* Schede delle quote: una colonna su telefono, due da tablet in su.
@@ -193,7 +193,7 @@ const documenti = (i?.documenti ?? []).filter((d: any) => d?.url);
     .quota:last-child:nth-child(odd) { grid-column: 1 / -1; }
   }
   .quota { display: flex; flex-direction: column; background: var(--ground); border-radius: var(--radius); border-top: 5px solid var(--verde); padding: 18px 18px 20px; }
-  .quota h3 { font-size: 1.25rem; line-height: 1.2; color: var(--verde); margin-bottom: 14px; }
+  .quota h3 { font-size: var(--fs-titolo-scheda); line-height: 1.2; color: var(--verde); margin-bottom: 14px; }
   /* Sottogriglia: i prezzi di Base e Plus stanno alla stessa altezza anche
      se "cosa comprende" va a capo su più righe in una sola colonna */
   .prezzi { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; column-gap: 14px; }
@@ -201,15 +201,15 @@ const documenti = (i?.documenti ?? []).filter((d: any) => d?.url);
   .prezzo { display: grid; grid-row: span 2; grid-template-rows: subgrid; row-gap: 12px; }
   .prezzo + .prezzo { border-left: 1px solid var(--filetto); padding-left: 14px; }
   .p-pacchetto { display: flex; flex-direction: column; gap: 6px; margin: 0; }
-  .p-include { font-size: 1rem; line-height: 1.35; color: var(--ink); }
+  .p-include { font-size: var(--fs-testo-secondario); line-height: 1.35; color: var(--ink); }
   .p-cifre { margin: 0; display: flex; flex-direction: column; gap: 10px; padding-top: 10px; border-top: 1px solid var(--filetto); }
-  .p-cifre dt { font-size: .95rem; line-height: 1.3; color: var(--ink-soft); }
+  .p-cifre dt { font-size: var(--fs-piccolo); line-height: 1.3; color: var(--ink-soft); }
   .p-cifre dd { margin: 2px 0 0; font-family: var(--font-display); font-weight: 800; line-height: 1; color: var(--ink); }
-  .p-nuovi { font-size: 2rem; }
-  .p-rinnovi { font-size: 1.5rem; }
+  .p-nuovi { font-size: var(--fs-numero); }
+  .p-rinnovi { font-size: var(--fs-numero-piccolo); }
   .nota-quote { margin-top: 14px; font-weight: 600; color: var(--verde); }
   .pagamento { margin-top: 26px; max-width: 70ch; }
-  .pagamento h3 { font-size: 1.25rem; }
+  .pagamento h3 { font-size: var(--fs-titolo-scheda); }
 
   .iscr { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 48px); align-items: start; }
   @media (max-width: 1023px) { .iscr { grid-template-columns: minmax(0, 1fr); } }
@@ -218,14 +218,14 @@ const documenti = (i?.documenti ?? []).filter((d: any) => d?.url);
   /* Informazioni sull'iscrizione a riquadri: etichetta in alto, testo sotto */
   .info-iscr { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 12px; }
   .info-iscr li { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; background: var(--tinta); border-left: 4px solid var(--verde); border-radius: 0 10px 10px 0; }
-  .info-tit { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .05em; font-weight: 700; font-size: .95rem; color: var(--verde); }
+  .info-tit { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .05em; font-weight: 700; font-size: var(--fs-piccolo); color: var(--verde); }
   .info-testo { color: var(--ink); font-weight: 600; line-height: 1.45; }
   .info-iscr li.senza .info-testo { font-weight: 400; color: var(--ink-soft); }
   .prova { border-left: 4px solid var(--giallo); background: var(--tinta); padding: 12px 16px; border-radius: 0 10px 10px 0; }
   .prova strong { color: var(--verde); }
   .sotto { margin-top: 8px; }
   .requisiti { margin: 0; padding-left: 1.3rem; display: flex; flex-direction: column; gap: 6px; color: var(--ink-soft); }
-  .btn.grande { min-height: 52px; font-size: 1.15rem; margin-top: 6px; }
+  .btn.grande { min-height: 52px; font-size: var(--fs-pulsante-grande); margin-top: 6px; }
 
   .iscr-lato { display: flex; flex-direction: column; gap: 16px; }
   .blocco { padding: 20px; }
@@ -237,9 +237,9 @@ const documenti = (i?.documenti ?? []).filter((d: any) => d?.url);
   .doc-ico { flex: none; width: 40px; height: 40px; border-radius: 8px; background: var(--verde); color: var(--giallo-chiaro);
     display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; font-size: .9rem; }
   .doc-titolo { display: block; font-weight: 600; color: var(--ink); line-height: 1.3; }
-  .doc-desc { display: block; font-size: .92rem; color: var(--ink-faint); }
+  .doc-desc { display: block; font-size: var(--fs-piccolo); color: var(--ink-faint); }
   .tel-nome { margin-left: .6em; color: var(--ink-faint); font-weight: 500; }
-  .referenti .btn { width: 100%; justify-content: flex-start; text-transform: none; font-family: var(--font-body); font-weight: 600; font-size: 1rem; letter-spacing: 0; }
+  .referenti .btn { width: 100%; justify-content: flex-start; text-transform: none; font-family: var(--font-body); font-weight: 600; font-size: var(--fs-testo-secondario); letter-spacing: 0; }
   /* Pulsante del numero della società: numero chiaro, leggibile sul verde */
   /* Numero a sinistra come negli altri pulsanti; l'icona chiude la riga a destra */
   /* Stessa spaziatura delle altre righe: numeri e nomi restano in colonna */

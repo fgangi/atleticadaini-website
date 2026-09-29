@@ -4,15 +4,54 @@
    volantino "Ripartono i corsi" 2026. Quando arriverà la linea grafica
    definitiva si cambiano solo qui.
    ============================================================ */
+/* ============================================================
+   Scala dei caratteri: le macrocategorie del sito, definite una volta sola.
+   Misure come Corigliano Volley (scelte il 2026-09-29).
+   Tutti i componenti usano queste variabili, mai misure scritte a mano:
+   cambiare una categoria qui la cambia ovunque (menu e footer compresi).
+   ============================================================ */
+:root {
+  /* Titoli */
+  --fs-apertura: clamp(2.1rem, 5.75vw, 5.1rem);            /* titolo grande della home */
+  --fs-titolo-pagina: clamp(2.5rem, 6.1vw, 3.9rem);   /* h1: "Chi siamo", "Contatti"… */
+  --fs-titolo-articolo: clamp(2.05rem, 5vw, 3.15rem); /* titolo di una news */
+  --fs-titolo-sezione: clamp(1.7rem, 3.8vw, 2.5rem);    /* h2: "Quanto costa"… */
+  --fs-titolo-blocco: clamp(1.4rem, 2.3vw, 1.7rem);  /* titoli di riquadri e schede grandi */
+  --fs-titolo-scheda: 1.16rem;                        /* h3: nomi di corsi, persone, news */
+  --fs-occhiello: 1.125rem;                            /* scritta piccola sopra i titoli */
+  --fs-occhiello-apertura: clamp(1rem, 1.5vw, 1.2rem);
+  /* Testo */
+  --fs-lead: clamp(1.05rem, 2.2vw, 1.25rem);          /* sottotitolo sotto i titoli */
+  --fs-testo-grande: 1.05rem;                         /* indirizzi, contatti in evidenza */
+  --fs-testo: 1rem;                              /* paragrafi */
+  --fs-testo-secondario: .95rem;                        /* descrizioni, tabelle */
+  --fs-piccolo: .88rem;                               /* note, didascalie, date */
+  --fs-mini: .82rem;                                  /* etichette minime */
+  /* Numeri */
+  --fs-numero-grande: clamp(2.2rem, 5vw, 3.5rem);   /* contatori */
+  --fs-numero: 1.85rem;                                  /* prezzi, record, codice fiscale */
+  --fs-numero-piccolo: 1.4rem;                        /* orari, rinnovi, prestazioni */
+  /* Interfaccia */
+  --fs-etichetta: .98rem;                            /* etichette maiuscole (gruppi, filtri) */
+  --fs-menu: 1.02rem;                                  /* voci della navbar */
+  --fs-menu-tendina: .98rem;                         /* voci delle tendine */
+  --fs-pulsante: 1.02rem;
+  --fs-pulsante-grande: 1.12rem;
+  --fs-footer-link: 1.02rem;
+  --fs-footer: .95rem;
+  --fs-footer-piccolo: .8rem;
+}
+@media (max-width: 639px) { :root { --fs-occhiello: 1rem; } }
+
 :root {
   color-scheme: light;
 
   /* --- Palette --- */
   /* Verde del logo: 8,5:1 col bianco, 5,1:1 col giallo (minimo richiesto 4,5) */
-  --verde: #1B573B;
-  --verde-scuro: #123A28;    /* stesso verde più scuro: footer, menu del telefono */
+  --verde: #19543A;          /* verde sociale (logo 80 anni), scelto il 2026-09-29 */
+  --verde-scuro: #103726;    /* stesso verde più scuro (luce −34%): footer, menu del telefono */
   --giallo: #E0C955;         /* barra gialla: accento, "Iscriviti" */
-  --giallo-chiaro: #F4F6AD;  /* fondo del volantino: fasce chiare */
+  --giallo-chiaro: #FFF4A5;  /* giallo sociale: fasce e riquadri chiari */
   --salvia: #849C6C;         /* omini del volantino: SOLO grafica (3:1 su bianco) */
   --grigio-verde: #657269;   /* sottotitoli: testo secondario */
   --filetto: #B2B77F;        /* riga del volantino: separatori */
@@ -29,6 +68,7 @@
   --accent: var(--verde);         /* link, pulsanti, occhielli su bianco */
   --accent-ink: #FFFFFF;          /* testo sopra --accent */
   --cta: var(--giallo);           /* inviti all'azione */
+  --cta-hover: #EAD676;          /* stesso giallo, più chiaro: TUTTI i pulsanti gialli al passaggio del mouse */
   --cta-ink: var(--verde-scuro);  /* sul giallo mai il bianco: 1,7:1 */
   --tinta: var(--giallo-chiaro);
 
@@ -51,18 +91,20 @@
   /* Altezza della barra che resta attaccata in alto scorrendo (senza la
      striscia dei social, che esce): serve agli ancoraggi del menu */
   --altezza-striscia: 44px;
-  --altezza-intestazione: 84px;
+  --altezza-intestazione: 96px;
+  /* Barra dopo lo scorrimento: striscia sparita, solo simbolo e menu */
+  --altezza-compatta: 64px;
   --stacco-occhiello: 4px;
 }
 /* Tre standard: telefono < 640px, tablet 640–1023px, PC >= 1024px */
-@media (max-width: 1023px) { :root { --altezza-intestazione: 72px; } }
-@media (max-width: 639px) { :root { --altezza-intestazione: 64px; } }
+@media (max-width: 1023px) { :root { --altezza-intestazione: 72px; --altezza-compatta: 60px; } }
+@media (max-width: 639px) { :root { --altezza-intestazione: 64px; --altezza-compatta: 56px; } }
 
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; font-family: var(--font-body); }
 body {
   margin: 0; background: var(--ground); color: var(--ink);
-  font-family: var(--font-body); font-size: 1.0625rem;
+  font-family: var(--font-body); font-size: var(--fs-testo);
   line-height: 1.6; -webkit-font-smoothing: antialiased;
   overflow-wrap: break-word;
 }
@@ -93,27 +135,27 @@ main { display: block; min-height: 60vh; }
    menu, pulsanti); il testo in caso normale usa Barlow, titoli di scheda compresi. */
 h1, h2, h3 { margin: 0; text-wrap: balance; line-height: 1; }
 h1, h2 { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .005em; color: var(--verde); }
-h1 { font-size: clamp(2.6rem, 6.4vw, 4.2rem); font-weight: 800; }
-h2 { font-size: clamp(1.9rem, 4vw, 2.7rem); font-weight: 800; }
-h3 { font-size: 1.2rem; font-weight: 700; line-height: 1.25; }
+h1 { font-size: var(--fs-titolo-pagina); font-weight: 800; }
+h2 { font-size: var(--fs-titolo-sezione); font-weight: 800; }
+h3 { font-size: var(--fs-titolo-scheda); font-weight: 700; line-height: 1.25; }
 p { margin: 0; color: var(--ink-soft); }
-.lead { font-size: clamp(1.08rem, 2.2vw, 1.28rem); color: var(--ink-soft); }
+.lead { font-size: var(--fs-lead); color: var(--ink-soft); }
 .eyebrow, .tag, .pill, .btn, th, .site-footer h4 { font-family: var(--font-display); text-transform: uppercase; }
-.eyebrow { font-size: 1.15rem; font-weight: 700; letter-spacing: .04em; line-height: 1; color: var(--grigio-verde); margin: 0 0 .6rem; }
-@media (max-width: 639px) { .eyebrow { font-size: 1.02rem; } }
+.eyebrow { font-size: var(--fs-occhiello); font-weight: 700; letter-spacing: .04em; line-height: 1; color: var(--grigio-verde); margin: 0 0 .6rem; }
+@media (max-width: 639px) { .eyebrow { font-size: var(--fs-occhiello); } }
 .section-head { display: flex; flex-direction: column; gap: var(--stacco-occhiello); margin-bottom: clamp(24px, 4vw, 40px); }
 .section-head .eyebrow { margin: 0; }
 .section-head .lead { margin-top: 10px; max-width: 62ch; }
 .section-head.between { flex-direction: row; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 12px 24px; }
 .section-head.between > div { display: flex; flex-direction: column; gap: var(--stacco-occhiello); }
 /* Link del menu alle sezioni: il titolo atterra sotto l'intestazione fissa */
-main [id] { scroll-margin-top: calc(var(--altezza-intestazione) + 24px); }
+main [id] { scroll-margin-top: calc(var(--altezza-compatta) + 24px); }
 
 /* --- pulsanti (bersaglio minimo 44px) --- */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: .5rem; cursor: pointer;
   min-height: 44px; padding: 0 1.2rem; border-radius: 999px;
-  letter-spacing: .03em; font-weight: 700; font-size: 1.08rem; line-height: 1;
+  letter-spacing: .03em; font-weight: 700; font-size: var(--fs-pulsante); line-height: 1;
   border: 1px solid var(--line); background: var(--ground); color: var(--verde);
   transition: transform .12s ease, background .12s ease, border-color .12s ease, box-shadow .12s ease;
 }
@@ -123,7 +165,7 @@ main [id] { scroll-margin-top: calc(var(--altezza-intestazione) + 24px); }
 .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
 .btn.primary:hover { background: var(--verde-scuro); }
 .btn.cta { background: var(--cta); color: var(--cta-ink); border-color: transparent; }
-.btn.cta:hover { background: #EAD676; }
+.btn.cta:hover { background: var(--cta-hover); }
 /* Su fondo scuro il pulsante secondario è un contorno chiaro */
 .btn.chiaro { background: transparent; color: #fff; border-color: rgba(255, 255, 255, .5); }
 .btn.chiaro:hover { border-color: #fff; background: rgba(255, 255, 255, .08); }
@@ -141,10 +183,10 @@ main [id] { scroll-margin-top: calc(var(--altezza-intestazione) + 24px); }
 /* Etichette piccole: condensato con peso alto, sotto i 13px diventa illeggibile */
 .pill {
   display: inline-flex; align-items: center; gap: .4rem; line-height: 1.15;
-  font-size: .88rem; font-weight: 700; letter-spacing: .05em;
+  font-size: var(--fs-mini); font-weight: 700; letter-spacing: .05em;
   padding: .3rem .65rem; border-radius: 999px; background: var(--tinta); color: var(--verde);
 }
-.tag { font-size: .95rem; color: var(--ink-faint); letter-spacing: .05em; font-weight: 700; }
+.tag { font-size: var(--fs-piccolo); color: var(--ink-faint); letter-spacing: .05em; font-weight: 700; }
 .more { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .04em; font-weight: 700; color: var(--accent); }
 
 /* Testo nascosto ma leggibile dai lettori di schermo */
@@ -152,9 +194,9 @@ main [id] { scroll-margin-top: calc(var(--altezza-intestazione) + 24px); }
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
 /* --- testo ricco (news, storia, pagine legali) --- */
-.prose { display: flex; flex-direction: column; gap: 1.05rem; font-size: 1.08rem; line-height: 1.7; }
-.prose h2 { font-size: 1.7rem; margin-top: 1rem; }
-.prose h3 { font-size: 1.25rem; margin-top: .6rem; }
+.prose { display: flex; flex-direction: column; gap: 1.05rem; font-size: var(--fs-testo); line-height: 1.7; }
+.prose h2 { font-size: var(--fs-titolo-blocco); margin-top: 1rem; }
+.prose h3 { font-size: var(--fs-titolo-scheda); margin-top: .6rem; }
 .prose p, .prose ul, .prose ol { color: var(--ink-soft); }
 .prose a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
 .prose blockquote { border-left: 3px solid var(--giallo); padding-left: 16px; color: var(--ink-soft); font-style: italic; margin: 0; }
@@ -196,8 +238,8 @@ a.card:active { transform: scale(.985); }
    Su PC e tablet una tabella vera; sul telefono ogni riga diventa una scheda
    con l'etichetta accanto al valore (data-label sulle celle): le colonne
    strette mandavano a capo nomi e tempi a ogni parola. */
-.tabella { width: 100%; border-collapse: collapse; font-size: 1rem; }
-.tabella th { text-align: left; font-weight: 700; letter-spacing: .04em; font-size: 1rem; color: var(--grigio-verde);
+.tabella { width: 100%; border-collapse: collapse; font-size: var(--fs-testo-secondario); }
+.tabella th { text-align: left; font-weight: 700; letter-spacing: .04em; font-size: var(--fs-testo-secondario); color: var(--grigio-verde);
   border-bottom: 2px solid var(--verde); padding: 8px 10px; white-space: nowrap; }
 .tabella td { padding: 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
 .tabella .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -212,7 +254,7 @@ a.card:active { transform: scale(.985); }
   .tabella td { border: 0; padding: 5px 0; display: flex; justify-content: space-between; gap: 14px; text-align: right; }
   .tabella td::before { content: attr(data-label); font-family: var(--font-display); text-transform: uppercase;
     letter-spacing: .04em; font-weight: 700; color: var(--grigio-verde); text-align: left; flex: none; }
-  .tabella td.titolo-riga { font-family: var(--font-display); text-transform: uppercase; font-size: 1.3rem; font-weight: 800;
+  .tabella td.titolo-riga { font-family: var(--font-display); text-transform: uppercase; font-size: var(--fs-titolo-scheda); font-weight: 800;
     color: var(--verde); text-align: left; padding-bottom: 6px; border-bottom: 1px solid var(--line-soft); margin-bottom: 4px; }
   .tabella td.titolo-riga::before { content: none; }
   .tabella td:empty { display: none; }
@@ -221,3 +263,11 @@ a.card:active { transform: scale(.985); }
 /* Schede del team: su PC piccoli (1024–1279) tre per riga, a quattro il
    numero di telefono non entra nella scheda compatta */
 @media (min-width: 1024px) and (max-width: 1279px) { .grid.team { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+/* Pulsanti che aprono un altro sito (mappe, siti, social): freccetta dopo il
+   testo, come a Corigliano Volley. Non su quelli che hanno già un'icona (WhatsApp) */
+.btn[target="_blank"]:not(:has(svg))::after {
+  content: ''; flex: none; width: 15px; height: 15px; background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='5' y1='12' x2='19' y2='12'/%3E%3Cpolyline points='12 5 19 12 12 19'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='5' y1='12' x2='19' y2='12'/%3E%3Cpolyline points='12 5 19 12 12 19'/%3E%3C/svg%3E") center / contain no-repeat;
+}

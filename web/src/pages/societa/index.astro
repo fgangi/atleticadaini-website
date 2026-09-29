@@ -87,15 +87,15 @@ const porte = [
   .numeri { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 28px; }
   @media (max-width: 639px) { .numeri { grid-template-columns: minmax(0, 1fr); } }
   .numeri li { display: flex; flex-direction: column; gap: 4px; border-top: 3px solid var(--verde); padding-top: 12px; }
-  .numeri strong { font-family: var(--font-display); font-size: clamp(2.2rem, 4vw, 3rem); font-weight: 800; line-height: 1; color: var(--verde); }
+  .numeri strong { font-family: var(--font-display); font-size: clamp(calc(var(--fs-numero) * 1.1), 4vw, calc(var(--fs-numero) * 1.5)); font-weight: 800; line-height: 1; color: var(--verde); }
   .numeri span { color: var(--ink-soft); }
 
   .ricon { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
   .ricon li { padding: 18px 20px; display: flex; flex-direction: column; gap: 4px; border-top: 5px solid var(--giallo); }
-  .r-anno { font-family: var(--font-display); font-size: 2.2rem; font-weight: 800; color: var(--verde); line-height: 1; }
-  .ricon strong { font-size: 1.1rem; color: var(--ink); }
+  .r-anno { font-family: var(--font-display); font-size: calc(var(--fs-numero) * 1.1); font-weight: 800; color: var(--verde); line-height: 1; }
+  .ricon strong { font-size: var(--fs-etichetta); color: var(--ink); }
   .porta { padding: 22px; display: flex; flex-direction: column; gap: 6px; transition: transform .14s ease, border-color .14s ease; }
   .porta:hover { transform: translateY(-3px); border-color: var(--salvia); }
-  .porta h3 { font-family: var(--font-display); text-transform: uppercase; font-size: 1.6rem; font-weight: 800; color: var(--verde); }
+  .porta h3 { font-family: var(--font-display); text-transform: uppercase; font-size: calc(var(--fs-titolo-scheda) * 1.28); font-weight: 800; color: var(--verde); }
   .porta .more { margin-top: 6px; }
 </style>

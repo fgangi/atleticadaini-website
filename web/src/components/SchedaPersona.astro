@@ -38,9 +38,9 @@ const iniziali = String(m.nome ?? '').split(/\s+/).map((w: string) => w[0]).join
   .p-foto img { width: 100%; height: 100%; object-fit: cover; }
   .p-iniziali { font-family: var(--font-display); font-size: 3.4rem; font-weight: 800; color: var(--giallo-chiaro); letter-spacing: .04em; }
   .p-corpo { flex: 1; padding: 14px 16px 12px; display: flex; flex-direction: column; gap: 4px; }
-  .p-gruppi { min-height: 1.2em; font-family: var(--font-display); text-transform: uppercase; letter-spacing: .03em; font-weight: 700; color: var(--verde); font-size: 1.05rem; line-height: 1.2; }
+  .p-gruppi { min-height: 1.2em; font-family: var(--font-display); text-transform: uppercase; letter-spacing: .03em; font-weight: 700; color: var(--verde); font-size: var(--fs-etichetta); line-height: 1.2; }
   /* Ruolo in testo normale: il gruppo sopra conta di più */
-  .p-ruolo { min-height: 1.4em; color: var(--ink-soft); font-size: .98rem; line-height: 1.4; }
+  .p-ruolo { min-height: 1.4em; color: var(--ink-soft); font-size: var(--fs-testo-secondario); line-height: 1.4; }
   /* Numero in fondo alla scheda, toccabile: serve per gare e organizzazione */
   .p-tel { margin-top: auto; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-weight: 600; color: var(--verde); white-space: nowrap; }
   .p-tel svg { flex: none; }
@@ -52,5 +52,5 @@ const iniziali = String(m.nome ?? '').split(/\s+/).map((w: string) => w[0]).join
     .p-corpo h3 { line-height: 1.25; min-height: 2.5em; }
   }
   /* Sugli schermi più stretti "Ragazzi e Cadetti" va a capo: due righe per tutti */
-  @media (max-width: 359px) { .p-tel { font-size: .88rem; } .p-gruppi { min-height: 2.4em; } }
+  @media (max-width: 359px) { .p-tel { font-size: var(--fs-mini); } .p-gruppi { min-height: 2.4em; } }
 </style>

@@ -123,18 +123,18 @@ const titoloTipo: Record<string, string> = { campione: 'I nostri campioni', azzu
   .filtri { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
   .filtro { display: inline-flex; align-items: center; min-height: 44px; padding: 0 1.1rem; border-radius: 999px; cursor: pointer;
     border: 1px solid var(--line); background: var(--ground); color: var(--verde);
-    font-family: var(--font-display); text-transform: uppercase; letter-spacing: .04em; font-weight: 700; font-size: 1.1rem; }
+    font-family: var(--font-display); text-transform: uppercase; letter-spacing: .04em; font-weight: 700; font-size: var(--fs-etichetta); }
   .filtro:hover { border-color: var(--verde); }
   .filtro[aria-pressed='true'] { background: var(--verde); color: #fff; border-color: transparent; }
-  .legenda { display: flex; align-items: center; gap: 8px; font-size: .95rem; margin-bottom: clamp(20px, 3vw, 32px); }
+  .legenda { display: flex; align-items: center; gap: 8px; font-size: var(--fs-piccolo); margin-bottom: clamp(20px, 3vw, 32px); }
   .legenda .campione { width: 22px; height: 14px; border-radius: 3px; background: var(--tinta); border: 1px solid var(--giallo); }
   .categoria + .categoria { margin-top: clamp(40px, 6vw, 64px); }
   .gruppo + .gruppo { margin-top: 36px; }
-  .z-titolo { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .05em; font-size: 1.1rem; font-weight: 700; color: var(--verde); margin: 22px 0 6px; }
+  .z-titolo { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .05em; font-size: var(--fs-etichetta); font-weight: 700; color: var(--verde); margin: 22px 0 6px; }
   .gruppo .tabella + .z-titolo { margin-top: 30px; }
-  .g-titolo { font-family: var(--font-display); text-transform: uppercase; font-size: 1.4rem; font-weight: 800; color: var(--grigio-verde); margin-bottom: 8px; }
+  .g-titolo { font-family: var(--font-display); text-transform: uppercase; font-size: calc(var(--fs-titolo-scheda) * 1.12); font-weight: 800; color: var(--grigio-verde); margin-bottom: 8px; }
   /* La prestazione è il dato principale: grande e condensata come su un tabellone */
-  .c-prest { font-family: var(--font-display); font-size: 1.25rem; font-weight: 800; color: var(--verde); }
+  .c-prest { font-family: var(--font-display); font-size: var(--fs-titolo-scheda); font-weight: 800; color: var(--verde); }
   .c-spec { font-weight: 700; color: var(--ink); }
   .solo-tel { display: none; }
   .z-det { margin-top: 18px; border-top: 1px solid var(--line); }
@@ -143,7 +143,7 @@ const titoloTipo: Record<string, string> = { campione: 'I nostri campioni', azzu
   .z-det summary::before { content: '+'; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
     background: var(--surface-2); color: var(--verde); font-family: var(--font-body); font-weight: 700; }
   .z-det[open] summary::before { content: '–'; }
-  .z-n { font-family: var(--font-body); text-transform: none; letter-spacing: 0; font-weight: 500; font-size: .92rem; color: var(--ink-faint); }
+  .z-n { font-family: var(--font-body); text-transform: none; letter-spacing: 0; font-weight: 500; font-size: var(--fs-piccolo); color: var(--ink-faint); }
   /* Telefono: una riga compatta per record, al posto della scheda con le
      etichette. Specialità e prestazione in alto, atleta e dettagli sotto. */
   @media (max-width: 639px) {
@@ -153,10 +153,10 @@ const titoloTipo: Record<string, string> = { campione: 'I nostri campioni', azzu
     .tabella-record td { display: block; padding: 0; border: 0; text-align: left; }
     .tabella-record td::before { content: none; }
     /* Tre righe: specialità / atleta / nato · data · luogo; la prestazione a destra */
-    .tabella-record .c-spec { grid-column: 1 / 4; grid-row: 1; font-size: 1.02rem; }
-    .tabella-record .c-prest { grid-column: 4; grid-row: 1 / span 3; align-self: center; font-size: 1.5rem; padding-left: 8px; }
+    .tabella-record .c-spec { grid-column: 1 / 4; grid-row: 1; font-size: var(--fs-testo-secondario); }
+    .tabella-record .c-prest { grid-column: 4; grid-row: 1 / span 3; align-self: center; font-size: var(--fs-numero-piccolo); padding-left: 8px; }
     .tabella-record .c-atleta { grid-column: 1 / 4; grid-row: 2; color: var(--ink-soft); }
-    .tabella-record .c-info { grid-row: 3; font-size: .9rem; color: var(--ink-faint); white-space: nowrap; }
+    .tabella-record .c-info { grid-row: 3; font-size: var(--fs-piccolo); color: var(--ink-faint); white-space: nowrap; }
     .tabella-record .c-info:last-child { white-space: normal; }
     .tabella-record .c-info:empty { display: none; }
     .tabella-record .c-info:not(:empty) ~ .c-info:not(:empty)::before { content: ', '; }
@@ -164,15 +164,15 @@ const titoloTipo: Record<string, string> = { campione: 'I nostri campioni', azzu
   }
   .titoli { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
   .titoli li { padding: 14px 18px; display: flex; flex-direction: column; gap: 2px; border-left: 5px solid var(--giallo); }
-  .t-anno { font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; color: var(--verde); line-height: 1; }
-  .titoli strong { color: var(--ink); font-size: 1.08rem; }
+  .t-anno { font-family: var(--font-display); font-size: var(--fs-numero-piccolo); font-weight: 800; color: var(--verde); line-height: 1; }
+  .titoli strong { color: var(--ink); font-size: var(--fs-testo); }
   /* Una riga per informazione: risultato e gara, poi manifestazione e luogo */
-  .t-atleta { color: var(--ink); font-size: 1.08rem; }
-  .t-risultato { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .03em; font-weight: 800; color: var(--verde); font-size: 1.05rem; }
+  .t-atleta { color: var(--ink); font-size: var(--fs-testo); }
+  .t-risultato { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .03em; font-weight: 800; color: var(--verde); font-size: var(--fs-etichetta); }
   /* Le unità restano minuscole (m, km): in maiuscolo "M" vorrebbe dire mega */
   .t-gara { color: var(--ink); text-transform: none; letter-spacing: 0; font-family: var(--font-body); font-weight: 700; }
-  .t-dove { color: var(--ink-soft); font-size: .98rem; }
-  .t-nota { color: var(--ink-faint); font-size: .92rem; }
+  .t-dove { color: var(--ink-soft); font-size: var(--fs-testo-secondario); }
+  .t-nota { color: var(--ink-faint); font-size: var(--fs-piccolo); }
 </style>
 
 <script is:inline>

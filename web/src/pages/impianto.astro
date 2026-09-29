@@ -32,7 +32,7 @@ const orariDi = (nome: string, primo: boolean) => corsi.filter((c) => c.orari?.l
               {im.indirizzo && <p class="indirizzo"><Indirizzo testo={im.indirizzo} /></p>}
               {im.ingresso && <p class="ingresso"><strong>{im.ingresso}</strong></p>}
               {im.comeArrivare && <p class="arrivare">{im.comeArrivare}</p>}
-              {naviga && <a class="btn primary" href={naviga} target="_blank" rel="noopener">Apri il navigatore</a>}
+              {naviga && <a class="btn primary" href={naviga} target="_blank" rel="noopener">Indicazioni stradali</a>}
             </div>
             <Mappa posizione={im.mappa} indirizzo={im.indirizzo} titolo={im.nome} />
           </div>
@@ -73,8 +73,8 @@ const orariDi = (nome: string, primo: boolean) => corsi.filter((c) => c.orari?.l
   .dove { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); gap: clamp(14px, 2.4vw, 22px); align-items: stretch; }
   @media (max-width: 1023px) { .dove { grid-template-columns: minmax(0, 1fr); } }
   .dove-testo { padding: clamp(20px, 3vw, 30px); display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
-  .blocco-titolo { font-size: clamp(1.5rem, 2.6vw, 1.9rem); margin-bottom: 4px; }
-  .indirizzo { font-size: 1.15rem; color: var(--ink); }
+  .blocco-titolo { font-size: var(--fs-titolo-blocco); margin-bottom: 4px; }
+  .indirizzo { font-size: var(--fs-testo-grande); color: var(--ink); }
   /* L'ingresso non è quello dell'indirizzo: va visto subito */
   .ingresso { padding: 10px 14px; border-left: 4px solid var(--giallo); background: var(--tinta); color: var(--verde-scuro); border-radius: 0 10px 10px 0; }
   .dove-testo .btn { margin-top: auto; }

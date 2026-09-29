@@ -13,7 +13,6 @@ interface Props {
 const { settings, impianto, presenze: p } = Astro.props;
 const s = settings ?? {};
 const nome = s.nome ?? 'Atletica Daini';
-const logoUrl = img(s.logoChiaro, 360);
 const anno = new Date().getFullYear();
 const tuttiTelefoni: { nome?: string; ruolo?: string; numero: string; principale?: boolean }[] = s.telefoni ?? [];
 // Il numero della società sta sopra, in giallo e con WhatsApp; i referenti sotto
@@ -51,7 +50,8 @@ const identificativi = [
       <!-- 1. Società: marchio, frase, social -->
       <div class="foot-brand">
         <a class="brand" href="/" aria-label={`${nome} – home`}>
-          <img class="foot-logo" src={logoUrl ?? '/loghi/logo-daini-chiaro.svg'} alt="" width="143" height="71" />
+          {/* Nel footer il logo degli 80 anni (1945-2025), versione per fondi scuri */}
+          <img class="foot-logo" src="/loghi/logo-80-anni-chiaro.svg" alt="" width="170" height="100" />
         </a>
         {/* Frase breve sulla società; la descrizione lunga serve a Google, non qui */}
         <p class="foot-desc">{s.fraseFooter ?? `Società di atletica leggera di Carate Brianza, dal ${s.annoFondazione ?? 1945}.`}</p>
@@ -78,10 +78,8 @@ const identificativi = [
         <h4>Naviga</h4>
         <ul class="fnav">
           <li><a href="/societa/">Chi siamo</a></li>
-          {p.storia > 0 && <li><a href="/societa/storia/">Storia</a></li>}
           {p.team > 0 && <li><a href="/societa/team/">Team</a></li>}
           {p.collaborazioni > 0 && <li><a href="/societa/collaborazioni/">Collaborazioni</a></li>}
-          {p.record > 0 && <li><a href="/societa/record/">Record</a></li>}
           <li><a href="/settore-giovanile/">Settore giovanile</a></li>
           {p.openDay && <li><a href="/open-days/">Open days</a></li>}
           <li><a href="/impianto/">Impianto</a></li>
@@ -148,7 +146,8 @@ const identificativi = [
           {sede && <>Sede sociale: <Indirizzo testo={sede} /></>}
         </span>
       )}
-      {identificativi.map((x) => <span>{x}</span>)}
+      {/* Codice fiscale, partita IVA e codice FIDAL su una riga sola, separati da una lineetta */}
+      {identificativi.length > 0 && <span class="f-id">{identificativi.map((x, i) => <>{i > 0 && <span class="f-sep" aria-hidden="true"> — </span>}<span class="tabnums">{x}</span></>)}</span>}
     </div>
 
     <div class="foot-bottom">
@@ -187,7 +186,7 @@ const identificativi = [
   .enti img { height: var(--lh); width: var(--lw); max-width: 100%; object-fit: contain; }
   /* Social sotto una riga sottile, centrati sulla larghezza del blocco */
   .foot-social { display: flex; flex-direction: column; align-items: center; gap: 12px; padding-top: 18px; border-top: 1px solid rgba(255, 255, 255, .2); }
-  .social-invito { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .04em; font-weight: 700; font-size: 1.05rem; color: #fff; }
+  .social-invito { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .04em; font-weight: 700; font-size: var(--fs-etichetta); color: #fff; }
   .foot-social :global(.social-icons) { justify-content: center; gap: 12px; }
   .brand { display: inline-flex; min-height: 44px; align-items: center; color: #fff; }
   /* Logo grande e centrato: riempie la colonna come i loghi e i social sotto */
@@ -195,27 +194,33 @@ const identificativi = [
   /* La frase sta vicina al logo Daini (ne fa parte) e staccata dai loghi
      istituzionali sotto. Il file del logo ha ~18px vuoti sotto la scritta:
      il margine negativo li recupera, e la frase resta a ~10px dalle lettere */
-  .foot-desc { margin-top: -26px; color: #C9D2C8; max-width: 46ch; font-size: 1rem; line-height: 1.5; text-wrap: pretty; }
-  .site-footer h4 { font-size: .95rem; letter-spacing: .14em; font-weight: 700; margin: 0 0 12px; color: var(--giallo); }
+  .foot-desc { margin-top: -4px; color: #C9D2C8; max-width: 46ch; font-size: var(--fs-footer); line-height: 1.5; text-wrap: pretty; }
+  .site-footer h4 { font-size: calc(var(--fs-footer-piccolo) * 1.08); letter-spacing: .14em; font-weight: 700; margin: 0 0 12px; color: var(--giallo); }
   .fnav { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
   /* Ogni link del footer è alto 44px: vicini e più bassi, sul telefono si toccava quello accanto */
   .fnav a { display: inline-flex; align-items: center; min-height: 44px;
-    font-family: var(--font-display); text-transform: uppercase; letter-spacing: .03em; font-size: 1.1rem; font-weight: 600; opacity: .88; }
+    font-family: var(--font-display); text-transform: uppercase; letter-spacing: .03em; font-size: var(--fs-footer-link); font-weight: 600; opacity: .88; }
   .fnav a:hover { opacity: 1; color: var(--giallo); }
   /* Email e numeri restano in caso normale: in maiuscolo un indirizzo si legge male */
-  .fnav.contatti a { font-family: var(--font-body); text-transform: none; letter-spacing: 0; font-size: 1rem; font-weight: 500; overflow-wrap: anywhere; }
+  .fnav.contatti a { font-family: var(--font-body); text-transform: none; letter-spacing: 0; font-size: var(--fs-footer); font-weight: 500; overflow-wrap: anywhere; }
   .fnav.contatti + .fnav.contatti { margin-top: 12px; }
   /* Su PC (col mouse) le righe dei contatti stanno vicine; su telefono e
      tablet restano da 44px, altrimenti si tocca il numero accanto */
   @media (min-width: 1024px) { .fnav.contatti a { min-height: 32px; } }
+  /* Su PC le voci di "Naviga" hanno righe da 44px e i contatti da 32px: senza
+     questo "Chi siamo" partirebbe 5px più in basso del numero WhatsApp accanto */
+  /* Su PC le voci di "Naviga" hanno righe da 36px: più raccolte, e la prima
+     lettera di "Chi siamo" cade alla stessa altezza del numero WhatsApp accanto
+     (misurato sui pixel: i due caratteri hanno altezze diverse) */
+  @media (min-width: 1024px) { .fnav:not(.contatti) a { min-height: 36px; } .fnav:not(.contatti) { margin-top: -1px; } }
   .nota { opacity: .7; }
   /* Numero in bianco e nome in grigio: bastano colore e spazio a separarli */
   .tel-nome { margin-left: .7em; color: #B9C4B8; }
   .fnav.contatti a.tel-principale { gap: 8px; color: var(--giallo); font-weight: 700; }
   .tel-principale .tel-nome { margin-left: 0; font-weight: 500; }
   .dove { margin-top: 18px; }
-  .dove p { color: #E8EDE6; font-size: 1rem; line-height: 1.5; }
-  .dove .nota { font-size: .92rem; margin-top: 4px; }
+  .dove p { color: #E8EDE6; font-size: var(--fs-footer); line-height: 1.5; }
+  .dove .nota { font-size: var(--fs-footer-piccolo); margin-top: 4px; }
   /* Rimandi alle pagine (Tutti i contatti, Come arrivare): in grassetto, per
      distinguerli dalle righe di dati */
   .link-forte { display: inline-flex; align-items: center; min-height: 44px; margin-top: 8px; font-weight: 700; opacity: .92; }
@@ -223,24 +228,27 @@ const identificativi = [
 
 
   .foot-legale { border-top: 1px solid rgba(255, 255, 255, .14); padding: 16px 0 4px;
-    display: flex; flex-direction: column; gap: 4px; font-size: .88rem; color: #B9C4B8; line-height: 1.5; }
+    display: flex; flex-direction: column; gap: 4px; font-size: var(--fs-footer-piccolo); color: #B9C4B8; line-height: 1.5; }
   .foot-legale strong { font-weight: 600; color: #E8EDE6; }
+  /* Se non ci stanno su una riga (telefono) vanno a capo interi, mai a metà */
+  .f-id .tabnums { white-space: nowrap; }
+  .f-sep { opacity: .6; }
   /* Stesso riquadro della fascia 5×1000 in home, in piccolo */
   .f-cinque { margin: 8px 0 20px; padding: 14px 20px; border-radius: var(--radius);
     background: rgba(244, 246, 173, .08); border: 1px solid rgba(244, 246, 173, .25);
     display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px 28px; }
   .f5-testo { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 14px; min-width: 0; }
-  .f5-tit { font-family: var(--font-display); font-weight: 800; font-size: 1.35rem; letter-spacing: .02em; color: var(--giallo); }
-  .f5-testo p { color: #D5DED3; font-size: .98rem; }
+  .f5-tit { font-family: var(--font-display); font-weight: 800; font-size: var(--fs-titolo-scheda); letter-spacing: .02em; color: var(--giallo); }
+  .f5-testo p { color: #D5DED3; font-size: var(--fs-footer); }
   .f5-codice { display: flex; align-items: center; gap: 14px; }
-  .f5-numero { font-family: var(--font-display); font-weight: 800; font-size: 1.5rem; letter-spacing: .05em; color: #fff; }
+  .f5-numero { font-family: var(--font-display); font-weight: 800; font-size: var(--fs-numero-piccolo); letter-spacing: .05em; color: #fff; }
   /* Larghezza fissa: passando da "Copia" a "Copiato" il pulsante non cambia misura */
-  .f5-copia { min-height: 44px; min-width: 7.5rem; padding: 0 1rem; gap: 6px; font-size: .95rem; }
+  .f5-copia { min-height: 44px; min-width: 7.5rem; padding: 0 1rem; gap: 6px; font-size: var(--fs-piccolo); }
   @media (max-width: 639px) {
     .f-cinque { padding: 14px 16px; }
     .f5-codice { width: 100%; justify-content: space-between; }
   }
-  .foot-bottom { padding: 8px 0 20px; font-size: .88rem; color: #B9C4B8; display: flex; align-items: center;
+  .foot-bottom { padding: 8px 0 20px; font-size: var(--fs-footer-piccolo); color: #B9C4B8; display: flex; align-items: center;
     justify-content: space-between; flex-wrap: wrap; gap: 4px 16px; }
   .foot-link { display: flex; flex-wrap: wrap; gap: 0 18px; }
   .foot-link a { display: inline-flex; align-items: center; min-height: 44px; text-decoration: underline; text-underline-offset: 2px; color: #E8EDE6; }

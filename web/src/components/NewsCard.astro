@@ -30,6 +30,6 @@ const sezione = SEZIONI_NEWS.find((s) => s.value === item.sezione)?.title;
   /* flex:1 + margin-top:auto allineano il "Leggi" in fondo a tutte le schede */
   .body { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
   .body h3 { margin: 2px 0; color: var(--ink); }
-  .body p { font-size: .98rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .more { margin-top: auto; padding-top: 10px; font-size: 1rem; }
+  .body p { font-size: var(--fs-testo-secondario); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .more { margin-top: auto; padding-top: 10px; font-size: var(--fs-testo-secondario); }
 </style>

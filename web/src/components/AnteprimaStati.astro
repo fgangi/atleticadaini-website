@@ -73,7 +73,11 @@
       const applica = (gruppo, v) => {
         scrivi('ap_' + gruppo, v);
         box.querySelectorAll(`[data-gruppo="${gruppo}"] button`).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
-        applicaVarianti(gruppo, v);
+        // Le prove che valgono per tutta la pagina (data-su-html): attributo su <html>
+        if (box.querySelector(`[data-gruppo="${gruppo}"]`)?.hasAttribute('data-su-html')) {
+          if (v === 'reale') delete document.documentElement.dataset['ap' + gruppo[0].toUpperCase() + gruppo.slice(1)];
+          else document.documentElement.dataset['ap' + gruppo[0].toUpperCase() + gruppo.slice(1)] = v;
+        } else applicaVarianti(gruppo, v);
       };
 
       box.querySelectorAll('[data-solo]').forEach((r) => { r.hidden = location.pathname !== r.dataset.solo; });

@@ -1,18 +1,26 @@
 ---
 import SocialIcons from './SocialIcons.astro';
 import CinqueMini from './CinqueMini.astro';
+// Logo ufficiale per fondi scuri, inserito nella pagina (non come immagine) per
+// poterlo animare: scorrendo "AINI" svanisce e resta la "D". Le classi interne
+// del file prendono un prefisso, perché gli stili di un SVG nella pagina valgono ovunque.
+import logoSvgGrezzo from '../../public/loghi/logo-daini-chiaro.svg?raw';
+const logoSvg = logoSvgGrezzo
+  .replace(/<!--[\s\S]*?-->/g, '')
+  .replace(/cls-/g, 'lh-')
+  .replace('<path class="lh-1"', '<path class="lh-1 logo-aini"')
+  .replace('<svg ', '<svg class="logo-svg" aria-hidden="true" focusable="false" ');
 
 type Voce = { href: string; label: string; risalto?: boolean; children?: { href: string; label: string }[] };
 interface Props {
   nome: string;
-  logoUrl?: string | null;
   social?: Record<string, string> | null;
   /** Promemoria del 5×1000 nella striscia in alto (acceso dal pannello) */
   cinque?: { cf: string; testo?: string | null } | null;
   /** Sezioni che compaiono solo quando hanno contenuto: la voce le segue */
   presenze: { album: number; record: number; team: number; collaborazioni?: number; storia: number; corsi: number; quote: number; iscrizioniAperte: boolean; openDay: boolean };
 }
-const { nome, logoUrl, social, cinque, presenze: p } = Astro.props;
+const { nome, social, cinque, presenze: p } = Astro.props;
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 
 const nav: Voce[] = [
@@ -65,20 +73,24 @@ const correnteEsatta = (href: string) => {
 const attivaVoce = (v: Voce) => attiva(v.href) || !!v.children?.some((c) => attiva(c.href));
 const conSocial = Object.values(social ?? {}).some((u) => typeof u === 'string' && u.startsWith('http'));
 ---
-<header class:list={['site-header', 'sfondo-scuro', { 'senza-striscia': !conSocial && !cinque }]}>
+<header class:list={['site-header', 'sfondo-scuro', { 'senza-striscia': !conSocial && !cinque }]} data-header>
   {(conSocial || cinque) && (
     <div class="topbar">
       <div class="container">
-        {cinque ? <CinqueMini cf={cinque.cf} testo={cinque.testo} /> : <span></span>}
-        {conSocial && <SocialIcons social={social} />}
+        {/* 5×1000 accanto ai social, a destra */}
+        <div class="topbar-destra">
+          {cinque && <CinqueMini cf={cinque.cf} testo={cinque.testo} />}
+          {conSocial && <SocialIcons social={social} />}
+        </div>
       </div>
     </div>
   )}
 
   <div class="container bar">
     <a class="brand" href="/" aria-label={`${nome} – home`}>
-      {/* Logo dal pannello (versione per fondi scuri) o, se manca, quello provvisorio del sito */}
-      <img class="brand-logo" src={logoUrl ?? '/loghi/logo-daini-chiaro.svg'} alt="" width="143" height="71" />
+      {/* Logo intero, alto quanto tutto l'header; scorrendo lascia il posto al solo simbolo */}
+      {/* Finestra sul logo: in cima mostra tutto "Daini", scorrendo si stringe sulla "D" */}
+      <span class="brand-finestra" set:html={logoSvg} />
     </a>
 
     <button class="nav-toggle" type="button" aria-label="Apri il menu" aria-expanded="false" data-nav-toggle>
@@ -110,37 +122,75 @@ const conSocial = Object.values(social ?? {}).some((u) => typeof u === 'string' 
     </nav>
   </div>
 </header>
+{/* L'header è fisso in alto: questo spazio tiene il suo posto nella pagina.
+    Ha sempre l'altezza piena, così quando l'header si stringe il contenuto non salta */}
+<div class:list={['header-spazio', { 'senza-striscia': !conSocial && !cinque }]} aria-hidden="true"></div>
 
 <style>
-  /* La striscia dei social esce dallo schermo scorrendo, da sola: l'header è
-     "sticky" con top negativo pari all'altezza della striscia, quindi resta
-     attaccata solo la barra con marchio e menu. Nessun JavaScript e nessun
-     salto della pagina, perché l'altezza dell'header non cambia mai. */
+  /* Header fisso con un'unica sfumatura verde (come Corigliano Volley). In cima:
+     striscia dei social + barra con il logo grande. Scorrendo (classe
+     "compatto") la striscia sparisce e la barra si stringe col solo simbolo.
+     Lo spazio sotto resta sempre alto uguale: la pagina non salta. */
   .site-header {
-    position: sticky; top: calc(-1 * var(--altezza-striscia)); z-index: 1000;
-    background: var(--verde); color: #fff;
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    background: linear-gradient(90deg, var(--verde) 0%, var(--verde-scuro) 100%); color: #fff;
     box-shadow: 0 1px 0 rgba(0, 0, 0, .12);
   }
-  .site-header.senza-striscia { top: 0; }
-  .topbar { height: var(--altezza-striscia); background: var(--verde-scuro); }
-  .topbar .container { display: flex; justify-content: space-between; align-items: center; height: 100%; }
+  .header-spazio { height: calc(var(--altezza-striscia) + var(--altezza-intestazione)); }
+  .header-spazio.senza-striscia { height: var(--altezza-intestazione); }
+  /* overflow visibile: il riquadro del 5×1000 si apre sotto la striscia */
+  .topbar { height: var(--altezza-striscia); transition: height .2s ease, opacity .2s ease; }
+  .topbar .container { position: relative; display: flex; justify-content: flex-end; align-items: center; height: 100%; }
+  .topbar-destra { display: flex; align-items: center; gap: 6px; }
   /* Icone nude nella striscia, ma con bersaglio di tocco pieno da 44px */
   .topbar :global(.social-icons) { margin: 0; gap: 0; }
-  .topbar :global(.social-icons a) { width: 44px; height: 44px; border: 0; border-radius: 8px; opacity: .88; }
-  /* Al passaggio del mouse l'icona si accende e basta: nessun riquadro */
-  .topbar :global(.social-icons a:hover) { opacity: 1; background: transparent; color: #fff; transform: none; }
+  .topbar :global(.social-icons a) { width: 44px; height: 44px; border: 0; border-radius: 8px; opacity: .88; transition: transform .12s ease, opacity .12s ease; }
+  /* Al passaggio del mouse l'icona si accende e si solleva appena (come Corigliano Volley) */
+  .topbar :global(.social-icons a:hover) { opacity: 1; background: transparent; color: #fff; transform: translateY(-2px); }
+  @media (prefers-reduced-motion: reduce) { .topbar :global(.social-icons a:hover) { transform: none; } }
   .topbar :global(.social-icons svg) { width: 18px; height: 18px; }
 
-  .bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: var(--altezza-intestazione); }
-  .brand { display: flex; align-items: center; min-height: 44px; flex: none; color: #fff; }
-  .brand-logo { height: calc(var(--altezza-intestazione) - 22px); width: auto; max-width: 200px; object-fit: contain; }
+  .bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: var(--altezza-intestazione);
+    transition: height .2s ease; }
+  /* Il logo sale nella striscia: occupa tutta l'altezza dell'header */
+  .brand { display: flex; align-items: center; min-height: 44px; flex: none; color: #fff; align-self: flex-end;
+    margin-top: calc(-1 * var(--altezza-striscia)); height: calc(var(--altezza-striscia) + var(--altezza-intestazione)); }
+  .senza-striscia .brand { margin-top: 0; height: var(--altezza-intestazione); }
+  .senza-striscia .brand-finestra { --alto: var(--altezza-intestazione); }
+  /* Logo animato. --h è l'altezza del disegno: in cima quella dell'header (meno un
+     margine) ma limitata dalla larghezza disponibile; il logo è largo 2,47 volte
+     l'altezza, la sola "D" 1,47. La finestra stringendosi nasconde "AINI". */
+  .brand-finestra {
+    --alto: calc(var(--altezza-striscia) + var(--altezza-intestazione));
+    --h: min(calc(var(--alto) - 20px), calc(var(--logo-max) / 2.465));
+    --logo-max: 240px;
+    display: block; overflow: hidden;
+    height: var(--h); width: calc(var(--h) * 2.465);
+    transition: width .35s ease, height .35s ease;
+  }
+  .brand-finestra :global(.logo-svg) { display: block; height: 100%; width: auto; }
+  .brand-finestra :global(.logo-aini) { transition: opacity .25s ease, transform .35s ease; }
+  .site-header.compatto .topbar { height: 0; opacity: 0; overflow: hidden; visibility: hidden; }
+  .site-header.compatto .bar { height: var(--altezza-compatta); }
+  .site-header.compatto .brand { margin-top: 0; height: var(--altezza-compatta); align-self: center; }
+  .site-header.compatto .brand-finestra { --h: calc(var(--altezza-compatta) - 18px); width: calc(var(--h) * 1.47); }
+  .site-header.compatto .brand-finestra :global(.logo-aini) { opacity: 0; transform: translateX(24px); }
+  .brand { transition: margin-top .35s ease, height .35s ease; }
+  @media (prefers-reduced-motion: reduce) {
+    .topbar, .bar, .brand, .brand-finestra, .brand-finestra :global(.logo-aini) { transition: none; }
+  }
+  /* Telefono: la striscia è piena (5×1000 e social), il logo resta nella barra */
+  @media (max-width: 639px) {
+    .brand { margin-top: 0; height: var(--altezza-intestazione); align-self: center; }
+    .brand-finestra { --logo-max: 150px; --alto: var(--altezza-intestazione); }
+  }
 
   /* --- menu da PC (da 1024px) --- */
   .mainnav { display: flex; align-items: center; gap: 2px; }
   .mainnav-link {
     display: inline-flex; align-items: center; gap: .3rem; min-height: 44px; padding: 0 .7rem;
     font-family: var(--font-display); text-transform: uppercase; letter-spacing: .03em;
-    font-size: 1.1rem; font-weight: 700; color: #fff; white-space: nowrap;
+    font-size: var(--fs-menu); font-weight: 700; color: #fff; white-space: nowrap;
     border: 0; background: transparent; cursor: pointer; border-radius: 8px;
   }
   .mainnav-link:hover { background: rgba(255, 255, 255, .1); }
@@ -160,9 +210,14 @@ const conSocial = Object.values(social ?? {}).some((u) => typeof u === 'string' 
   /* PC stretti (1024–1279px): 9 voci più "Iscriviti" stanno su una riga solo
      stringendo un po' spaziatura e carattere */
   @media (min-width: 1024px) and (max-width: 1279px) {
-    .mainnav-link { padding: 0 .48rem; font-size: 1.02rem; }
+    .mainnav-link { padding: 0 .48rem; font-size: calc(var(--fs-menu) * .93); }
     .nav-cta { margin-left: 6px; padding: 0 1rem; }
-    .brand-logo { max-width: 150px; }
+    .brand-finestra { --logo-max: 170px; }
+  }
+  /* PC larghi: logo grande e voci un po' più strette, così il menu non esce dal margine */
+  @media (min-width: 1280px) {
+    .mainnav-link { padding: 0 .55rem; }
+    .brand-finestra { --logo-max: 210px; }
   }
   @media (min-width: 1024px) {
     .submenu {
@@ -180,7 +235,7 @@ const conSocial = Object.values(social ?? {}).some((u) => typeof u === 'string' 
     .submenu a {
       display: flex; align-items: center; min-height: 44px; padding: 0 .8rem; border-radius: 8px;
       color: var(--ink-soft); white-space: nowrap;
-      font-family: var(--font-display); text-transform: uppercase; letter-spacing: .03em; font-size: 1.05rem; font-weight: 700;
+      font-family: var(--font-display); text-transform: uppercase; letter-spacing: .03em; font-size: var(--fs-menu-tendina); font-weight: 700;
     }
     .submenu a:hover, .submenu a[aria-current='page'] { background: var(--surface-2); color: var(--verde); }
   }
@@ -198,21 +253,44 @@ const conSocial = Object.values(social ?? {}).some((u) => typeof u === 'string' 
       position: absolute; top: 100%; left: 0; right: 0; flex-direction: column; align-items: stretch;
       background: var(--verde-scuro); border-top: 1px solid rgba(255, 255, 255, .12);
       padding: 8px clamp(16px, 4vw, 32px) 20px; gap: 0; display: none;
-      max-height: calc(100dvh - var(--altezza-intestazione)); overflow-y: auto; z-index: 1001;
+      max-height: calc(100dvh - var(--altezza-compatta)); overflow-y: auto; z-index: 1001;
     }
     .mainnav[data-open='true'] { display: flex; }
-    .mainnav-link { width: 100%; justify-content: space-between; min-height: 52px; font-size: 1.2rem; border-radius: 0;
+    .mainnav-link { width: 100%; justify-content: space-between; min-height: 52px; font-size: calc(var(--fs-menu) * 1.09); border-radius: 0;
       border-bottom: 1px solid rgba(255, 255, 255, .08); }
     .mainnav-link[aria-current='page'], .mainnav-link[data-active='true'] { box-shadow: inset 3px 0 0 var(--giallo); }
     .submenu { padding: 4px 0 8px 1rem; }
     .submenu a { display: flex; align-items: center; min-height: 44px; color: rgba(255, 255, 255, .8);
-      font-family: var(--font-display); text-transform: uppercase; letter-spacing: .03em; font-size: 1.08rem; font-weight: 700; }
+      font-family: var(--font-display); text-transform: uppercase; letter-spacing: .03em; font-size: calc(var(--fs-menu-tendina) * 1.03); font-weight: 700; }
     .submenu a:hover, .submenu a[aria-current='page'] { color: var(--giallo); }
     .nav-cta { margin: 16px 0 0; }
   }
 </style>
 
 <script>
+// Header compatto scorrendo. Due soglie diverse (entra a 80px, esce sotto 24px):
+// fermandosi sul confine l'header non si apre e chiude di continuo
+function initCompatto() {
+  const h = document.querySelector<HTMLElement>('[data-header]');
+  if (!h || h.dataset.scroll) return;
+  h.dataset.scroll = '1';
+  let attesa = false;
+  const aggiorna = () => {
+    attesa = false;
+    const y = window.scrollY;
+    if (y > 80 && !h.classList.contains('compatto')) {
+      h.classList.add('compatto');
+      // La striscia sparisce: il riquadro del 5×1000 eventualmente aperto si chiude
+      h.querySelector<HTMLDetailsElement>('[data-cinque-mini]')?.removeAttribute('open');
+    }
+    else if (y < 24) h.classList.remove('compatto');
+  };
+  aggiorna();
+  window.addEventListener('scroll', () => { if (!attesa) { attesa = true; requestAnimationFrame(aggiorna); } }, { passive: true });
+}
+initCompatto();
+document.addEventListener('astro:page-load', initCompatto);
+
 // Con le transizioni fra pagine lo script si riesegue: il flag "bound"
 // evita di agganciare due volte gli stessi eventi.
 function initHeader() {

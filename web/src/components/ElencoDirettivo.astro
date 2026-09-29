@@ -23,7 +23,7 @@ const { membri } = Astro.props;
   .direttivo li { display: grid; grid-template-columns: 11rem minmax(0, 1fr) auto; align-items: center; gap: 4px 16px;
     padding: 10px 18px; background: var(--ground); border: 1px solid var(--line); border-radius: 12px; }
   .d-carica { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .04em; font-weight: 700; color: var(--verde); }
-  .d-nome { font-weight: 700; color: var(--ink); font-size: 1.05rem; }
+  .d-nome { font-weight: 700; color: var(--ink); font-size: var(--fs-testo); }
   .d-tel { display: inline-flex; align-items: center; min-height: 44px; font-weight: 600; color: var(--verde); white-space: nowrap; }
   /* Telefono: carica sopra, nome e numero sotto */
   @media (max-width: 639px) {

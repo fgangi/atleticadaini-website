@@ -145,7 +145,7 @@ function Scelta({ url, punto, readOnly, onMuovi, onFine, etichetta, piccola = fa
       {punto && (
         <span aria-hidden="true" style={{
           position: 'absolute', left: `${punto.x * 100}%`, top: `${punto.y * 100}%`, width: 34, height: 34, marginLeft: -17, marginTop: -17,
-          borderRadius: '50%', border: '3px solid #fff', boxShadow: '0 0 0 2px #1B573B, 0 2px 8px rgba(0,0,0,.5)', background: 'rgba(224,201,85,.35)', pointerEvents: 'none',
+          borderRadius: '50%', border: '3px solid #fff', boxShadow: '0 0 0 2px #19543A, 0 2px 8px rgba(0,0,0,.5)', background: 'rgba(224,201,85,.35)', pointerEvents: 'none',
         }} />
       )}
     </div>
@@ -182,8 +182,8 @@ function Anteprima({ formato, url, dim, crop, punto }: {
         {/* Dove sta il testo sopra la foto: su PC a sinistra, su tablet e telefono ovunque */}
         {formato.velo && (
           <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: formato.velo === 'sinistra'
-            ? 'linear-gradient(90deg, rgba(18,58,40,.9) 0%, rgba(18,58,40,.8) 55%, rgba(18,58,40,.2) 100%)'
-            : 'rgba(18,58,40,.55)' }} />
+            ? 'linear-gradient(90deg, rgba(16,55,38,.9) 0%, rgba(16,55,38,.8) 55%, rgba(16,55,38,.2) 100%)'
+            : 'rgba(16,55,38,.55)' }} />
         )}
       </div>
       <figcaption style={{ fontSize: 12, opacity: 0.75 }}>{formato.nome}</figcaption>

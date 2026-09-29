@@ -59,8 +59,8 @@ const foto = (a.foto ?? []).map((f: any) => ({
   .visore[open] { display: grid; place-items: center; }
   .visore::backdrop { background: rgba(0, 0, 0, .6); }
   .visore img { max-width: 94vw; max-height: 84dvh; object-fit: contain; }
-  .v-didascalia { position: absolute; bottom: 16px; left: 70px; right: 130px; color: #E3EAE1; font-size: .95rem; }
-  .v-numero { position: absolute; bottom: 16px; right: 70px; color: #E3EAE1; font-size: .95rem; margin: 0; }
+  .v-didascalia { position: absolute; bottom: 16px; left: 70px; right: 130px; color: #E3EAE1; font-size: var(--fs-piccolo); }
+  .v-numero { position: absolute; bottom: 16px; right: 70px; color: #E3EAE1; font-size: var(--fs-piccolo); margin: 0; }
   @media (max-width: 639px) { .v-didascalia { left: 16px; right: 16px; bottom: 70px; } .v-numero { right: auto; left: 50%; transform: translateX(-50%); bottom: 26px; } }
   .v-btn { position: absolute; width: 48px; height: 48px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .3);
     background: rgba(0, 0, 0, .35); color: #fff; font-size: 1.6rem; line-height: 1; cursor: pointer; display: grid; place-items: center; }

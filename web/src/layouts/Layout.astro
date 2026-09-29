@@ -42,7 +42,9 @@ const desc = description && !/^\s*https?:\/\//i.test(description) ? description 
 const indicizzabile = import.meta.env.PUBLIC_INDICIZZABILE === 'true' && !noindex;
 const canonico = new URL(Astro.url.pathname, Astro.site).href;
 const origine = new URL('/', Astro.site).href;
-const ogImmagine = immagine ?? img(settings?.logo, 1200) ?? new URL('/anteprima-link.png', Astro.site).href;
+// Link condivisi: la foto della pagina se c'è, altrimenti l'immagine verde col
+// logo bianco (il logo nudo su WhatsApp finirebbe su fondo nero)
+const ogImmagine = immagine ?? new URL('/anteprima-link.png', Astro.site).href;
 
 // Dati strutturati in home: dicono a Google il nome del sito e della società
 const social = Object.values(settings?.social ?? {}).filter((u) => typeof u === 'string' && u.startsWith('http'));
@@ -82,20 +84,20 @@ const datiStrutturati = home ? JSON.stringify({
     <meta property="og:url" content={canonico} />
     <meta property="og:image" content={ogImmagine} />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="theme-color" content="#1B573B" />
+    <meta name="theme-color" content="#19543A" />
     {datiStrutturati && <script type="application/ld+json" set:html={datiStrutturati} />}
     {/* Icone provvisorie, da rifare col logo definitivo. Se si cambiano,
         aumentare ?v= : i browser tengono a lungo in memoria le favicon. */}
-    <link rel="icon" href="/favicon.svg?v=3" type="image/svg+xml" />
-    <link rel="icon" href="/favicon-96.png?v=3" type="image/png" sizes="96x96" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3" />
+    <link rel="icon" href="/favicon.svg?v=4" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-96.png?v=4" type="image/png" sizes="96x96" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=4" />
     {/* Transizioni fluide fra le pagine invece del ricaricamento secco */}
     <ClientRouter />
     <slot name="head" />
   </head>
   <body>
     <a class="salta" href="#contenuto">Vai al contenuto</a>
-    <Header nome={nome} logoUrl={img(settings?.logoChiaro, 440)} social={settings?.social} presenze={p}
+    <Header nome={nome} social={settings?.social} presenze={p}
       cinque={settings?.cinquePerMille?.promemoria && settings?.codiceFiscale ? { cf: settings.codiceFiscale, testo: settings.cinquePerMille.testo } : null} />
     <CopiaCodice />
     <main id="contenuto">

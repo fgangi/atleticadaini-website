@@ -44,10 +44,10 @@ const allegati = (post.allegati ?? []).filter((a: any) => a?.url);
   .post { padding: clamp(28px, 5vw, 56px) 0 clamp(24px, 5vw, 48px); }
   .indietro { display: inline-flex; align-items: center; min-height: 44px; margin-bottom: 12px; color: var(--verde); font-weight: 600; }
   .meta { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
-  .post h1 { font-size: clamp(2.2rem, 5.4vw, 3.4rem); margin-bottom: 14px; }
+  .post h1 { font-size: var(--fs-titolo-articolo); margin-bottom: 14px; }
   .cover { margin: clamp(22px, 4vw, 38px) 0; }
   .cover img { display: block; margin: 0 auto; max-width: 100%; max-height: 80vh; width: auto; height: auto; border-radius: var(--radius); }
   .allegati { margin-top: 32px; }
-  .allegati h2 { font-size: 1.6rem; margin-bottom: 12px; }
+  .allegati h2 { font-size: var(--fs-titolo-blocco); margin-bottom: 12px; }
   .allegati ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
 </style>

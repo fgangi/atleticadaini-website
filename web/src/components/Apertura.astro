@@ -104,10 +104,10 @@ const stile = sfondo ? `--foto:url('${sfondo}');--foto-piccola:url('${sfondoPicc
   .apertura { position: relative; background: var(--sfondo-apertura); color: #fff;
     padding: clamp(56px, 11vw, 132px) 0 clamp(52px, 9vw, 112px); overflow: hidden; isolation: isolate; }
   /* Con la foto dal pannello: un velo verde a sinistra tiene leggibile il testo */
-  .apertura.con-foto { background: linear-gradient(90deg, rgba(18, 58, 40, .94) 0%, rgba(18, 58, 40, .78) 48%, rgba(18, 58, 40, .35) 100%),
+  .apertura.con-foto { background: linear-gradient(90deg, rgba(16, 55, 38, .94) 0%, rgba(16, 55, 38, .78) 48%, rgba(16, 55, 38, .35) 100%),
     var(--foto) center / cover no-repeat, var(--verde-scuro); }
   @media (max-width: 1023px) {
-    .apertura.con-foto { background: linear-gradient(rgba(18, 58, 40, .82), rgba(18, 58, 40, .82)),
+    .apertura.con-foto { background: linear-gradient(rgba(16, 55, 38, .82), rgba(16, 55, 38, .82)),
       var(--foto-piccola, var(--foto)) center / cover no-repeat, var(--verde-scuro); }
   }
 
@@ -120,18 +120,18 @@ const stile = sfondo ? `--foto:url('${sfondo}');--foto-piccola:url('${sfondoPicc
   /* Velo verde fitto fin oltre la metà, dove arriva il testo: anche con un punto
      bianco della foto dietro, il testo chiaro resta a 5,9:1 di contrasto (minimo 4,5) */
   .velo { position: absolute; inset: 0;
-    background: linear-gradient(90deg, rgba(18, 58, 40, .92) 0%, rgba(18, 58, 40, .82) 55%, rgba(18, 58, 40, .25) 100%),
-      linear-gradient(0deg, rgba(18, 58, 40, .75) 0%, rgba(18, 58, 40, 0) 30%); }
+    background: linear-gradient(90deg, rgba(16, 55, 38, .92) 0%, rgba(16, 55, 38, .82) 55%, rgba(16, 55, 38, .25) 100%),
+      linear-gradient(0deg, rgba(16, 55, 38, .75) 0%, rgba(16, 55, 38, 0) 30%); }
   @media (max-width: 1023px) {
-    .velo { background: linear-gradient(rgba(18, 58, 40, .78), rgba(18, 58, 40, .78)); }
+    .velo { background: linear-gradient(rgba(16, 55, 38, .78), rgba(16, 55, 38, .78)); }
   }
 
   .ap-testo { display: flex; flex-direction: column; align-items: flex-start; gap: var(--stacco-occhiello); }
-  .eyebrow { color: var(--giallo); margin: 0; font-size: clamp(1.05rem, 1.6vw, 1.3rem); letter-spacing: .12em; }
-  h1 { color: #fff; font-size: clamp(3rem, 9vw, 6.4rem); line-height: .92; max-width: 14ch; }
+  .eyebrow { color: var(--giallo); margin: 0; font-size: var(--fs-occhiello-apertura); letter-spacing: .12em; }
+  h1 { color: #fff; font-size: var(--fs-apertura); line-height: .92; max-width: 14ch; }
   .lead { color: #E3EAE1; margin-top: 18px; max-width: 52ch; }
   .azioni { margin-top: clamp(22px, 3vw, 34px); }
-  .btn.grande { min-height: 52px; padding: 0 1.5rem; font-size: 1.2rem; }
+  .btn.grande { min-height: 52px; padding: 0 1.5rem; font-size: var(--fs-pulsante-grande); }
   .prova { margin-top: 18px; color: #E3EAE1; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .prova .pill { background: rgba(244, 246, 173, .16); color: var(--giallo-chiaro); }
   .prova a { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; color: #fff; font-weight: 600; }
@@ -154,7 +154,7 @@ const stile = sfondo ? `--foto:url('${sfondo}');--foto-piccola:url('${sfondoPicc
   .sl-punto span { width: 10px; height: 10px; border-radius: 50%; border: 2px solid #fff; transition: background .2s ease, transform .2s ease; }
   .sl-punto[aria-current='true'] span { background: var(--giallo); border-color: var(--giallo); transform: scale(1.15); }
   .sl-punto:hover span { background: rgba(255, 255, 255, .6); }
-  .sl-didascalia { margin: 0; color: #E3EAE1; font-size: .9rem; text-shadow: 0 1px 3px rgba(0, 0, 0, .6); }
+  .sl-didascalia { margin: 0; color: #E3EAE1; font-size: var(--fs-piccolo); text-shadow: 0 1px 3px rgba(0, 0, 0, .6); }
   .apertura:not(.con-slider) .sl-barra { justify-content: flex-end; }
 
   @media (prefers-reduced-motion: reduce) { .slide { transition: none; } }

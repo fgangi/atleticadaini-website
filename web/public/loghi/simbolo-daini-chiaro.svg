@@ -1,9 +1,9 @@
-<!-- Logo ufficiale fornito dalla società il 2026-09-29 (SVG), scritta "AINI" convertita in tracciati. Simbolo "D" per fondi chiari. -->
+<!-- Logo ufficiale fornito dalla società il 2026-09-29 (SVG), scritta "AINI" convertita in tracciati. Simbolo "D" per fondi scuri: bianco. -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 84.5 259.63 176.63">
   <defs>
     <style>
       .cls-1 {
-        fill: #19543A;
+        fill: #ffffff;
       }
 
       .cls-2 {
@@ -21,7 +21,7 @@
 
       .cls-3 {
         stroke: #fff;
-        stroke-width: 2.5px;
+        stroke-width: 2.5px; stroke-opacity: 0;
       }
     </style>
   </defs>

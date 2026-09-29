@@ -137,7 +137,7 @@ const eventi = date.length && campo ? JSON.stringify(date.map((d: any) => ({
           {campo.indirizzo && <p><Indirizzo testo={campo.indirizzo} /></p>}
           {campo.ingresso && <p class="ingresso"><strong>{campo.ingresso}</strong></p>}
           <div class="azioni">
-            {naviga && <a class="btn primary" href={naviga} target="_blank" rel="noopener">Apri il navigatore</a>}
+            {naviga && <a class="btn primary" href={naviga} target="_blank" rel="noopener">Indicazioni stradali</a>}
             <a class="btn" href="/impianto/">L'impianto</a>
           </div>
         </div>
@@ -171,33 +171,33 @@ const eventi = date.length && campo ? JSON.stringify(date.map((d: any) => ({
 <style>
   .hero-azioni { margin-top: 22px; }
   .hero-sempre { margin-top: 14px; max-width: 60ch; color: #fff; font-weight: 600; padding-left: 14px; border-left: 4px solid var(--giallo); }
-  .btn.grande { min-height: 52px; padding: 0 1.5rem; font-size: 1.15rem; }
+  .btn.grande { min-height: 52px; padding: 0 1.5rem; font-size: var(--fs-pulsante-grande); }
   .hero-ref { margin-top: 12px; color: #E3EAE1; }
 
   .date { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
   .data { padding: 18px 20px; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; border-top: 5px solid var(--giallo); }
-  .d-giorno { font-family: var(--font-display); text-transform: uppercase; font-weight: 800; font-size: 1.45rem; color: var(--verde); line-height: 1.1; }
-  .d-orario { font-family: var(--font-display); font-weight: 800; font-size: 1.8rem; color: var(--ink); line-height: 1; }
-  .d-nota { font-size: .95rem; }
+  .d-giorno { font-family: var(--font-display); text-transform: uppercase; font-weight: 800; font-size: var(--fs-numero-piccolo); color: var(--verde); line-height: 1.1; }
+  .d-orario { font-family: var(--font-display); font-weight: 800; font-size: var(--fs-numero); color: var(--ink); line-height: 1; }
+  .d-nota { font-size: var(--fs-piccolo); }
   .data .btn { margin-top: auto; }
 
   .passi { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 28px; counter-reset: none; }
   @media (max-width: 1023px) { .passi { grid-template-columns: minmax(0, 1fr); } }
   .passi li { display: flex; flex-direction: column; gap: 6px; }
   .p-n { width: 48px; height: 48px; border-radius: 50%; background: var(--verde); color: var(--giallo); display: grid; place-items: center;
-    font-family: var(--font-display); font-weight: 800; font-size: 1.6rem; }
-  .passi h3 { font-family: var(--font-display); text-transform: uppercase; font-size: 1.5rem; font-weight: 800; color: var(--verde); margin-top: 6px; }
+    font-family: var(--font-display); font-weight: 800; font-size: calc(var(--fs-numero-piccolo) * 1.07); }
+  .passi h3 { font-family: var(--font-display); text-transform: uppercase; font-size: calc(var(--fs-titolo-scheda) * 1.2); font-weight: 800; color: var(--verde); margin-top: 6px; }
 
   .info { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(14px, 2.4vw, 22px); align-items: start; }
   @media (max-width: 1023px) { .info { grid-template-columns: minmax(0, 1fr); } }
   .blocco { padding: clamp(20px, 3vw, 30px); display: flex; flex-direction: column; gap: 10px; }
-  .blocco-titolo { font-size: clamp(1.5rem, 2.4vw, 1.8rem); margin-bottom: 6px; }
-  .portare-titolo { font-size: 1.1rem; margin-top: 8px; color: var(--verde); }
+  .blocco-titolo { font-size: var(--fs-titolo-blocco); margin-bottom: 6px; }
+  .portare-titolo { font-size: var(--fs-etichetta); margin-top: 8px; color: var(--verde); }
   .portare { margin: 0; padding-left: 1.2rem; display: flex; flex-direction: column; gap: 6px; color: var(--ink-soft); }
   .documenti { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
   .documenti a { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; font-weight: 600; }
   .doc-ico { flex: none; width: 40px; height: 40px; border-radius: 8px; background: var(--verde); color: var(--giallo-chiaro); display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; font-size: .9rem; }
-  .dove-nome { font-family: var(--font-display); text-transform: uppercase; font-size: 1.4rem; font-weight: 800; color: var(--verde); }
+  .dove-nome { font-family: var(--font-display); text-transform: uppercase; font-size: calc(var(--fs-titolo-scheda) * 1.12); font-weight: 800; color: var(--verde); }
   .ingresso { padding: 8px 12px; border-left: 4px solid var(--giallo); background: var(--tinta); color: var(--verde-scuro); }
   .blocco .azioni { margin-top: 6px; }
 

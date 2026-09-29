@@ -119,14 +119,14 @@ const dati = [
   .largo { grid-column: 1 / -1; }
   @media (max-width: 1023px) { .contatti { grid-template-columns: minmax(0, 1fr); } }
   .blocco { padding: clamp(20px, 3vw, 30px); }
-  .blocco-titolo { font-size: clamp(1.5rem, 2.4vw, 1.8rem); margin: 0 0 18px; }
-  .blocco-titolo.piccolo { font-size: 1.3rem; margin-bottom: 14px; }
+  .blocco-titolo { font-size: var(--fs-titolo-blocco); margin: 0 0 18px; }
+  .blocco-titolo.piccolo { font-size: var(--fs-titolo-scheda); margin-bottom: 14px; }
 
   /* Numero della società: fondo giallo chiaro e pulsanti, il resto è elenco */
   .principale { background: var(--giallo-chiaro); border-left: 5px solid var(--verde); border-radius: 12px; padding: 16px 18px 18px; margin-bottom: 14px; }
-  .pr-nome { margin: 0; font-family: var(--font-display); text-transform: uppercase; letter-spacing: .04em; font-weight: 800; font-size: 1.1rem; color: var(--verde); display: flex; flex-direction: column; }
-  .pr-nome span { font-family: var(--font-body); text-transform: none; letter-spacing: 0; font-weight: 600; font-size: 1rem; color: var(--ink); }
-  .pr-numero { margin: 6px 0 12px; font-family: var(--font-display); font-weight: 800; font-size: clamp(1.7rem, 4vw, 2rem); line-height: 1; color: var(--ink); }
+  .pr-nome { margin: 0; font-family: var(--font-display); text-transform: uppercase; letter-spacing: .04em; font-weight: 800; font-size: var(--fs-etichetta); color: var(--verde); display: flex; flex-direction: column; }
+  .pr-nome span { font-family: var(--font-body); text-transform: none; letter-spacing: 0; font-weight: 600; font-size: var(--fs-testo-secondario); color: var(--ink); }
+  .pr-numero { margin: 6px 0 12px; font-family: var(--font-display); font-weight: 800; font-size: clamp(calc(var(--fs-numero) * .85), 4vw, var(--fs-numero)); line-height: 1; color: var(--ink); }
   .pr-azioni { display: flex; flex-wrap: wrap; gap: 10px; }
   .pr-azioni .btn { gap: 8px; min-height: 48px; }
   .azioni-contatto { display: flex; flex-direction: column; gap: 10px; }
@@ -135,8 +135,8 @@ const dati = [
   .contatto:hover { border-color: var(--verde); transform: translateY(-1px); }
   .contatto svg { flex: none; color: var(--verde); }
   .contatto > span { display: flex; flex-direction: column; min-width: 0; }
-  .c-tipo { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .04em; font-size: .98rem; font-weight: 700; color: var(--grigio-verde); }
-  .c-valore { font-weight: 600; font-size: 1.1rem; overflow-wrap: anywhere; }
+  .c-tipo { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .04em; font-size: var(--fs-piccolo); font-weight: 700; color: var(--grigio-verde); }
+  .c-valore { font-weight: 600; font-size: var(--fs-testo-grande); overflow-wrap: anywhere; }
 
   .luoghi { margin: 0; display: flex; flex-direction: column; gap: 20px; }
   .luoghi dt { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .04em; font-weight: 700; color: var(--grigio-verde); }
@@ -148,13 +148,13 @@ const dati = [
   .link-utili a { display: flex; flex-direction: column; justify-content: center; min-height: 56px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; }
   .link-utili a:hover { border-color: var(--verde); }
   .link-utili strong { color: var(--verde); }
-  .link-utili span { font-size: .92rem; color: var(--ink-faint); }
+  .link-utili span { font-size: var(--fs-piccolo); color: var(--ink-faint); }
   .social { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
   .social p { font-family: var(--font-display); text-transform: uppercase; font-weight: 700; letter-spacing: .04em; color: var(--grigio-verde); }
   /* Su fondo bianco le icone diventano verdi */
   .social :global(.su-chiaro a) { color: var(--verde); border-color: var(--line); }
 
   .dati { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px 24px; margin: 0; }
-  .dati dt { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .05em; font-size: .95rem; font-weight: 700; color: var(--grigio-verde); }
+  .dati dt { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .05em; font-size: var(--fs-piccolo); font-weight: 700; color: var(--grigio-verde); }
   .dati dd { margin: 2px 0 0; color: var(--ink-soft); overflow-wrap: anywhere; }
 </style>

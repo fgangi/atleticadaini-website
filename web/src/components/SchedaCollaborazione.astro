@@ -33,7 +33,7 @@ const iniziali = String(c.nome ?? '').split(/\s+/).map((w: string) => w[0]).join
         )}
         <div class="c-azioni">
           {c.telefono && <a class="btn" href={telHref(c.telefono)}><span class="tabnums">{formatTel(c.telefono)}</span></a>}
-          {c.indirizzo && <a class="btn" href={indicazioniUrl(c.indirizzo)} target="_blank" rel="noopener">Come arrivare</a>}
+          {c.indirizzo && <a class="btn" href={indicazioniUrl(c.indirizzo)} target="_blank" rel="noopener">Indicazioni stradali</a>}
           {c.link && <a class="btn" href={c.link} target="_blank" rel="noopener">Sito web</a>}
           {c.instagram && <a class="btn" href={c.instagram} target="_blank" rel="noopener">Instagram</a>}
         </div>
@@ -51,8 +51,8 @@ const iniziali = String(c.nome ?? '').split(/\s+/).map((w: string) => w[0]).join
   .c-media.logo { background: #fff; border: 1px solid var(--line); }
   .c-media.logo img { object-fit: contain; padding: 18px; }
   .c-iniziali { font-family: var(--font-display); font-size: 3rem; font-weight: 800; color: var(--giallo-chiaro); }
-  .c-testa h2 { font-size: clamp(1.5rem, 2.6vw, 1.9rem); line-height: 1.1; }
-  .c-prof { margin-top: 4px; font-family: var(--font-display); text-transform: uppercase; letter-spacing: .04em; font-weight: 700; color: var(--verde); font-size: 1.05rem; }
+  .c-testa h2 { font-size: var(--fs-titolo-blocco); line-height: 1.1; }
+  .c-prof { margin-top: 4px; font-family: var(--font-display); text-transform: uppercase; letter-spacing: .04em; font-weight: 700; color: var(--verde); font-size: var(--fs-etichetta); }
   .c-corpo { margin-top: 12px; display: flex; flex-direction: column; gap: 12px; }
   .c-descr { color: var(--ink); max-width: 62ch; }
   .c-punti { margin: 0; padding-left: 1.2rem; display: grid; gap: 4px; color: var(--ink-soft); }
@@ -60,7 +60,7 @@ const iniziali = String(c.nome ?? '').split(/\s+/).map((w: string) => w[0]).join
   .c-indirizzo { display: flex; flex-direction: column; color: var(--ink); line-height: 1.4; }
   .c-etichetta { line-height: 1.15; font-family: var(--font-display); text-transform: uppercase; letter-spacing: .04em; font-weight: 700; color: var(--grigio-verde); }
   .c-azioni { display: flex; flex-wrap: wrap; gap: 8px; }
-  .c-azioni .btn { text-transform: none; font-family: var(--font-body); font-weight: 600; font-size: 1rem; letter-spacing: 0; }
+  .c-azioni .btn { text-transform: none; font-family: var(--font-body); font-weight: 600; font-size: var(--fs-testo-secondario); letter-spacing: 0; }
   @media (max-width: 639px) {
     .collab { grid-template-columns: 84px minmax(0, 1fr); align-items: center; }
     .c-media { grid-row: auto; width: 84px; border-radius: 50%; }
