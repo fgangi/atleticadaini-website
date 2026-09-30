@@ -7,7 +7,7 @@ export const impianto = defineType({
   title: 'Impianto',
   type: 'document',
   fields: [
-    defineField({ name: 'nome', title: 'Nome', type: 'string', description: 'Es. "Centro sportivo XXV Aprile".', validation: (r) => r.required() }),
+    defineField({ name: 'nome', title: 'Nome', type: 'string', description: 'Scritto come su Google Maps, così le indicazioni stradali portano al posto giusto. Es. "Stadio XXV Aprile".', validation: (r) => r.required() }),
     defineField({ name: 'indirizzo', title: 'Indirizzo', type: 'text', rows: 2, description: 'Es. "Via XXV Aprile, 20841 Carate Brianza (MB)".' }),
     defineField({ name: 'ingresso', title: 'Come si entra', type: 'string', description: 'Es. "Ingresso da via Giuseppe di Vittorio". Messo in evidenza nella pagina.' }),
     defineField({ name: 'descrizione', title: 'Descrizione', type: 'text', rows: 4 }),
@@ -15,7 +15,7 @@ export const impianto = defineType({
       description: 'Una voce per riga, es. "Pista a 6 corsie", "Pedana del salto in lungo".' }),
     defineField({ name: 'comeArrivare', title: 'Come arrivare', type: 'text', rows: 3, description: 'Parcheggio, mezzi pubblici, bici.' }),
     defineField({ name: 'mappa', title: 'Posizione sulla mappa', type: 'text', rows: 2,
-      description: 'Incolla il codice "Incorpora una mappa" di Google Maps, oppure scrivi coordinate o indirizzo.' }),
+      description: 'Scrivi il nome del posto come su Google Maps seguito dal comune, es. "Stadio XXV Aprile, Carate Brianza MB" (senza via e CAP: Google si confonde). Serve per la mappa e per le indicazioni stradali. In alternativa incolla il codice "Incorpora una mappa" di Google Maps.' }),
     defineField({ name: 'foto', title: 'Foto', type: 'array', options: { layout: 'grid' },
       of: [foto('impianto', { fields: [{ name: 'alt', type: 'string', title: 'Didascalia' }] })] }),
     defineField({ name: 'ordine', title: 'Ordine', type: 'number', description: 'Il primo è l\'impianto principale (in home).' }),

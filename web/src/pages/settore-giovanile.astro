@@ -39,7 +39,7 @@ const documenti = (i?.documenti ?? []).filter((d: any) => d?.url);
 ---
 <Layout title="Settore giovanile" description="Corsi di atletica leggera a Carate Brianza per ragazze e ragazzi dai 4 anni: orari, quote, moduli e come iscriversi.">
   <PageHero eyebrow={i?.stagione ? `Stagione ${i.stagione}` : 'Scuola di atletica'} title="Settore giovanile"
-    lead="Corsi di atletica leggera dai 4 anni in su, fino al gruppo agonistico e ai master, con istruttori federali e laureati in scienze motorie.">
+    lead="Corsi di atletica leggera dai 4 anni in su, fino al gruppo agonistico, con istruttori federali e laureati in scienze motorie.">
     <div class="azioni hero-azioni">
       <a class="btn cta" href="#iscrizioni">{aperte ? 'Iscriviti' : 'Come iscriversi'}</a>
       {corsi.length > 0 && <a class="btn chiaro" href="#corsi">Corsi e orari</a>}

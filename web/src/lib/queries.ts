@@ -20,7 +20,7 @@ export const openDayQuery = groq`*[_id == "openDay"][0]{
 }`;
 
 export const corsiQuery = groq`*[_type == "corso"] | order(ordine asc, nome asc){
-  _id, nome, eta, sottotitolo, descrizione, orari, foto, giovanile, "luogo": luogo->nome
+  _id, nome, eta, punti, orari, foto, giovanile
 }`;
 
 export const teamQuery = groq`*[_type == "membroTeam"] | order(ordine asc, nome asc){

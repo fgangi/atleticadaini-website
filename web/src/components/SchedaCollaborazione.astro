@@ -3,97 +3,135 @@ import Indirizzo from './Indirizzo.astro';
 import { img, telHref, formatTel, indicazioniUrl } from '../lib/sanity';
 
 /**
- * Scheda di una convenzione o di uno sponsor: foto (o logo), chi è, il vantaggio
- * per i tesserati in evidenza, contatti. Senza vantaggio inserito il riquadro
- * non compare; in sviluppo resta una cornice che mostra dove andrà.
+ * Scheda di una convenzione o di uno sponsor: foto (o logo), chi è, contatti e,
+ * in un buono verde a destra, il vantaggio per i tesserati. Su telefono il buono
+ * sale subito sotto il nome: è la cosa che interessa di più a un genitore.
+ * Senza vantaggio inserito il buono non compare; in sviluppo resta una cornice
+ * che mostra dove andrà.
  */
 interface Props { c: any }
 const { c } = Astro.props;
 const foto = c.logo ? null : img(c.foto, 480, 480);
 const logo = c.logo ? img(c.logo, 480) : null;
 const iniziali = String(c.nome ?? '').split(/\s+/).map((w: string) => w[0]).join('').slice(0, 2).toUpperCase();
+const segnaposto = !c.sconto && import.meta.env.DEV && c.tipo !== 'sponsor';
+const icone = {
+  tel: 'M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z',
+  mappa: 'M12 22s-7-6.1-7-12a7 7 0 0 1 14 0c0 5.9-7 12-7 12zM12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z',
+  web: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20',
+  insta: 'M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zM12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM17.5 6.5h.01',
+};
 ---
-<article class="collab card">
+<article class:list={['collab card', { 'con-buono': c.sconto || segnaposto }]}>
   <div class:list={['c-media', { logo: !!logo }]}>
     {logo ? <img src={logo} alt={`Logo ${c.nome}`} loading="lazy" />
       : foto ? <img src={foto} alt="" loading="lazy" />
       : <span class="c-iniziali" aria-hidden="true">{iniziali}</span>}
   </div>
-  <div class="c-testa">
-    <h2>{c.nome}</h2>
-    {c.professione && <p class="c-prof">{c.professione}</p>}
-  </div>
-  <div class="c-corpo">
+  {/* Chi è e dove, in un blocco unico accanto alla foto: così le righe non si allargano
+      per seguire l'altezza della foto. Su telefono il blocco si scioglie nella griglia */}
+  <div class="c-info">
+    <div class="c-testa">
+      <h2>{c.nome}</h2>
+      {c.professione && <p class="c-prof">{c.professione}</p>}
+    </div>
     {c.descrizione && <p class="c-descr">{c.descrizione}</p>}
-    {c.sconto ? (
-      <div class="c-sconto">
-        <span class="c-sconto-tit">Per i tesserati Daini</span>
-        <span class="c-sconto-val">{c.sconto}</span>
-        {c.scontoDettaglio && <span class="c-sconto-det">{c.scontoDettaglio}</span>}
-      </div>
-    ) : import.meta.env.DEV && c.tipo !== 'sponsor' && (
-      <div class="c-sconto vuoto">
-        <span class="c-sconto-tit">Per i tesserati Daini</span>
-        <span class="c-sconto-det">Qui comparirà la convenzione (cornice visibile solo in anteprima)</span>
-      </div>
-    )}
     {c.punti?.length > 0 && <ul class="c-punti">{c.punti.map((x: string) => <li>{x}</li>)}</ul>}
-    {(c.indirizzo || c.telefono || c.link || c.instagram) && (
-      <div class="c-contatti">
+    {c.indirizzo && (
+      <p class="c-indirizzo">
         {/* Come negli altri indirizzi del sito: etichetta nel carattere dei titoli, poi l'indirizzo */}
-        {c.indirizzo && (
-          <p class="c-indirizzo">
-            <span class="c-etichetta">{c.luogo || (c.tipo === 'sponsor' ? 'Sede' : 'Studio')}</span>
-            <Indirizzo testo={c.indirizzo} />
-          </p>
-        )}
-        <div class="c-azioni">
-          {c.telefono && <a class="btn" href={telHref(c.telefono)}><span class="tabnums">{formatTel(c.telefono)}</span></a>}
-          {c.indirizzo && <a class="btn" href={indicazioniUrl(c.indirizzo)} target="_blank" rel="noopener">Indicazioni stradali</a>}
-          {c.link && <a class="btn" href={c.link} target="_blank" rel="noopener">Sito web</a>}
-          {c.instagram && <a class="btn" href={c.instagram} target="_blank" rel="noopener">Instagram</a>}
-        </div>
-      </div>
+        <span class="c-etichetta">{c.luogo || (c.tipo === 'sponsor' ? 'Sede' : 'Studio')}</span>
+        <Indirizzo testo={c.indirizzo} />
+      </p>
     )}
   </div>
+  {c.sconto ? (
+    <div class="c-buono">
+      <span class="c-buono-tit">Per i tesserati Daini</span>
+      <span class="c-buono-val">{c.sconto}</span>
+      {c.scontoDettaglio && <span class="c-buono-det">{c.scontoDettaglio}</span>}
+    </div>
+  ) : segnaposto && (
+    <div class="c-buono vuoto">
+      <span class="c-buono-tit">Per i tesserati Daini</span>
+      <span class="c-buono-det">Qui comparirà la convenzione (cornice visibile solo in anteprima)</span>
+    </div>
+  )}
+  {(c.telefono || c.indirizzo || c.link || c.instagram) && (
+    <div class="c-azioni">
+      {c.telefono && <a class="btn" href={telHref(c.telefono)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icone.tel} /></svg><span class="tabnums">{formatTel(c.telefono)}</span></a>}
+      {c.indirizzo && <a class="btn" href={indicazioniUrl(c.indirizzo)} target="_blank" rel="noopener" aria-label={`Indicazioni stradali per ${c.nome}`}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icone.mappa} /></svg>Indicazioni</a>}
+      {c.link && <a class="btn" href={c.link} target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icone.web} /></svg>Sito web</a>}
+      {c.instagram && <a class="btn" href={c.instagram} target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icone.insta} /></svg>Instagram</a>}
+    </div>
+  )}
 </article>
 <style>
-  /* Scheda larga: foto a sinistra, testo a destra; su telefono la foto
-     piccola sta accanto al nome e il resto va sotto */
-  .collab { display: grid; grid-template-columns: 220px minmax(0, 1fr); grid-template-rows: auto 1fr; column-gap: clamp(18px, 3vw, 32px);
-    padding: clamp(16px, 2.4vw, 24px); }
-  .c-media { grid-row: 1 / 3; width: 220px; aspect-ratio: 1; border-radius: 12px; overflow: hidden; background: var(--sfondo-scuro); display: grid; place-items: center; }
+  /* PC e tablet: foto | chi è | buono; sotto foto e testo, i pulsanti a tutta larghezza.
+     Senza buono la terza colonna non c'è */
+  .collab { --pad: clamp(16px, 2.4vw, 24px); display: grid; gap: 16px clamp(18px, 2.6vw, 28px); align-items: start;
+    padding: var(--pad); overflow: hidden;
+    grid-template-columns: 170px minmax(0, 1fr);
+    grid-template-areas: "media info" "azioni azioni"; }
+  .collab.con-buono { grid-template-columns: 170px minmax(0, 1fr) 250px;
+    grid-template-areas: "media info buono" "azioni azioni buono"; }
+
+  .c-media { grid-area: media; width: 100%; aspect-ratio: 1; border-radius: 12px; overflow: hidden; background: var(--sfondo-scuro); display: grid; place-items: center; }
   .c-media img { width: 100%; height: 100%; object-fit: cover; }
   .c-media.logo { background: #fff; border: 1px solid var(--line); }
-  .c-media.logo img { object-fit: contain; padding: 18px; }
-  .c-iniziali { font-family: var(--font-display); font-size: 3rem; font-weight: 800; color: var(--giallo-chiaro); }
+  .c-media.logo img { object-fit: contain; padding: 6%; }
+  .c-iniziali { font-family: var(--font-display); font-size: 2.6rem; font-weight: 800; color: var(--giallo-chiaro); }
+  .c-info { grid-area: info; display: flex; flex-direction: column; gap: 12px; }
+  .c-testa { grid-area: testa; }
   .c-testa h2 { font-size: var(--fs-titolo-blocco); line-height: 1.1; }
   .c-prof { margin-top: 4px; font-family: var(--font-display); text-transform: uppercase; letter-spacing: .04em; font-weight: 700; color: var(--verde); font-size: var(--fs-etichetta); }
-  .c-corpo { margin-top: 12px; display: flex; flex-direction: column; gap: 12px; }
-  .c-descr { color: var(--ink); max-width: 62ch; }
-  .c-punti { margin: 0; padding-left: 1.2rem; display: grid; gap: 4px; color: var(--ink-soft); }
-  /* Vantaggio per i tesserati: il motivo della scheda, quindi in evidenza */
-  .c-sconto { display: flex; flex-direction: column; gap: 2px; align-self: flex-start; min-width: min(100%, 280px);
-    padding: 12px 16px; background: var(--tinta); border-left: 5px solid var(--verde); border-radius: 0 10px 10px 0; }
-  .c-sconto-tit { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .05em; font-weight: 700; font-size: var(--fs-etichetta); color: var(--verde); }
-  .c-sconto-val { font-family: var(--font-display); font-weight: 800; font-size: var(--fs-numero); line-height: 1.05; color: var(--verde-scuro); }
-  .c-sconto-det { color: var(--ink); font-size: var(--fs-testo-secondario); }
-  .c-sconto.vuoto { background: transparent; border: 2px dashed var(--line); border-left: 5px solid var(--line); }
-  .c-sconto.vuoto .c-sconto-tit { color: var(--ink-faint); }
-  .c-sconto.vuoto .c-sconto-det { color: var(--ink-faint); font-style: italic; }
-  .c-contatti { margin-top: auto; display: flex; flex-direction: column; gap: 8px; }
-  .c-indirizzo { display: flex; flex-direction: column; color: var(--ink); line-height: 1.4; }
+  /* Chi è: testo un po' più grande e scuro, è la parte da leggere */
+  .c-descr { grid-area: descr; color: var(--ink); font-size: var(--fs-testo-grande); max-width: 60ch; }
+  .c-punti { grid-area: punti; margin: 0; padding-left: 1.2rem; display: grid; gap: 4px; color: var(--ink-soft); }
+  .c-indirizzo { grid-area: indirizzo; display: flex; flex-direction: column; color: var(--ink); line-height: 1.4; }
   .c-etichetta { line-height: 1.15; font-family: var(--font-display); text-transform: uppercase; letter-spacing: .04em; font-weight: 700; color: var(--grigio-verde); }
-  .c-azioni { display: flex; flex-wrap: wrap; gap: 8px; }
-  .c-azioni .btn { text-transform: none; font-family: var(--font-body); font-weight: 600; font-size: var(--fs-testo-secondario); letter-spacing: 0; }
-  @media (max-width: 639px) {
-    .collab { grid-template-columns: 84px minmax(0, 1fr); align-items: center; }
-    .c-media { grid-row: auto; width: 84px; border-radius: 50%; }
-    .c-media.logo { border-radius: 12px; }
-    .c-media.logo img { padding: 6px; }
-    .c-iniziali { font-size: 1.6rem; }
-    .c-corpo { grid-column: 1 / -1; }
-    .c-azioni .btn { flex: 1 1 auto; }
+
+  /* Pulsanti con icona, tutti larghi uguali e distribuiti su tutta la riga:
+     quanti ce ne stanno per riga lo decide la larghezza della scheda */
+  .c-azioni { grid-area: azioni; align-self: end; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; }
+  .c-azioni .btn { gap: 8px; justify-content: center; padding-inline: 12px; text-transform: none; font-family: var(--font-body);
+    font-weight: 600; font-size: var(--fs-testo-secondario); letter-spacing: 0; white-space: nowrap; }
+  .c-azioni svg { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* Il vantaggio come un buono: fascia verde da bordo a bordo, separata da una linea
+     tratteggiata "da ritagliare" */
+  .c-buono { grid-area: buono; align-self: stretch; margin: calc(-1 * var(--pad)) calc(-1 * var(--pad)) calc(-1 * var(--pad)) 0;
+    display: flex; flex-direction: column; justify-content: center; gap: 6px; padding: 24px 22px;
+    background: var(--verde); color: #fff; border-left: 2px dashed rgba(255, 255, 255, .45); }
+  .c-buono-tit { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .05em; font-weight: 700; font-size: var(--fs-etichetta); color: var(--giallo); }
+  .c-buono-val { font-family: var(--font-display); font-weight: 800; font-size: var(--fs-numero-grande); line-height: 1; color: #fff; }
+  .c-buono-det { color: #E3EAE1; font-size: var(--fs-testo-secondario); }
+  .c-buono.vuoto { background: transparent; border-left: 2px dashed var(--line); }
+  .c-buono.vuoto .c-buono-tit { color: var(--ink-faint); }
+  .c-buono.vuoto .c-buono-det { color: var(--ink-faint); font-style: italic; }
+
+  @media (min-width: 640px) and (max-width: 1023px) {
+    .collab { grid-template-columns: 140px minmax(0, 1fr); }
+    .collab.con-buono { grid-template-columns: 140px minmax(0, 1fr) 210px; }
+    /* Due pulsanti per riga; se l'ultimo resta solo occupa tutta la riga */
+    .c-azioni { grid-template-columns: 1fr 1fr; }
+    .c-azioni .btn:nth-child(odd):last-child { grid-column: 1 / -1; }
   }
 
+  /* Telefono: foto piccola accanto al nome, poi il buono a tutta larghezza, poi chi è e i contatti */
+  @media (max-width: 639px) {
+    .collab, .collab.con-buono { row-gap: 12px; grid-template-columns: 76px minmax(0, 1fr);
+      grid-template-areas: "media testa" "buono buono" "descr descr" "punti punti" "indirizzo indirizzo" "azioni azioni"; }
+    .c-info { display: contents; }
+    .c-testa { align-self: center; }
+    .c-media:not(.logo) { border-radius: 50%; }
+    .c-iniziali { font-size: 1.5rem; }
+    .c-buono { margin: 4px calc(-1 * var(--pad)); padding: 16px var(--pad); border-left: 0;
+      border-block: 2px dashed rgba(255, 255, 255, .45); }
+    .c-buono.vuoto { border-block-color: var(--line); }
+    .c-azioni { grid-template-columns: 1fr 1fr; }
+    .c-azioni .btn { padding-inline: 10px; }
+    /* Il telefono su una riga intera (non va a capo); l'ultimo pulsante rimasto solo si allarga */
+    .c-azioni .btn:first-child, .c-azioni .btn:nth-child(even):last-child { grid-column: 1 / -1; }
+  }
 </style>

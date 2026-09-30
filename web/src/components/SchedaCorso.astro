@@ -3,7 +3,7 @@ import { img } from '../lib/sanity';
 
 /**
  * Scheda di un corso: la stessa in home e nel settore giovanile.
- * Con `completa` mostra anche foto e descrizione per intero.
+ * Con `completa` mostra anche la foto. Il luogo non si scrive: l'impianto è uno solo.
  */
 interface Props { c: any; completa?: boolean }
 const { c, completa = false } = Astro.props;
@@ -14,42 +14,48 @@ const foto = completa ? img(c.foto, 720, 450) : null;
   <div class="corso-corpo">
     <div class="corso-testa">
       <h3>{c.nome}</h3>
-      {c.eta && <span class:list={['pill', { agonistico: c.giovanile === false }]}>{c.eta}</span>}
+      {c.eta && <span class="pill eta">{c.eta}</span>}
     </div>
-    {c.sottotitolo && <p class="corso-sotto">{c.sottotitolo}</p>}
-    {completa && c.descrizione && <p class="corso-desc">{c.descrizione}</p>}
+    {c.punti?.length > 0 && (
+      <ul class="punti">
+        {c.punti.map((x: string) => <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg>{x}</li>)}
+      </ul>
+    )}
     {c.orari?.length > 0 && (
       <dl class="orari">
         {c.orari.map((o: any) => (
           <div class="orario">
-            <dt>{o.giorni}{o.nota && <span class="nota">{o.nota}</span>}</dt>
+            <dt>{o.giorni}</dt>
             <dd class="tabnums">{o.orario}</dd>
+            {/* Sempre presente, anche vuota, così giorni e orario stanno alla stessa altezza in tutte le schede */}
+            <dd class="nota" aria-hidden={o.nota ? undefined : 'true'}>{o.nota}</dd>
           </div>
         ))}
       </dl>
     )}
-    {completa && c.luogo && <p class="luogo">Dove: {c.luogo}</p>}
   </div>
 </article>
 <style>
-  /* Il gruppo agonistico si riconosce dall'etichetta dell'età in verde */
-  .pill.agonistico { background: var(--verde); color: #fff; }
+  /* Età: la stessa etichetta verde per tutti i corsi */
+  .pill.eta { background: var(--verde); color: #fff; }
   /* Barra verticale a sinistra, come le schede orari del volantino */
   .corso { display: flex; flex-direction: column; border-left: 5px solid var(--giallo); height: 100%; }
   .corso-foto { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; }
-  .corso-corpo { padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .corso-corpo { padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
   .corso-testa { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
   .corso h3 { font-family: var(--font-display); text-transform: uppercase; font-size: calc(var(--fs-titolo-scheda) * 1.36); font-weight: 800; color: var(--verde); line-height: 1; }
-  /* Descrizione breve = presentazione del corso: più grande e in evidenza.
-     La lunga (solo nel settore giovanile) resta testo normale, più chiaro */
-  .corso-sotto { font-size: var(--fs-testo); font-weight: 600; line-height: 1.4; color: var(--verde-scuro); }
-  .corso-desc { font-size: var(--fs-testo-secondario); line-height: 1.6; color: var(--ink-soft); }
+  /* Tre punti con la spunta: per chi è, cosa si fa, a cosa serve */
+  .punti { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .punti li { display: flex; gap: 10px; align-items: flex-start; color: var(--ink); font-size: var(--fs-testo-grande); line-height: 1.35; }
+  .punti svg { flex: none; width: 22px; height: 22px; padding: 3px; margin-top: 1px; border-radius: 50%; background: var(--tinta);
+    fill: none; stroke: var(--verde); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+  /* Orari in fondo, nello stesso ordine in ogni scheda: giorni, orario grande, poi
+     l'eventuale nota. Giorni e orario restano così alla stessa altezza tra i corsi;
+     dove la nota manca, lo spazio resta in fondo alla scheda e non in mezzo */
   .orari { margin: auto 0 0; padding-top: 8px; display: flex; flex-direction: column; gap: 8px; }
-  .orario { display: flex; align-items: baseline; justify-content: space-between; gap: 6px 14px; flex-wrap: wrap;
-    padding-top: 8px; border-top: 1px solid var(--line-soft); }
-  .orario dt { font-weight: 600; color: var(--ink); display: flex; flex-direction: column; }
-  .orario .nota { font-weight: 400; font-size: var(--fs-piccolo); color: var(--ink-faint); }
+  .orario { display: flex; flex-direction: column; gap: 6px; padding-top: 8px; border-top: 1px solid var(--line-soft); }
+  .orario dt { font-weight: 600; color: var(--ink); }
+  .orario .nota { margin: -2px 0 0; font-family: var(--font-body); font-weight: 400; font-size: var(--fs-piccolo); color: var(--ink-faint); white-space: normal; line-height: 1.5; min-height: 1.5em; }
   /* L'orario come nel volantino: grande, condensato, cifre allineate */
   .orario dd { margin: 0; font-family: var(--font-display); font-size: var(--fs-numero-piccolo); font-weight: 800; color: var(--verde); white-space: nowrap; }
-  .luogo { font-size: var(--fs-piccolo); color: var(--ink-faint); }
 </style>

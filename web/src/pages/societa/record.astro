@@ -36,6 +36,13 @@ const chi = (r: any) => r.atleta ?? (r.staffetta?.length ? r.staffetta.join(', '
 // La data esatta se c'è, altrimenti l'anno (molti record storici hanno solo quello)
 const quando = (r: any) => r.data ? new Date(r.data).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' }) : String(r.anno ?? '');
 const titoloTipo: Record<string, string> = { campione: 'I nostri campioni', azzurro: 'Maglie azzurre' };
+// Albo d'oro come linea del tempo: le voci (già in ordine dal più recente) divise per decennio
+const perDecennio = (voci: any[]) => {
+  const m = new Map<number, any[]>();
+  for (const v of voci) { const d = Math.floor(v.anno / 10) * 10; m.set(d, [...(m.get(d) ?? []), v]); }
+  return [...m.entries()].sort((a, b) => b[0] - a[0])
+    .map(([d, lista]) => ({ etichetta: d >= 2000 ? `Anni ${d}` : `Anni '${String(d).slice(-2)}`, lista }));
+};
 ---
 <Layout title="Record" description="Record sociali dell'Atletica Daini per categoria, campioni italiani e maglie azzurre.">
   <PageHero eyebrow="Albo della società" title="Record" lead="I migliori risultati di sempre ottenuti da atlete e atleti dei Daini." />
@@ -99,17 +106,23 @@ const titoloTipo: Record<string, string> = { campione: 'I nostri campioni', azzu
     <section class="section fascia-tenue">
       <div class="container">
         <div class="section-head" id={t.value}><span class="eyebrow">Albo d'oro</span><h2>{titoloTipo[t.value] ?? t.title}</h2></div>
-        <ul class="titoli">
-          {t.voci.map((v) => (
-            <li class="card">
-              <span class="t-anno tabnums">{v.anno}</span>
-              <strong class="t-atleta">{v.atleta}</strong>
-              {(v.risultato || v.gara) && <span class="t-risultato">{v.risultato}{v.risultato && v.gara && <span class="t-gara"> {v.gara}</span>}{!v.risultato && v.gara}</span>}
-              {v.manifestazione && <span class="t-dove">{v.manifestazione}</span>}
-              {v.nota && <span class="t-nota">{v.nota}</span>}
-            </li>
+        <div class="tempo">
+          {perDecennio(t.voci).map((d) => (
+            <div class="decennio">
+              <h3 class="dec-titolo">{d.etichetta}</h3>
+              <ol class="dec-lista">
+                {d.lista.map((v) => (
+                  <li>
+                    <span class="t-anno tabnums">{v.anno}</span>
+                    <strong class="t-atleta">{v.atleta}</strong>
+                    {(v.risultato || v.gara) && <span class="t-risultato">{v.risultato}{v.risultato && v.gara && ' '}{v.gara && <span class="t-gara">{v.gara}</span>}</span>}
+                    {(v.manifestazione || v.nota) && <span class="t-dove">{v.manifestazione}{v.nota && <span class="t-nota">{v.manifestazione && ' '}({v.nota})</span>}</span>}
+                  </li>
+                ))}
+              </ol>
+            </div>
           ))}
-        </ul>
+        </div>
       </div>
     </section>
   ))}
@@ -162,17 +175,31 @@ const titoloTipo: Record<string, string> = { campione: 'I nostri campioni', azzu
     .tabella-record .c-info:not(:empty) ~ .c-info:not(:empty)::before { content: ', '; }
     .solo-tel { display: inline; }
   }
-  .titoli { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
-  .titoli li { padding: 14px 18px; display: flex; flex-direction: column; gap: 2px; border-left: 5px solid var(--giallo); }
-  .t-anno { font-family: var(--font-display); font-size: var(--fs-numero-piccolo); font-weight: 800; color: var(--verde); line-height: 1; }
-  .titoli strong { color: var(--ink); font-size: var(--fs-testo); }
-  /* Una riga per informazione: risultato e gara, poi manifestazione e luogo */
-  .t-atleta { color: var(--ink); font-size: var(--fs-testo); }
-  .t-risultato { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .03em; font-weight: 800; color: var(--verde); font-size: var(--fs-etichetta); }
+  /* Albo d'oro: linea del tempo. Decennio a sinistra, una riga per risultato
+     lungo una linea gialla con un pallino per anno */
+  .tempo { display: grid; gap: 28px; }
+  .decennio { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 24px; }
+  .dec-titolo { font-family: var(--font-display); font-weight: 800; font-size: var(--fs-numero); color: var(--verde); line-height: 1; padding-top: 8px; }
+  .dec-lista { list-style: none; margin: 0; padding: 0 0 0 22px; border-left: 3px solid var(--giallo); }
+  .dec-lista li { position: relative; display: grid; grid-template-columns: 3.4rem minmax(0, 14rem) minmax(0, 1fr); column-gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .dec-lista li::before { content: ""; position: absolute; left: -30px; top: 17px; width: 13px; height: 13px; border-radius: 50%; background: var(--verde); border: 3px solid var(--surface); }
+  .t-anno { grid-row: 1 / 3; font-family: var(--font-display); font-weight: 800; font-size: var(--fs-testo-grande); color: var(--verde); }
+  .t-atleta { grid-row: 1 / 3; font-weight: 700; color: var(--ink); }
+  .t-risultato { grid-column: 3; font-family: var(--font-display); text-transform: uppercase; letter-spacing: .03em; font-weight: 800; color: var(--verde); font-size: var(--fs-etichetta); }
   /* Le unità restano minuscole (m, km): in maiuscolo "M" vorrebbe dire mega */
   .t-gara { color: var(--ink); text-transform: none; letter-spacing: 0; font-family: var(--font-body); font-weight: 700; }
-  .t-dove { color: var(--ink-soft); font-size: var(--fs-testo-secondario); }
-  .t-nota { color: var(--ink-faint); font-size: var(--fs-piccolo); }
+  .t-dove { grid-column: 3; color: var(--ink-soft); font-size: var(--fs-testo-secondario); }
+  .t-nota { color: var(--ink-faint); }
+  /* Telefono: decennio sopra, poi anno a sinistra e il resto impilato a destra */
+  @media (max-width: 639px) {
+    .decennio { grid-template-columns: 1fr; gap: 10px; }
+    .dec-titolo { font-size: var(--fs-numero-piccolo); padding-top: 0; }
+    .dec-lista { padding-left: 18px; }
+    .dec-lista li { grid-template-columns: 3rem minmax(0, 1fr); }
+    .dec-lista li::before { left: -26px; }
+    .t-atleta { grid-row: auto; grid-column: 2; }
+    .t-risultato, .t-dove { grid-column: 2; }
+  }
 </style>
 
 <script is:inline>

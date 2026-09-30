@@ -3,7 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import PageHero from '../components/PageHero.astro';
 import Mappa from '../components/Mappa.astro';
 import Indirizzo from '../components/Indirizzo.astro';
-import { sfetch, img, indicazioniUrl } from '../lib/sanity';
+import { sfetch, img, indicazioniLuogo } from '../lib/sanity';
 import { impiantiQuery, corsiQuery } from '../lib/queries';
 
 /**
@@ -20,7 +20,7 @@ const orariDi = (nome: string, primo: boolean) => corsi.filter((c) => c.orari?.l
 
   {impianti.length > 0 ? impianti.map((im, n) => {
     const foto = (im.foto ?? []).map((f: any) => ({ src: img(f, 900, 640), alt: f.alt ?? '' })).filter((f: any) => f.src);
-    const naviga = indicazioniUrl(im.indirizzo);
+    const naviga = indicazioniLuogo(im);
     const orari = orariDi(im.nome, n === 0);
     return (
       <section class="section">

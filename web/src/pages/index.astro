@@ -11,7 +11,7 @@ import RecordHome from '../components/RecordHome.astro';
 import Mappa from '../components/Mappa.astro';
 import Fascia5x1000 from '../components/Fascia5x1000.astro';
 import Indirizzo from '../components/Indirizzo.astro';
-import { sfetch, img, indicazioniUrl, testoSemplice } from '../lib/sanity';
+import { sfetch, img, indicazioniLuogo, testoSemplice } from '../lib/sanity';
 import {
   settingsQuery, iscrizioniQuery, corsiQuery, newsUltimeQuery, newsInEvidenzaQuery,
   recordQuery, titoliQuery, impiantiQuery, storiaQuery, albumListQuery, openDayQuery,
@@ -45,7 +45,7 @@ const notizie = ultime.filter((n) => n._id !== inEvidenza?._id).slice(0, 3);
 
 const impianto = impianti[0];
 const fotoImpianto = img(impianto?.foto?.[0], 900, 640);
-const naviga = indicazioniUrl(impianto?.indirizzo);
+const naviga = indicazioniLuogo(impianto);
 
 // Dalla storia solo l'inizio: il racconto completo sta nella sua pagina
 const introStoria = storia?.introduzione ? testoSemplice(storia.introduzione) : '';

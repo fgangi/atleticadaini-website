@@ -4,7 +4,7 @@ import PageHero from '../components/PageHero.astro';
 import SchedaCorso from '../components/SchedaCorso.astro';
 import Indirizzo from '../components/Indirizzo.astro';
 import Mappa from '../components/Mappa.astro';
-import { sfetch, img, whatsappHref, formatTel, indicazioniUrl, FUSO } from '../lib/sanity';
+import { sfetch, img, whatsappHref, formatTel, indicazioniLuogo, FUSO } from '../lib/sanity';
 import { openDayQuery, settingsQuery, corsiQuery, impiantiQuery } from '../lib/queries';
 
 /**
@@ -33,9 +33,9 @@ const oggi = new Date().toLocaleDateString('sv-SE', { timeZone: FUSO });
 const date = (od.date ?? []).filter((d: any) => d?.giorno && d.giorno >= oggi)
   .sort((a: any, b: any) => a.giorno.localeCompare(b.giorno));
 const giornoLungo = (g: string) => new Date(`${g}T12:00:00`).toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', timeZone: FUSO });
-// Tutti i corsi: si può provare anche da adulti, nel gruppo agonistico
+// Tutti i corsi, compreso il gruppo agonistico (Allievi e oltre)
 const campo = impianti[0];
-const naviga = indicazioniUrl(campo?.indirizzo);
+const naviga = indicazioniLuogo(campo);
 const foto = img(od.immagine, 1200, 630);
 const documenti = (od.documenti ?? []).filter((d: any) => d?.url);
 
@@ -100,7 +100,7 @@ const rispostaConLink = (f: any): { testo: string; link?: string }[] => {
       <div class="section-head"><span class="eyebrow">Come funziona</span><h2>Tre passi</h2></div>
       <ol class="passi">
         <li><span class="p-n">1</span><h3>Scrivici</h3><p>Su WhatsApp, dicendoci l'età di chi vuole provare, tua o di tuo figlio: ti diciamo quale corso e quale giorno.</p></li>
-        <li><span class="p-n">2</span><h3>Vieni al campo</h3><p>{campo ? <>Al {campo.nome}{campo.ingresso ? <>. <strong>{campo.ingresso}</strong>.</> : '.'}</> : 'Al campo di allenamento.'}</p></li>
+        <li><span class="p-n">2</span><h3>Vieni al campo</h3><p>{campo ? <>{campo.nome}{campo.ingresso ? <>. <strong>{campo.ingresso}</strong>.</> : '.'}</> : 'Al campo di allenamento.'}</p></li>
         <li><span class="p-n">3</span><h3>Prova con gli istruttori</h3><p>Un allenamento vero, insieme al gruppo della propria età. Poi, se piace, ti spieghiamo come iscriversi.</p></li>
       </ol>
     </div>

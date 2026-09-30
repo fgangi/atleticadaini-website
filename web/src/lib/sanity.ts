@@ -100,6 +100,18 @@ export function indicazioniUrl(destinazione?: string | null): string | null {
 }
 
 /**
+ * Indicazioni verso un impianto: stessa ricerca della mappa ("Stadio XXV Aprile,
+ * Carate Brianza MB"), così Google porta alla scheda dello stadio e non a un punto
+ * qualsiasi della via. Con nome + via + CAP Google invece non trova niente.
+ * Se nella mappa c'è un codice incollato da Google si usa l'indirizzo.
+ */
+export function indicazioniLuogo(luogo?: { nome?: string | null; indirizzo?: string | null; mappa?: string | null } | null): string | null {
+  const ricerca = luogo?.mappa?.trim();
+  if (ricerca && !/^(https?:|<)/i.test(ricerca)) return indicazioniUrl(ricerca);
+  return indicazioniUrl(luogo?.indirizzo);
+}
+
+/**
  * Foto già ritagliata sul server nella forma del riquadro, centrata sul punto
  * importante scelto nel pannello (senza punto, sulla parte con più dettagli).
  * Restituisce src e srcset: il browser scarica solo la misura che gli serve.

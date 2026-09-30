@@ -12,8 +12,14 @@ export const corso = defineType({
   fields: [
     defineField({ name: 'nome', title: 'Nome', type: 'string', description: 'Es. "Esordienti".', validation: (r) => r.required() }),
     defineField({ name: 'eta', title: 'Età', type: 'string', description: 'Es. "4–11 anni" o "nati 2015–2020".' }),
-    defineField({ name: 'sottotitolo', title: 'In breve', type: 'string', description: 'Es. "Avviamento allo sport attraverso il gioco".' }),
-    defineField({ name: 'descrizione', title: 'Descrizione', type: 'text', rows: 5 }),
+    // Tre righe brevi al posto di un paragrafo: per chi è, cosa si fa, a cosa serve.
+    // Si leggono al volo e chi aggiorna il pannello non può allungarle troppo
+    defineField({ name: 'punti', title: 'Tre punti', type: 'array', of: [{ type: 'string' }],
+      description: 'Nell\'ordine: per chi è (es. "Dalle medie al primo anno delle superiori"), cosa si fa (es. "Giochi di corsa, salti e lanci"), a cosa serve (es. "Per scoprire la specialità più adatta"). Frasi brevi.',
+      validation: (r) => r.max(4).warning('Meglio tre punti: di più non si leggono al volo.') }),
+    // Testi di prima, non più mostrati sul sito: nascosti ma conservati
+    defineField({ name: 'sottotitolo', title: 'In breve (non più usato)', type: 'string', hidden: true }),
+    defineField({ name: 'descrizione', title: 'Descrizione (non più usata)', type: 'text', rows: 5, hidden: true }),
     defineField({
       name: 'orari',
       title: 'Giorni e orari',

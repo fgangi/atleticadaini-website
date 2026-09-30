@@ -5,7 +5,7 @@ import Indirizzo from '../components/Indirizzo.astro';
 import SocialIcons from '../components/SocialIcons.astro';
 import IconaWhatsApp from '../components/IconaWhatsApp.astro';
 import Mappa from '../components/Mappa.astro';
-import { sfetch, telHref, formatTel, indicazioniUrl, whatsappHref, nomeRuolo } from '../lib/sanity';
+import { sfetch, telHref, formatTel, indicazioniLuogo, whatsappHref, nomeRuolo } from '../lib/sanity';
 import { settingsQuery, impiantiQuery } from '../lib/queries';
 
 /**
@@ -75,8 +75,8 @@ const dati = [
                 <dt>Campo di allenamento</dt>
                 <dd><strong>{campo.nome}</strong>{campo.indirizzo && <><br /><Indirizzo testo={campo.indirizzo} /></>}</dd>
                 {campo.ingresso && <dd class="ingresso"><strong>{campo.ingresso}</strong></dd>}
-                {indicazioniUrl(campo.indirizzo) && (
-                  <dd class="link-luogo"><a class="btn primary" href={indicazioniUrl(campo.indirizzo)} target="_blank" rel="noopener">Indicazioni stradali</a></dd>
+                {indicazioniLuogo(campo) && (
+                  <dd class="link-luogo"><a class="btn primary" href={indicazioniLuogo(campo)} target="_blank" rel="noopener">Indicazioni stradali</a></dd>
                 )}
               </div>
             )}
