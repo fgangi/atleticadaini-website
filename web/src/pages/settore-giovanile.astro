@@ -127,7 +127,8 @@ const documenti = (i?.documenti ?? []).filter((d: any) => d?.url);
         {i?.requisiti?.length > 0 && (
           <>
             <h3 class="sotto">Cosa serve</h3>
-            <ol class="requisiti">{i.requisiti.map((r: string) => <li>{r}</li>)}</ol>
+            {/* Le parole fra asterischi vanno in grassetto, come su WhatsApp */}
+            <ol class="requisiti">{i.requisiti.map((r: string) => <li>{r.split(/\*([^*]+)\*/).map((x, k) => k % 2 ? <strong>{x}</strong> : x)}</li>)}</ol>
           </>
         )}
         {i?.linkModulo && aperte && <a class="btn cta grande" href={i.linkModulo} target="_blank" rel="noopener">Compila l'iscrizione online</a>}
@@ -225,6 +226,7 @@ const documenti = (i?.documenti ?? []).filter((d: any) => d?.url);
   .prova strong { color: var(--verde); }
   .sotto { margin-top: 8px; }
   .requisiti { margin: 0; padding-left: 1.3rem; display: flex; flex-direction: column; gap: 6px; color: var(--ink-soft); }
+  .requisiti strong { color: var(--ink); font-weight: 700; }
   .btn.grande { min-height: 52px; font-size: var(--fs-pulsante-grande); margin-top: 6px; }
 
   .iscr-lato { display: flex; flex-direction: column; gap: 16px; }

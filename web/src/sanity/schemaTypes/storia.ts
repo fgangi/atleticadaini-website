@@ -1,4 +1,5 @@
 import { defineType, defineField } from 'sanity';
+import { foto } from './foto';
 
 /** Storia della società: un solo documento, raccontato per periodi. */
 export const storia = defineType({
@@ -8,6 +9,9 @@ export const storia = defineType({
   fields: [
     defineField({ name: 'introduzione', title: 'Introduzione', type: 'blockContent',
       description: 'Il racconto della fondazione. In home ne compare l\'inizio.' }),
+    defineField({ name: 'fotoSquadra', title: 'Foto di squadra', ...foto('paginaFoto', { fields: [
+      { name: 'alt', type: 'string', title: 'Cosa mostra la foto (per chi non vede)' },
+    ] }), description: 'Sfondo dell\'intestazione di Chi siamo. Orizzontale, con la squadra nella parte bassa: in alto va il titolo.' }),
     defineField({
       name: 'capitoli',
       title: 'Periodi',

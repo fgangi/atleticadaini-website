@@ -75,7 +75,7 @@ export const iscrizioni = defineType({
       description: 'Bonifico, causale, ricevuta per la detrazione. L\'IBAN va qui solo se la società vuole pubblicarlo.' }),
 
     defineField({ name: 'requisiti', title: 'Cosa serve per iscriversi', type: 'array', group: 'documenti',
-      of: [{ type: 'string' }], description: 'Un requisito per riga, es. "Certificato medico agonistico (da Ragazzi in poi)".' }),
+      of: [{ type: 'string' }], description: 'Un requisito per riga. Per il grassetto, parole fra asterischi come su WhatsApp: "*Certificato medico agonistico* (da Ragazzi in poi)".' }),
     defineField({ name: 'documenti', title: 'Moduli da scaricare', type: 'array', group: 'documenti',
       of: [{ type: 'reference', to: [{ type: 'documento' }] }] }),
   ],

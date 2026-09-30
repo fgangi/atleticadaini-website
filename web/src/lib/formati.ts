@@ -10,6 +10,9 @@ export type Formato = { nome: string; ratio: number; velo?: 'sinistra' | 'pieno'
 // adatta il browser), su tablet circa 1,1, su telefono circa 0,55
 export const APERTURA = { pc: 2, tablet: 1.1, telefono: 0.55 };
 
+// Foto di sfondo dell'intestazione di pagina (Chi siamo): larga su PC, quasi quadrata su tablet e telefono
+export const PAGINA_FOTO = { pc: 2.4, telefono: 1 };
+
 export const FORMATI: Record<string, Formato[]> = {
   apertura: [
     { nome: 'Su PC', ratio: APERTURA.pc, velo: 'sinistra' },
@@ -25,6 +28,10 @@ export const FORMATI: Record<string, Formato[]> = {
   corso: [{ nome: 'Scheda del corso', ratio: 16 / 10 }],
   impianto: [{ nome: 'Foto dell\'impianto', ratio: 4 / 3 }],
   collaborazione: [{ nome: 'Scheda della convenzione', ratio: 1 }],
+  paginaFoto: [
+    { nome: 'Su PC', ratio: PAGINA_FOTO.pc, velo: 'sinistra' },
+    { nome: 'Su tablet e telefono', ratio: PAGINA_FOTO.telefono, velo: 'pieno' },
+  ],
   condivisione: [{ nome: 'Link condiviso su WhatsApp e social', ratio: 1200 / 630 }],
 };
 

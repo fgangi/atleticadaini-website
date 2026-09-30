@@ -32,7 +32,7 @@ export const impiantiQuery = groq`*[_type == "impianto"] | order(ordine asc, nom
 }`;
 
 export const storiaQuery = groq`*[_id == "storia"][0]{
-  introduzione, riconoscimenti,
+  introduzione, riconoscimenti, fotoSquadra,
   capitoli[]{ _key, periodo, titolo, testo, immagine, "album": album->{ titolo, "slug": slug.current } }
 }`;
 

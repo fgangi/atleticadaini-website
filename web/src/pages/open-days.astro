@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import PageHero from '../components/PageHero.astro';
 import SchedaCorso from '../components/SchedaCorso.astro';
 import Indirizzo from '../components/Indirizzo.astro';
+import Mappa from '../components/Mappa.astro';
 import { sfetch, img, whatsappHref, formatTel, indicazioniUrl, FUSO } from '../lib/sanity';
 import { openDayQuery, settingsQuery, corsiQuery, impiantiQuery } from '../lib/queries';
 
@@ -140,15 +141,16 @@ const rispostaConLink = (f: any): { testo: string; link?: string }[] => {
         </div>
       )}
       {campo && (
-        <div class="card blocco">
+        <div class="card blocco dove-siamo">
           <h2 class="blocco-titolo">Dove siamo</h2>
-          <p class="dove-nome">{campo.nome}</p>
-          {campo.indirizzo && <p><Indirizzo testo={campo.indirizzo} /></p>}
+          {/* Come in Contatti: nome in grassetto e indirizzo sotto, compatti */}
+          <p class="dove-luogo"><strong>{campo.nome}</strong>{campo.indirizzo && <><br /><Indirizzo testo={campo.indirizzo} /></>}</p>
           {campo.ingresso && <p class="ingresso"><strong>{campo.ingresso}</strong></p>}
-          <div class="azioni">
-            {naviga && <a class="btn primary" href={naviga} target="_blank" rel="noopener">Indicazioni stradali</a>}
-            <a class="btn" href="/impianto/">L'impianto</a>
-          </div>
+          {naviga && <div class="azioni"><a class="btn primary" href={naviga} target="_blank" rel="noopener">Indicazioni stradali</a></div>}
+          {/* Mappa del campo, come in Contatti: riempie il riquadro fino a pareggiare "Cosa portare" */}
+          {(campo.mappa || campo.indirizzo) && (
+            <div class="dove-mappa"><Mappa posizione={campo.mappa} indirizzo={campo.indirizzo} titolo={campo.nome} /></div>
+          )}
         </div>
       )}
     </div>
@@ -200,13 +202,18 @@ const rispostaConLink = (f: any): { testo: string; link?: string }[] => {
   .info { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(14px, 2.4vw, 22px); align-items: start; }
   @media (max-width: 1023px) { .info { grid-template-columns: minmax(0, 1fr); } }
   .blocco { padding: clamp(20px, 3vw, 30px); display: flex; flex-direction: column; gap: 10px; }
+  /* Riquadri affiancati alti uguali; in "Dove siamo" la mappa prende lo spazio che resta */
+  .info > .blocco { align-self: stretch; }
+  .dove-mappa { flex: 1; display: flex; margin-top: 10px; min-height: 220px; }
+  .dove-mappa :global(.mappa) { flex: 1; min-height: 0; }
+  @media (min-width: 1024px) { .dove-mappa { min-height: 100px; } }
+  .dove-luogo { color: var(--ink); }
   .blocco-titolo { font-size: var(--fs-titolo-blocco); margin-bottom: 6px; }
   .portare-titolo { font-size: var(--fs-etichetta); margin-top: 8px; color: var(--verde); }
   .portare { margin: 0; padding-left: 1.2rem; display: flex; flex-direction: column; gap: 6px; color: var(--ink-soft); }
   .documenti { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
   .documenti a { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; font-weight: 600; }
   .doc-ico { flex: none; width: 40px; height: 40px; border-radius: 8px; background: var(--verde); color: var(--giallo-chiaro); display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; font-size: .9rem; }
-  .dove-nome { font-family: var(--font-display); text-transform: uppercase; font-size: calc(var(--fs-titolo-scheda) * 1.12); font-weight: 800; color: var(--verde); }
   .ingresso { padding: 8px 12px; border-left: 4px solid var(--giallo); background: var(--tinta); color: var(--verde-scuro); }
   .blocco .azioni { margin-top: 6px; }
 
