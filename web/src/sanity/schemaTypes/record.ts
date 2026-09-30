@@ -23,7 +23,7 @@ export const record = defineType({
   title: 'Record sociale',
   type: 'document',
   fields: [
-    defineField({ name: 'specialita', title: 'Specialità', type: 'string', description: 'Es. "200 m", "Salto in alto", "4×100".', validation: (r) => r.required() }),
+    defineField({ name: 'specialita', title: 'Specialità', type: 'string', description: 'Es. "200m", "Salto in alto", "Staffetta 4x100m". Distanze scritte attaccate: 400m, 10km.', validation: (r) => r.required() }),
     defineField({ name: 'categoria', title: 'Categoria', type: 'string', options: { list: CATEGORIE_RECORD }, initialValue: 'assoluti', validation: (r) => r.required() }),
     defineField({ name: 'sesso', title: 'Sesso', type: 'string', options: { list: [{ title: 'Maschile', value: 'M' }, { title: 'Femminile', value: 'F' }], layout: 'radio' }, validation: (r) => r.required() }),
     defineField({ name: 'sezione', title: 'Sezione', type: 'string', options: { list: SEZIONI_RECORD, layout: 'radio' }, initialValue: 'aperto', validation: (r) => r.required() }),

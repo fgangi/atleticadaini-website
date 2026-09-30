@@ -13,6 +13,8 @@ import Contatore from './Contatore.astro';
 interface Props { record: any[]; titoli: any[] }
 const { record, titoli } = Astro.props;
 const annoCorrente = new Date().getFullYear();
+// Nelle specialità in maiuscolo l'unità resta minuscola: "200M" si leggerebbe mega
+const parti = (s: string) => String(s ?? '').split(/(?<=\d)(k?m)\b/);
 const chi = (r: any) => r.atleta ?? (r.staffetta?.length ? r.staffetta.join(', ') : 'Staffetta');
 
 const nRecord = record.length;
@@ -48,7 +50,7 @@ const primati = [piuRecente, piuLongevo, ...inEvidenza]
         {primati.map((r: any) => (
           <article class:list={['pr-scheda', { nuovo: r.anno === annoCorrente }]}>
             <span class="pr-etichetta">{r.etichetta}</span>
-            <span class="pr-spec">{r.specialita}<span class="pr-genere">{r.genere}</span></span>
+            <span class="pr-spec"><span>{parti(r.specialita).map((x, i) => i % 2 ? <span class="unita">{x}</span> : x)}</span><span class="pr-genere">{r.genere}</span></span>
             <span class="pr-prest tabnums">{r.prestazione}</span>
             <p class="pr-chi">{chi(r)}</p>
             <p class="pr-quando">{r.luogo ? `${r.luogo}, ${r.anno}` : r.anno}</p>
@@ -82,6 +84,7 @@ const primati = [piuRecente, piuLongevo, ...inEvidenza]
   .pr-scheda.nuovo { background: var(--giallo-chiaro); }
   .pr-scheda.nuovo .pr-etichetta { background: var(--giallo); color: var(--verde-scuro); }
   .pr-spec { margin-top: 8px; font-family: var(--font-display); text-transform: uppercase; font-weight: 800; font-size: var(--fs-titolo-scheda); line-height: 1.1; color: var(--verde); display: flex; flex-direction: column; }
+  .pr-spec .unita { text-transform: none; }
   .pr-genere { font-size: var(--fs-mini); font-weight: 700; letter-spacing: .1em; color: var(--grigio-verde); }
   .pr-prest { font-family: var(--font-display); font-weight: 800; font-size: clamp(calc(var(--fs-numero) * 1.15), 3.6vw, calc(var(--fs-numero) * 1.4)); line-height: 1; color: var(--ink); margin-top: 4px; }
   .pr-chi { color: var(--ink); font-weight: 600; margin-top: auto; padding-top: 8px; }
