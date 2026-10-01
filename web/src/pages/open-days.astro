@@ -1,11 +1,13 @@
 ---
+import IconaWhatsApp from '../components/IconaWhatsApp.astro';
+import Icona from '../components/Icona.astro';
 import Layout from '../layouts/Layout.astro';
 import PageHero from '../components/PageHero.astro';
 import SchedaCorso from '../components/SchedaCorso.astro';
 import Indirizzo from '../components/Indirizzo.astro';
 import Mappa from '../components/Mappa.astro';
-import { sfetch, img, whatsappHref, formatTel, indicazioniLuogo, FUSO } from '../lib/sanity';
-import { openDayQuery, settingsQuery, corsiQuery, impiantiQuery } from '../lib/queries';
+import { sfetch, img, whatsappHref, formatTel, telHref, indicazioniLuogo, FUSO } from '../lib/sanity';
+import { openDayQuery, settingsQuery, corsiQuery, impiantiQuery, intestazioniQuery } from '../lib/queries';
 
 /**
  * Open days e lezioni di prova: la pagina che promuove i corsi, pensata anche
@@ -20,6 +22,8 @@ const [od, s, corsi, impianti] = await Promise.all([
   sfetch<any[]>(corsiQuery, {}, []),
   sfetch<any[]>(impiantiQuery, {}, []),
 ]);
+// Foto dietro al titolo, scelta nel pannello (Impostazioni → Foto delle intestazioni)
+const fotoTesta = (await sfetch<any>(intestazioniQuery, {}, null))?.openDays;
 if (od?.attivo !== true) return Astro.redirect('/settore-giovanile/');
 
 const numero = od.whatsapp || s?.telefoni?.[0]?.numero;
@@ -61,15 +65,16 @@ const rispostaConLink = (f: any): { testo: string; link?: string }[] => {
 ---
 <Layout title={od.occhiello || 'Open days'} description={od.testo ?? 'Vieni a provare l\'atletica con i Daini a Carate Brianza: corsi per ragazze e ragazzi dai 4 anni.'} immagine={foto}>
   {eventi && <script type="application/ld+json" set:html={eventi} slot="head" />}
-  <PageHero eyebrow={od.occhiello || 'Open days'} title={od.titolo || "Vieni a provare l'atletica"} lead={od.testo}>
+  <PageHero foto={fotoTesta} eyebrow={od.occhiello || 'Open days'} title={od.titolo || "Vieni a provare l'atletica"} lead={od.testo}>
     <p class="hero-sempre" data-sempre hidden={date.length > 0}>
       {od.tuttoAnno || "Si può venire a provare in ogni periodo dell'anno, a qualsiasi età: scrivici e ti diciamo il corso e il giorno giusto."}
     </p>
     <div class="azioni hero-azioni">
-      {prenota && <a class="btn cta grande" href={prenota} target="_blank" rel="noopener">Prenota su WhatsApp</a>}
-      <a class="btn chiaro grande" href="#corsi">Corsi e orari</a>
+      {prenota && <a class="btn cta grande" href={prenota} target="_blank" rel="noopener"><IconaWhatsApp /> Prenota su WhatsApp</a>}
+      <a class="btn chiaro grande vai" href="#corsi">Corsi e orari</a>
     </div>
-    {numero && <p class="hero-ref">{referente ? `Ti risponde ${referente} al` : 'Scrivici su WhatsApp al'} <span class="tabnums">{formatTel(numero)}</span></p>}
+    {/* Sotto il pulsante WhatsApp un'alternativa, non lo stesso invito ripetuto: chi preferisce telefonare */}
+    {numero && <p class="hero-ref">{referente ? `Ti risponde ${referente}. ` : ''}Preferisci chiamare? <a href={telHref(numero)} class="tabnums">{formatTel(numero)}</a></p>}
   </PageHero>
 
   {/* Date: la sezione esiste solo se ci sono giorni in programma. Senza date
@@ -86,7 +91,7 @@ const rispostaConLink = (f: any): { testo: string; link?: string }[] => {
               {d.orario && <span class="d-orario tabnums">{d.orario}</span>}
               {d.perChi && <p class="d-chi">{d.perChi}</p>}
               {d.nota && <p class="d-nota">{d.nota}</p>}
-              {numero && <a class="btn primary" href={whatsappHref(numero, `${messaggio} Vorrei venire ${giornoLungo(d.giorno)}.`)} target="_blank" rel="noopener">Prenota questa data</a>}
+              {numero && <a class="btn primary" href={whatsappHref(numero, `${messaggio} Vorrei venire ${giornoLungo(d.giorno)}.`)} target="_blank" rel="noopener"><IconaWhatsApp /> Prenota questa data</a>}
             </li>
           ))}
         </ul>
@@ -99,9 +104,9 @@ const rispostaConLink = (f: any): { testo: string; link?: string }[] => {
     <div class="container">
       <div class="section-head"><span class="eyebrow">Come funziona</span><h2>Tre passi</h2></div>
       <ol class="passi">
-        <li><span class="p-n">1</span><h3>Scrivici</h3><p>Su WhatsApp, dicendoci l'età di chi vuole provare, tua o di tuo figlio: ti diciamo quale corso e quale giorno.</p></li>
-        <li><span class="p-n">2</span><h3>Vieni al campo</h3><p>{campo ? <>{campo.nome}{campo.ingresso ? <>. <strong>{campo.ingresso}</strong>.</> : '.'}</> : 'Al campo di allenamento.'}</p></li>
-        <li><span class="p-n">3</span><h3>Prova con gli istruttori</h3><p>Un allenamento vero, insieme al gruppo della propria età. Poi, se piace, ti spieghiamo come iscriversi.</p></li>
+        <li><span class="p-n">1</span><h3>Scrivici</h3><p>Su WhatsApp, dicci l'età di chi vuole provare: ti consigliamo il corso e il giorno giusti.</p></li>
+        <li><span class="p-n">2</span><h3>Vieni al campo</h3><p>{campo ? <>Ci alleniamo allo {campo.nome}, a Carate Brianza.{campo.ingresso && <> <strong>{campo.ingresso}</strong>.</>}</> : 'Al campo di allenamento.'}</p></li>
+        <li><span class="p-n">3</span><h3>Prova gratis</h3><p>Un vero allenamento con gli istruttori, insieme al gruppo della stessa età. Alla fine ti spieghiamo come fare l'iscrizione.</p></li>
       </ol>
     </div>
   </section>
@@ -111,7 +116,7 @@ const rispostaConLink = (f: any): { testo: string; link?: string }[] => {
       <div class="container">
         <div class="section-head between" id="corsi">
           <div><span class="eyebrow">Per età</span><h2>Corsi e orari</h2></div>
-          <a class="btn" href="/settore-giovanile/#quote">Quote e iscrizioni</a>
+          <a class="btn vai" href="/settore-giovanile/#quote">Quote e iscrizioni</a>
         </div>
         <div class:list={['grid', corsi.length >= 3 ? 'cols-3' : 'cols-2']}>{corsi.map((c) => <SchedaCorso c={c} />)}</div>
       </div>
@@ -146,7 +151,7 @@ const rispostaConLink = (f: any): { testo: string; link?: string }[] => {
           {/* Come in Contatti: nome in grassetto e indirizzo sotto, compatti */}
           <p class="dove-luogo"><strong>{campo.nome}</strong>{campo.indirizzo && <><br /><Indirizzo testo={campo.indirizzo} /></>}</p>
           {campo.ingresso && <p class="ingresso"><strong>{campo.ingresso}</strong></p>}
-          {naviga && <div class="azioni"><a class="btn primary" href={naviga} target="_blank" rel="noopener">Indicazioni stradali</a></div>}
+          {naviga && <div class="azioni"><a class="btn primary" href={naviga} target="_blank" rel="noopener"><Icona nome="mappa" /> Indicazioni stradali</a></div>}
           {/* Mappa del campo, come in Contatti: riempie il riquadro fino a pareggiare "Cosa portare" */}
           {(campo.mappa || campo.indirizzo) && (
             <div class="dove-mappa"><Mappa posizione={campo.mappa} indirizzo={campo.indirizzo} titolo={campo.nome} /></div>
@@ -173,7 +178,7 @@ const rispostaConLink = (f: any): { testo: string; link?: string }[] => {
     <section class="section chiusura sfondo-scuro">
       <div class="container">
         <h2>Ti aspettiamo in pista</h2>
-        <a class="btn cta grande" href={prenota} target="_blank" rel="noopener">Prenota su WhatsApp</a>
+        <a class="btn cta grande" href={prenota} target="_blank" rel="noopener"><IconaWhatsApp /> Prenota su WhatsApp</a>
       </div>
     </section>
   )}
@@ -184,6 +189,7 @@ const rispostaConLink = (f: any): { testo: string; link?: string }[] => {
   .hero-sempre { margin-top: 14px; max-width: 60ch; color: #fff; font-weight: 600; padding-left: 14px; border-left: 4px solid var(--giallo); }
   .btn.grande { min-height: 52px; padding: 0 1.5rem; font-size: var(--fs-pulsante-grande); }
   .hero-ref { margin-top: 12px; color: #E3EAE1; }
+  .hero-ref a { color: #fff; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
 
   .date { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
   .data { padding: 18px 20px; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; border-top: 5px solid var(--giallo); }

@@ -1,4 +1,6 @@
 ---
+import Icona from './Icona.astro';
+import Passi5x1000 from './Passi5x1000.astro';
 /**
  * Promemoria piccolo del 5×1000 nella striscia in alto, a sinistra dei social.
  * Toccandolo si apre un riquadro con il codice fiscale e il pulsante "Copia":
@@ -12,10 +14,11 @@ const { cf, testo } = Astro.props;
   <summary><span class="cm-pill">Dona il 5×1000</span></summary>
   <div class="cm-pannello" data-copia-box>
     <p class="cm-tit">Il tuo 5×1000 ai Daini</p>
-    <p class="cm-testo">{testo || 'Nella dichiarazione dei redditi, firma nel riquadro delle associazioni sportive dilettantistiche e scrivi il nostro codice fiscale. A te non costa nulla.'}</p>
+    {/* I passi al posto del testo del pannello: qui serve sapere dove scrivere il codice */}
+    <Passi5x1000 piccolo />
     <span class="cm-etichetta">Codice fiscale</span>
     <span class="cm-codice tabnums">{cf}</span>
-    <button type="button" class="btn cta cm-copia" data-copia={cf}><span data-copia-etichetta>Copia il codice</span></button>
+    <button type="button" class="btn cta cm-copia" data-copia={cf}><Icona nome="copia" /><span data-copia-etichetta>Copia il codice</span></button>
     <span class="sr-only" data-copia-esito role="status" aria-live="polite"></span>
   </div>
 </details>

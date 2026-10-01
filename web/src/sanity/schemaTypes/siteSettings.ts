@@ -13,8 +13,21 @@ export const siteSettings = defineType({
     { name: 'home', title: 'Home' },
     { name: 'team', title: 'Team' },
     { name: 'legale', title: 'Pagine legali' },
+    { name: 'intestazioni', title: 'Foto delle intestazioni' },
   ],
   fields: [
+    // Foto dietro al titolo delle pagine interne, come in Chi siamo (che la prende dalla Storia).
+    // Meglio foto di gruppo o scattate da lontano: niente primi piani di minori
+    defineField({
+      name: 'intestazioni', title: 'Foto delle intestazioni', type: 'object', group: 'intestazioni',
+      description: 'Foto dietro al titolo di alcune pagine. Orizzontali e grandi (almeno 2000 px), meglio di gruppo o da lontano. Se manca, resta la fascia verde.',
+      fields: ([
+        ['settoreGiovanile', 'Settore giovanile'], ['openDays', 'Open days'], ['record', 'Record'], ['storia', 'Storia'],
+        ['team', 'Team'], ['impianto', 'Impianto'], ['contatti', 'Contatti'],
+      ] as const).map(([name, title]) => ({ name, title, ...foto('paginaFoto', { fields: [
+        { name: 'alt', type: 'string', title: 'Cosa mostra la foto (per chi non vede)' },
+      ] }) })),
+    }),
     defineField({ name: 'nome', title: 'Nome breve', type: 'string', group: 'societa',
       description: 'Quello che compare nei titoli delle pagine, es. "Atletica Daini".',
       validation: (r) => r.required() }),

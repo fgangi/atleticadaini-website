@@ -266,6 +266,8 @@ a.card:active { transform: scale(.985); }
 
 /* Pulsanti che aprono un altro sito (mappe, siti, social): freccetta dopo il
    testo, come a Corigliano Volley. Non su quelli che hanno già un'icona (WhatsApp) */
+/* Pulsanti che portano a un'altra pagina del sito ("vai"): stessa freccia dei link esterni */
+.btn.vai::after,
 .btn[target="_blank"]:not(:has(svg))::after {
   content: ''; flex: none; width: 15px; height: 15px; background: currentColor;
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='5' y1='12' x2='19' y2='12'/%3E%3Cpolyline points='12 5 19 12 12 19'/%3E%3C/svg%3E") center / contain no-repeat;

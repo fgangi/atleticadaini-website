@@ -4,24 +4,31 @@ import { PAGINA_FOTO } from '../lib/formati';
 
 /**
  * Intestazione delle pagine interne: fascia verde con il motivo delle corsie.
- * Con `foto` la foto fa da sfondo alla fascia, sotto un velo verde.
+ * Con `foto` la foto fa da sfondo alla fascia, sotto un velo verde. La foto è
+ * ritagliata sul server nella forma della fascia di ogni schermo, centrata sul
+ * punto scelto nel pannello: così le teste restano dentro.
  */
 interface Props { eyebrow?: string; title: string; lead?: string | null; foto?: any; }
 const { eyebrow, title, lead, foto } = Astro.props;
 const pc = ritaglio(foto, PAGINA_FOTO.pc, [1280, 1600, 2000, 2400]);
-const piccola = ritaglio(foto, PAGINA_FOTO.telefono, [640, 960, 1280]);
+const pcPiccolo = ritaglio(foto, PAGINA_FOTO.pcPiccolo, [1024, 1280, 1600]);
+const tablet = ritaglio(foto, PAGINA_FOTO.tablet, [768, 1024, 1536]);
+const telefono = ritaglio(foto, PAGINA_FOTO.telefono, [480, 800, 1200]);
+const conFoto = pc && pcPiccolo && tablet && telefono;
 ---
-<section class:list={['page-hero sfondo-scuro', { 'con-foto': pc && piccola }]}>
+<section class:list={['page-hero sfondo-scuro', { 'con-foto': conFoto }]}>
   <div class="container">
     {eyebrow && <span class="eyebrow">{eyebrow}</span>}
     <h1>{title}</h1>
     {lead && <p class="lead">{lead}</p>}
     <slot />
   </div>
-  {pc && piccola && (
+  {conFoto && (
     <picture class="ph-foto">
-      <source media="(min-width: 1024px)" srcset={pc.srcset} sizes="100vw" />
-      <img src={piccola.src} srcset={piccola.srcset} sizes="100vw" alt={foto.alt ?? ''} fetchpriority="high" />
+      <source media="(min-width: 1280px)" srcset={pc.srcset} sizes="100vw" />
+      <source media="(min-width: 1024px)" srcset={pcPiccolo.srcset} sizes="100vw" />
+      <source media="(min-width: 640px)" srcset={tablet.srcset} sizes="100vw" />
+      <img src={telefono.src} srcset={telefono.srcset} sizes="100vw" alt={foto.alt ?? ''} fetchpriority="high" />
     </picture>
   )}
 </section>
@@ -34,16 +41,19 @@ const piccola = ritaglio(foto, PAGINA_FOTO.telefono, [640, 960, 1280]);
   .page-hero .lead { max-width: 60ch; margin: 12px 0 0; color: #E3EAE1; }
 
   /* La foto riempie la fascia dietro al testo; il velo verde tiene leggibili le scritte:
-     su PC più scuro a sinistra (dove sta il testo), su tablet e telefono uniforme */
-  .con-foto { position: relative; isolation: isolate; overflow: hidden; display: flex; align-items: center;
-    min-height: min(calc(100vw * 1.25), 620px); }
+     su PC più scuro a sinistra (dove sta il testo), su tablet e telefono uniforme.
+     Altezza "media": poco più della fascia senza foto, per non spingere giù il contenuto */
+  .con-foto { position: relative; isolation: isolate; overflow: hidden; display: flex; align-items: center; min-height: 340px; }
   .ph-foto { position: absolute; inset: 0; z-index: -1; }
-  .ph-foto img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 75%; display: block; }
+  .ph-foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .ph-foto::after { content: ""; position: absolute; inset: 0; background: rgba(16, 55, 38, .68); }
   .con-foto .container { width: 100%; }
-  @media (min-width: 640px) { .con-foto { min-height: min(calc(100vw / 1.6), 560px); } }
+  @media (min-width: 640px) { .con-foto { min-height: 360px; } }
   @media (min-width: 1024px) {
-    .con-foto { min-height: min(calc(100vw / 2.4), 680px); }
+    .con-foto { min-height: 400px; }
     .ph-foto::after { background: linear-gradient(90deg, rgba(16, 55, 38, .92) 0%, rgba(16, 55, 38, .8) 45%, rgba(16, 55, 38, .2) 100%); }
   }
+  /* Sugli schermi larghi la fascia cresce con la larghezza (un quarto): se restasse
+     alta 400 px la foto verrebbe tagliata sopra e sotto, teste comprese */
+  @media (min-width: 1280px) { .con-foto { min-height: max(400px, 25vw); } }
 </style>

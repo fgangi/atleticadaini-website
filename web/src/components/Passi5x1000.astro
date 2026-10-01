@@ -1,0 +1,35 @@
+---
+/**
+ * Come si dona il 5×1000, in tre passi: senza il nome del riquadro giusto
+ * chi compila la dichiarazione non sa dove scrivere il codice fiscale.
+ * Il nome del riquadro è quello della scheda per la scelta del 5 per mille.
+ */
+interface Props { piccolo?: boolean; chiaro?: boolean }
+const { piccolo = false, chiaro = false } = Astro.props;
+---
+<ol class:list={['passi-5x1000', { piccolo, chiaro }]}>
+  <li><span>Nella dichiarazione dei redditi (730, Modello Redditi o Certificazione Unica) apri la <strong>scheda per la scelta del 5 per mille</strong>.</span></li>
+  <li><span><strong>Firma</strong> nel riquadro <em>«Sostegno delle associazioni sportive dilettantistiche»</em>.</span></li>
+  <li><span>Sotto la firma scrivi il nostro <strong>codice fiscale</strong>.</span></li>
+</ol>
+<p class:list={['nota-5x1000', { piccolo, chiaro }]}>Se la dichiarazione la fa il CAF o il commercialista, basta dare loro il codice fiscale. A te non costa nulla.</p>
+<style>
+  .passi-5x1000 { list-style: none; counter-reset: passo; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .passi-5x1000 li { counter-increment: passo; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; align-items: start; color: var(--ink); line-height: 1.45; }
+  /* Numero del passo nel cerchio giallo, come gli altri elenchi a passi del sito */
+  .passi-5x1000 li::before { content: counter(passo); width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--giallo); color: var(--verde-scuro); font-family: var(--font-display); font-weight: 800; font-size: 1rem; line-height: 1; }
+  .passi-5x1000 strong { color: var(--verde-scuro); }
+  .passi-5x1000 em { font-style: normal; font-weight: 600; color: var(--verde); }
+  .nota-5x1000 { margin-top: 10px; font-size: var(--fs-testo-secondario); color: var(--ink-soft); }
+  /* Su fondo verde */
+  .chiaro li { color: #fff; }
+  .chiaro strong { color: var(--giallo-chiaro); }
+  .chiaro em { color: var(--giallo); }
+  .nota-5x1000.chiaro { color: #D5DED3; }
+  /* Nel riquadro piccolo in alto */
+  .piccolo { gap: 7px; }
+  .piccolo li { font-size: var(--fs-piccolo); grid-template-columns: 22px minmax(0, 1fr); gap: 8px; line-height: 1.4; }
+  .piccolo li::before { width: 22px; height: 22px; font-size: .85rem; }
+  .nota-5x1000.piccolo { margin-top: 2px; font-size: var(--fs-mini); }
+</style>

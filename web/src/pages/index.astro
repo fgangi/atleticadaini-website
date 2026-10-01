@@ -1,4 +1,5 @@
 ---
+import Icona from '../components/Icona.astro';
 import Layout from '../layouts/Layout.astro';
 import Apertura from '../components/Apertura.astro';
 import SchedaCorso from '../components/SchedaCorso.astro';
@@ -63,7 +64,7 @@ const tesserati = await contaTesserati(settings);
       <div class="container">
         <div class="section-head between">
           <div><span class="eyebrow">In primo piano</span><h2>Ultime news</h2></div>
-          <a class="btn" href="/news/">Tutte le news</a>
+          <a class="btn vai" href="/news/">Tutte le news</a>
         </div>
         {inEvidenza && <div class="evidenza"><NewsInEvidenza item={inEvidenza} /></div>}
         {notizie.length > 0 && (
@@ -84,7 +85,7 @@ const tesserati = await contaTesserati(settings);
             <span class="eyebrow">{iscrizioni?.stagione ? `Stagione ${iscrizioni.stagione}` : 'Per ogni età'}</span>
             <h2>Corsi e orari</h2>
           </div>
-          <a class="btn primary" href="/settore-giovanile/">Quote e iscrizioni</a>
+          <a class="btn primary vai" href="/settore-giovanile/">Quote e iscrizioni</a>
         </div>
         <div class:list={['grid', corsi.length >= 3 ? 'cols-3' : 'cols-2']}>
           {corsi.map((c) => <SchedaCorso c={c} />)}
@@ -128,8 +129,8 @@ const tesserati = await contaTesserati(settings);
           {impianto.indirizzo && <p class="imp-indirizzo"><Indirizzo testo={impianto.indirizzo} /></p>}
           {impianto.ingresso && <p class="imp-ingresso"><strong>{impianto.ingresso}</strong></p>}
           <div class="azioni">
-            <a class="btn primary" href="/impianto/">Scopri l'impianto</a>
-            {naviga && <a class="btn" href={naviga} target="_blank" rel="noopener">Indicazioni stradali</a>}
+            <a class="btn primary vai" href="/impianto/">Scopri l'impianto</a>
+            {naviga && <a class="btn" href={naviga} target="_blank" rel="noopener"><Icona nome="mappa" /> Indicazioni stradali</a>}
           </div>
         </div>
         {fotoImpianto
@@ -150,7 +151,7 @@ const tesserati = await contaTesserati(settings);
             <span class="eyebrow">Dal {settings?.annoFondazione ?? 1945}</span>
             <h2>La nostra storia</h2>
             <p class="lead">{incipit}</p>
-            <a class="btn primary" href="/societa/storia/">Leggi la storia</a>
+            <a class="btn primary vai" href="/societa/storia/">Leggi la storia</a>
           </div>
         )}
         {albumHome.length > 0 && (

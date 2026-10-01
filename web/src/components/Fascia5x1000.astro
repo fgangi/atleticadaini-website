@@ -1,4 +1,6 @@
 ---
+import Icona from './Icona.astro';
+import Passi5x1000 from './Passi5x1000.astro';
 /**
  * Fascia del 5×1000, accesa dal pannello nel periodo delle dichiarazioni.
  * Il codice fiscale si copia con un tocco: è l'unica cosa che serve davvero.
@@ -13,12 +15,13 @@ const attiva = dati?.attiva === true && !!codiceFiscale;
       <div>
         <span class="eyebrow">Sostieni i {nome.split(' ').at(-1)}</span>
         <h2 id="titolo-5x1000">{dati?.titolo || 'Il tuo 5×1000 ai Daini'}</h2>
-        <p class="c-testo">{dati?.testo || 'Nella dichiarazione dei redditi, firma nel riquadro delle associazioni sportive dilettantistiche e scrivi il nostro codice fiscale. A te non costa nulla.'}</p>
+        {dati?.testo && <p class="c-testo">{dati.testo}</p>}
+        <div class="c-passi"><Passi5x1000 chiaro /></div>
       </div>
       <div class="c-codice">
         <span class="c-etichetta">Codice fiscale</span>
         <span class="c-numero tabnums" data-cf>{codiceFiscale}</span>
-        <button type="button" class="btn cta" data-copia-cf>Copia il codice</button>
+        <button type="button" class="btn cta" data-copia-cf><Icona nome="copia" /> Copia il codice</button>
         <span class="c-esito" role="status" aria-live="polite"></span>
       </div>
     </div>
@@ -36,6 +39,7 @@ const attiva = dati?.attiva === true && !!codiceFiscale;
   .c-etichetta { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .1em; font-weight: 700; color: var(--giallo-chiaro); }
   .c-numero { font-family: var(--font-display); font-size: var(--fs-numero); font-weight: 800; letter-spacing: .06em; line-height: 1; }
   .c-esito { font-size: var(--fs-piccolo); color: var(--giallo-chiaro); min-height: 1.4em; }
+  .c-passi { margin-top: 18px; max-width: 60ch; }
 </style>
 <script>
   function initCf() {

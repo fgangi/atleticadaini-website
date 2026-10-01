@@ -1,6 +1,9 @@
 // Tag template per evidenziare le query GROQ (nessuna dipendenza esterna).
 const groq = String.raw;
 
+// Foto dietro al titolo delle pagine interne (una per sezione)
+export const intestazioniQuery = groq`*[_id == "siteSettings"][0].intestazioni`;
+
 export const settingsQuery = groq`*[_id == "siteSettings"][0]{
   nome, denominazione, descrizione, fraseFooter, annoFondazione, tesserati, logo, codiceFiscale, partitaIva, codiceFidal,
   enti, email, telefoni, sede, social, linkUtili, puntiForza, cinquePerMille, slider, reclutamento,

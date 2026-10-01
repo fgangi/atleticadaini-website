@@ -1,4 +1,5 @@
 ---
+import Icona from '../components/Icona.astro';
 import Layout from '../layouts/Layout.astro';
 import PageHero from '../components/PageHero.astro';
 import Indirizzo from '../components/Indirizzo.astro';
@@ -6,7 +7,7 @@ import SocialIcons from '../components/SocialIcons.astro';
 import IconaWhatsApp from '../components/IconaWhatsApp.astro';
 import Mappa from '../components/Mappa.astro';
 import { sfetch, telHref, formatTel, indicazioniLuogo, whatsappHref, nomeRuolo } from '../lib/sanity';
-import { settingsQuery, impiantiQuery } from '../lib/queries';
+import { settingsQuery, impiantiQuery, intestazioniQuery } from '../lib/queries';
 
 /**
  * Contatti a blocchi, dal più usato al meno usato:
@@ -17,6 +18,8 @@ import { settingsQuery, impiantiQuery } from '../lib/queries';
  * Ogni voce compare solo se il dato c'è nel pannello: niente righe vuote.
  */
 const [s, impianti] = await Promise.all([sfetch<any>(settingsQuery, {}, null), sfetch<any[]>(impiantiQuery, {}, [])]);
+// Foto dietro al titolo, scelta nel pannello (Impostazioni → Foto delle intestazioni)
+const fotoTesta = (await sfetch<any>(intestazioniQuery, {}, null))?.contatti;
 // Il numero della società (WhatsApp) va in evidenza, i referenti sotto
 const principali: any[] = (s?.telefoni ?? []).filter((t: any) => t.principale);
 const telefoni: any[] = (s?.telefoni ?? []).filter((t: any) => !t.principale);
@@ -32,7 +35,7 @@ const dati = [
 ].filter(Boolean) as { dt: string; dd: string }[];
 ---
 <Layout title="Contatti" description="Contatti dell'Atletica Daini: telefoni, email, campo di allenamento e sede a Carate Brianza.">
-  <PageHero eyebrow="Siamo qui" title="Contatti" lead="Chiamaci, scrivici o passa al campo prima o dopo gli allenamenti." />
+  <PageHero foto={fotoTesta} eyebrow="Siamo qui" title="Contatti" lead="Chiamaci, scrivici o passa al campo prima o dopo gli allenamenti." />
 
   <section class="section">
     <div class="container contatti">
@@ -45,7 +48,7 @@ const dati = [
               <p class="pr-numero tabnums">{formatTel(t.numero)}</p>
               <div class="pr-azioni">
                 <a class="btn primary" href={whatsappHref(t.numero)} target="_blank" rel="noopener"><IconaWhatsApp /> Scrivici su WhatsApp</a>
-                <a class="btn" href={telHref(t.numero)}>Chiama</a>
+                <a class="btn" href={telHref(t.numero)}><Icona nome="tel" /> Chiama</a>
               </div>
             </div>
           ))}
@@ -76,7 +79,7 @@ const dati = [
                 <dd><strong>{campo.nome}</strong>{campo.indirizzo && <><br /><Indirizzo testo={campo.indirizzo} /></>}</dd>
                 {campo.ingresso && <dd class="ingresso"><strong>{campo.ingresso}</strong></dd>}
                 {indicazioniLuogo(campo) && (
-                  <dd class="link-luogo"><a class="btn primary" href={indicazioniLuogo(campo)} target="_blank" rel="noopener">Indicazioni stradali</a></dd>
+                  <dd class="link-luogo"><a class="btn primary" href={indicazioniLuogo(campo)} target="_blank" rel="noopener"><Icona nome="mappa" /> Indicazioni stradali</a></dd>
                 )}
               </div>
             )}

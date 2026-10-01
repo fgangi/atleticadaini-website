@@ -72,7 +72,7 @@ export const iscrizioni = defineType({
     defineField({ name: 'noteQuote', title: 'Note alle quote', type: 'text', rows: 2, group: 'quote',
       description: 'Es. "Sconto del 10% sul secondo figlio".' }),
     defineField({ name: 'pagamento', title: 'Come pagare', type: 'blockContent', group: 'quote',
-      description: 'Bonifico, causale, ricevuta per la detrazione. L\'IBAN va qui solo se la società vuole pubblicarlo.' }),
+      description: 'Un paragrafo per informazione, nella forma "Titolo: testo" (es. "Causale: nome e cognome dell\'atleta"): sul sito ogni paragrafo diventa un riquadro. L\'IBAN va qui solo se la società vuole pubblicarlo.' }),
 
     defineField({ name: 'requisiti', title: 'Cosa serve per iscriversi', type: 'array', group: 'documenti',
       of: [{ type: 'string' }], description: 'Un requisito per riga. Per il grassetto, parole fra asterischi come su WhatsApp: "*Certificato medico agonistico* (da Ragazzi in poi)".' }),

@@ -1,4 +1,5 @@
 ---
+import Icona from './Icona.astro';
 import { img, telHref, formatTel, whatsappHref, nomeRuolo } from '../lib/sanity';
 import IconaWhatsApp from './IconaWhatsApp.astro';
 import { logoRifilato, misuraLogo } from '../lib/loghi';
@@ -102,11 +103,11 @@ const identificativi = [
         {telefoni.length > 0 && (
           <ul class="fnav contatti">
             {telefoni.map((t) => (
-              <li><a href={telHref(t.numero)}><span class="tabnums">{formatTel(t.numero)}</span>{t.nome && <span class="tel-nome">{nomeRuolo(t)}</span>}</a></li>
+              <li><a class="con-icona" href={telHref(t.numero)}><Icona nome="tel" size={18} /><span class="tabnums">{formatTel(t.numero)}</span>{t.nome && <span class="tel-nome">{nomeRuolo(t)}</span>}</a></li>
             ))}
           </ul>
         )}
-        {s.email && <ul class="fnav contatti"><li><a href={`mailto:${s.email}`}>{s.email}</a></li></ul>}
+        {s.email && <ul class="fnav contatti"><li><a class="con-icona" href={`mailto:${s.email}`}><Icona nome="mail" size={18} /><span>{s.email}</span></a></li></ul>}
         <a class="link-forte" href="/contatti/">Tutti i contatti →</a>
         {impianto?.indirizzo && (
           <div class="dove">
@@ -125,7 +126,7 @@ const identificativi = [
       <div class="f-cinque" data-copia-box>
         <div class="f5-testo">
           <span class="f5-tit">5×1000</span>
-          <p>Sostieni i Daini: nella dichiarazione dei redditi scrivi il nostro codice fiscale.</p>
+          <p>Sostieni i Daini: nella dichiarazione dei redditi firma nel riquadro delle associazioni sportive dilettantistiche e scrivi il nostro codice fiscale.</p>
         </div>
         <div class="f5-codice">
           <span class="f5-numero tabnums">{s.codiceFiscale}</span>
@@ -226,7 +227,13 @@ const identificativi = [
   .nota { opacity: .7; }
   /* Numero in bianco e nome in grigio: bastano colore e spazio a separarli */
   .tel-nome { margin-left: .7em; color: #B9C4B8; }
-  .fnav.contatti a.tel-principale { gap: 8px; color: var(--giallo); font-weight: 700; }
+  /* Telefoni ed email con l'icona a sinistra, come il numero WhatsApp: testi allineati in colonna */
+  .fnav.contatti a.tel-principale, .fnav.contatti a.con-icona { gap: 8px; }
+  .fnav.contatti a.tel-principale { color: var(--giallo); font-weight: 700; }
+  .con-icona .tel-nome { margin-left: .2em; }
+  /* Il numero resta su una riga; sui telefoni stretti va a capo il nome */
+  .fnav.contatti .tabnums { flex: none; white-space: nowrap; }
+  .fnav.contatti .tel-nome { min-width: 0; line-height: 1.3; }
   .tel-principale .tel-nome { margin-left: 0; font-weight: 500; }
   .dove { margin-top: 18px; }
   .dove p { color: #E8EDE6; font-size: var(--fs-footer); line-height: 1.5; }

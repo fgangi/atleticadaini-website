@@ -1,4 +1,5 @@
 ---
+import Icona from '../../components/Icona.astro';
 import Layout from '../../layouts/Layout.astro';
 import PageHero from '../../components/PageHero.astro';
 import IconaWhatsApp from '../../components/IconaWhatsApp.astro';
@@ -53,7 +54,7 @@ const email = s?.email;
         </div>
         <div class="invito-azioni">
           {numero && <a class="btn primary grande" href={whatsappHref(numero, 'Ciao! Vorrei proporvi una convenzione per i vostri tesserati.')} target="_blank" rel="noopener"><IconaWhatsApp /> Scrivici su WhatsApp</a>}
-          {email && <a class="btn grande" href={`mailto:${email}?subject=${encodeURIComponent('Proposta di convenzione')}`}>Mandaci una mail</a>}
+          {email && <a class="btn grande" href={`mailto:${email}?subject=${encodeURIComponent('Proposta di convenzione')}`}><Icona nome="mail" /> Mandaci una mail</a>}
         </div>
       </div>
     </section>

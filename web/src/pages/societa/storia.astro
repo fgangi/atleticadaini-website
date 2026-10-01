@@ -1,16 +1,19 @@
 ---
+import Icona from '../../components/Icona.astro';
 import Layout from '../../layouts/Layout.astro';
 import PageHero from '../../components/PageHero.astro';
 import { sfetch, img, richText } from '../../lib/sanity';
-import { storiaQuery, settingsQuery } from '../../lib/queries';
+import { storiaQuery, settingsQuery, intestazioniQuery } from '../../lib/queries';
 
 const [storia, s] = await Promise.all([sfetch<any>(storiaQuery, {}, null), sfetch<any>(settingsQuery, {}, null)]);
+// Foto dietro al titolo, scelta nel pannello (Impostazioni → Foto delle intestazioni)
+const fotoTesta = (await sfetch<any>(intestazioniQuery, {}, null))?.storia;
 const anno = s?.annoFondazione ?? 1945;
 const intro = richText(storia?.introduzione);
 const capitoli: any[] = storia?.capitoli ?? [];
 ---
 <Layout title="Storia" description={`La storia della ${s?.nome ?? 'Atletica Daini'} dal ${anno}: la fondazione, i decenni, i campioni.`}>
-  <PageHero eyebrow={`Dal ${anno}`} title="La nostra storia" />
+  <PageHero foto={fotoTesta} eyebrow={`Dal ${anno}`} title="La nostra storia" />
 
   {intro && (
     <section class="section">
@@ -33,7 +36,7 @@ const capitoli: any[] = storia?.capitoli ?? [];
                 <div class="t-corpo">
                   {c.titolo && <h2 class="t-titolo">{c.titolo}</h2>}
                   {c.testo && <p>{c.testo}</p>}
-                  {c.album?.slug && <a class="btn" href={`/gallery/${c.album.slug}/`}>Foto: {c.album.titolo}</a>}
+                  {c.album?.slug && <a class="btn" href={`/gallery/${c.album.slug}/`}><Icona nome="foto" /> Foto: {c.album.titolo}</a>}
                 </div>
                 {foto && <img class="t-foto" src={foto} alt={c.titolo ?? c.periodo} loading="lazy" />}
               </li>

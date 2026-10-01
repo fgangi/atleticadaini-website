@@ -1,22 +1,25 @@
 ---
+import Icona from '../components/Icona.astro';
 import Layout from '../layouts/Layout.astro';
 import PageHero from '../components/PageHero.astro';
 import Mappa from '../components/Mappa.astro';
 import Indirizzo from '../components/Indirizzo.astro';
 import { sfetch, img, indicazioniLuogo } from '../lib/sanity';
-import { impiantiQuery, corsiQuery } from '../lib/queries';
+import { impiantiQuery, corsiQuery, intestazioniQuery } from '../lib/queries';
 
 /**
  * Dove ci alleniamo: prima come trovarci (indirizzo, ingresso, navigatore,
  * mappa), poi cosa c'è e quando ci siamo. Un blocco per ogni impianto.
  */
 const [impianti, corsi] = await Promise.all([sfetch<any[]>(impiantiQuery, {}, []), sfetch<any[]>(corsiQuery, {}, [])]);
+// Foto dietro al titolo, scelta nel pannello (Impostazioni → Foto delle intestazioni)
+const fotoTesta = (await sfetch<any>(intestazioniQuery, {}, null))?.impianto;
 const principale = impianti[0];
 // Orari di chi si allena in ciascun impianto (senza luogo = impianto principale)
 const orariDi = (nome: string, primo: boolean) => corsi.filter((c) => c.orari?.length && (c.luogo ? c.luogo === nome : primo));
 ---
 <Layout title="Impianto" description={principale ? `Dove ci alleniamo: ${principale.nome}${principale.indirizzo ? ', ' + String(principale.indirizzo).replace(/\s*\n\s*/g, ', ') : ''}.` : 'Dove si allena l\'Atletica Daini.'}>
-  <PageHero eyebrow="Dove ci alleniamo" title={impianti.length === 1 ? principale.nome : 'Impianto'} lead={impianti.length === 1 ? null : 'I luoghi dove si allenano i Daini.'} />
+  <PageHero foto={fotoTesta} eyebrow="Dove ci alleniamo" title={impianti.length === 1 ? principale.nome : 'Impianto'} lead={impianti.length === 1 ? null : 'I luoghi dove si allenano i Daini.'} />
 
   {impianti.length > 0 ? impianti.map((im, n) => {
     const foto = (im.foto ?? []).map((f: any) => ({ src: img(f, 900, 640), alt: f.alt ?? '' })).filter((f: any) => f.src);
@@ -32,7 +35,7 @@ const orariDi = (nome: string, primo: boolean) => corsi.filter((c) => c.orari?.l
               {im.indirizzo && <p class="indirizzo"><Indirizzo testo={im.indirizzo} /></p>}
               {im.ingresso && <p class="ingresso"><strong>{im.ingresso}</strong></p>}
               {im.comeArrivare && <p class="arrivare">{im.comeArrivare}</p>}
-              {naviga && <a class="btn primary" href={naviga} target="_blank" rel="noopener">Indicazioni stradali</a>}
+              {naviga && <a class="btn primary" href={naviga} target="_blank" rel="noopener"><Icona nome="mappa" /> Indicazioni stradali</a>}
             </div>
             <Mappa posizione={im.mappa} indirizzo={im.indirizzo} titolo={im.nome} />
           </div>
@@ -59,7 +62,7 @@ const orariDi = (nome: string, primo: boolean) => corsi.filter((c) => c.orari?.l
                   <li><strong>{c.nome}</strong> {c.orari.map((o: any) => <span class="o">{o.giorni} <span class="tabnums">{o.orario}</span></span>)}</li>
                 ))}
               </ul>
-              <a class="btn" href="/settore-giovanile/#corsi">Corsi e iscrizioni</a>
+              <a class="btn vai" href="/settore-giovanile/#corsi">Corsi e iscrizioni</a>
             </div>
           )}
         </div>

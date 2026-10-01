@@ -1,33 +1,46 @@
 ---
+import Icona from './Icona.astro';
 import { telHref, formatTel } from '../lib/sanity';
 
 /**
- * Consiglio direttivo come elenco semplice (carica, nome, telefono): è
- * un'informazione istituzionale, le schede con le foto restano agli
- * allenatori. Chi allena ed è anche nel consiglio ha così una sola scheda.
+ * Consiglio direttivo: una scheda per persona (iniziali, carica, nome,
+ * telefono), affiancate a tutta larghezza come le altre schede della pagina.
+ * Niente foto: è un'informazione istituzionale, le schede con le foto restano
+ * agli allenatori. Chi allena ed è anche nel consiglio ha così una sola scheda.
  */
 interface Props { membri: any[] }
 const { membri } = Astro.props;
+const iniziali = (n: string) => String(n ?? '').split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
 ---
 <ul class="direttivo">
   {membri.map((m) => (
-    <li>
-      <span class="d-carica">{m.ruolo}</span>
-      <span class="d-nome">{m.nome}</span>
-      {m.telefono && <a class="d-tel tabnums" href={telHref(m.telefono)} aria-label={`Chiama ${m.nome}: ${formatTel(m.telefono)}`}>{formatTel(m.telefono)}</a>}
+    <li class="card">
+      <div class="d-testa">
+        <span class="d-iniziali" aria-hidden="true">{iniziali(m.nome)}</span>
+        <div>
+          <span class="d-carica">{m.ruolo}</span>
+          <span class="d-nome">{m.nome}</span>
+        </div>
+      </div>
+      {m.telefono && (
+        <a class="d-tel tabnums" href={telHref(m.telefono)} aria-label={`Chiama ${m.nome}: ${formatTel(m.telefono)}`}>
+          <Icona nome="tel" size={18} />{formatTel(m.telefono)}
+        </a>
+      )}
     </li>
   ))}
 </ul>
 <style>
-  .direttivo { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; max-width: 760px; }
-  .direttivo li { display: grid; grid-template-columns: 11rem minmax(0, 1fr) auto; align-items: center; gap: 4px 16px;
-    padding: 10px 18px; background: var(--ground); border: 1px solid var(--line); border-radius: 12px; }
-  .d-carica { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .04em; font-weight: 700; color: var(--verde); }
-  .d-nome { font-weight: 700; color: var(--ink); font-size: var(--fs-testo); }
-  .d-tel { display: inline-flex; align-items: center; min-height: 44px; font-weight: 600; color: var(--verde); white-space: nowrap; }
-  /* Telefono: carica sopra, nome e numero sotto */
-  @media (max-width: 639px) {
-    .direttivo li { grid-template-columns: minmax(0, 1fr) auto; }
-    .d-carica { grid-column: 1 / -1; }
-  }
+  /* Tante colonne quante ne stanno (almeno 280 px l'una): due persone occupano
+     tutta la riga su PC e tablet, una sotto l'altra su telefono */
+  .direttivo { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 14px; }
+  .direttivo li { display: flex; flex-direction: column; gap: 12px; padding: 18px 20px; border-top: 5px solid var(--giallo); }
+  .d-testa { display: flex; align-items: center; gap: 14px; }
+  .d-iniziali { flex: none; width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--sfondo-scuro); color: var(--giallo-chiaro); font-family: var(--font-display); font-weight: 800; font-size: 1.3rem; letter-spacing: .03em; }
+  .d-carica { display: block; font-family: var(--font-display); text-transform: uppercase; letter-spacing: .04em; font-weight: 700; font-size: var(--fs-etichetta); color: var(--verde); }
+  .d-nome { display: block; font-family: var(--font-display); text-transform: uppercase; font-weight: 800; font-size: var(--fs-titolo-scheda); color: var(--ink); line-height: 1.15; }
+  /* Telefono in fondo, separato da una riga sottile, come nelle schede del Team */
+  .d-tel { margin-top: auto; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding-top: 8px;
+    border-top: 1px solid var(--line-soft); font-weight: 600; color: var(--verde); white-space: nowrap; }
 </style>

@@ -1,15 +1,18 @@
 ---
+import Icona from '../../components/Icona.astro';
 import Layout from '../../layouts/Layout.astro';
 import PageHero from '../../components/PageHero.astro';
 import SchedaPersona from '../../components/SchedaPersona.astro';
 import ElencoDirettivo from '../../components/ElencoDirettivo.astro';
 import IconaWhatsApp from '../../components/IconaWhatsApp.astro';
 import { sfetch, whatsappHref } from '../../lib/sanity';
-import { teamQuery, corsiQuery, settingsQuery } from '../../lib/queries';
+import { teamQuery, corsiQuery, settingsQuery, intestazioniQuery } from '../../lib/queries';
 import { AREE_TEAM } from '../../sanity/schemaTypes/membroTeam';
 import { membriDirettivo } from '../../lib/team';
 
 const [team, corsi, s] = await Promise.all([sfetch<any[]>(teamQuery, {}, []), sfetch<any[]>(corsiQuery, {}, []), sfetch<any>(settingsQuery, {}, null)]);
+// Foto dietro al titolo, scelta nel pannello (Impostazioni → Foto delle intestazioni)
+const fotoTesta = (await sfetch<any>(intestazioniQuery, {}, null))?.team;
 
 // Fascia "Cerchiamo allenatori": WhatsApp della società e una mail con
 // l'oggetto già scritto, comoda per mandare il curriculum
@@ -29,7 +32,7 @@ const nomiGruppi = (m: any) => corsi.filter((c) => m.corsi?.includes(c._id)).map
 const inOrdine = (membri: any[]) => [...membri].sort((a, b) => ordineCorso(a) - ordineCorso(b) || (a.ordine ?? 99) - (b.ordine ?? 99));
 ---
 <Layout title="Team" description="Allenatori, istruttori e collaboratori dell'Atletica Daini.">
-  <PageHero eyebrow="La società" title="Il team" lead="Le persone che seguono ragazzi e atleti in pista, e quelle che fanno funzionare la società." />
+  <PageHero foto={fotoTesta} eyebrow="La società" title="Il team" lead="Le persone che seguono ragazzi e atleti in pista, e quelle che fanno funzionare la società." />
   {gruppi.length > 0 ? gruppi.map((g) => (
     <section class="section">
       <div class="container">
@@ -55,7 +58,7 @@ const inOrdine = (membri: any[]) => [...membri].sort((a, b) => ordineCorso(a) - 
         </div>
         <div class="rec-azioni">
           {numero && <a class="btn cta grande" href={whatsappHref(numero, rec.messaggio || undefined)} target="_blank" rel="noopener"><IconaWhatsApp /> Scrivici su WhatsApp</a>}
-          {email && <a class="btn chiaro grande" href={`mailto:${email}?subject=${encodeURIComponent(rec.oggetto || 'Candidatura come allenatore')}`}>Mandaci una mail</a>}
+          {email && <a class="btn chiaro grande" href={`mailto:${email}?subject=${encodeURIComponent(rec.oggetto || 'Candidatura come allenatore')}`}><Icona nome="mail" /> Mandaci una mail</a>}
         </div>
       </div>
     </section>

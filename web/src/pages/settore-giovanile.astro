@@ -1,10 +1,11 @@
 ---
+import Icona from '../components/Icona.astro';
 import Layout from '../layouts/Layout.astro';
 import PageHero from '../components/PageHero.astro';
 import SchedaCorso from '../components/SchedaCorso.astro';
 import IconaWhatsApp from '../components/IconaWhatsApp.astro';
 import { sfetch, richText, telHref, formatTel, whatsappHref, nomeRuolo } from '../lib/sanity';
-import { settingsQuery, iscrizioniQuery, corsiQuery, openDayQuery } from '../lib/queries';
+import { settingsQuery, iscrizioniQuery, corsiQuery, openDayQuery, intestazioniQuery } from '../lib/queries';
 
 /**
  * Pagina per chi vuole iscriversi, nell'ordine in cui un genitore si fa le
@@ -17,9 +18,19 @@ const [settings, i, corsi, od] = await Promise.all([
   sfetch<any[]>(corsiQuery, {}, []),
   sfetch<any>(openDayQuery, {}, null),
 ]);
+// Foto dietro al titolo, scelta nel pannello (Impostazioni → Foto delle intestazioni)
+const fotoTesta = (await sfetch<any>(intestazioniQuery, {}, null))?.settoreGiovanile;
 const aperte = i?.aperte === true;
 const euro = (n?: number | null) => (typeof n === 'number' ? n.toLocaleString('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: n % 1 ? 2 : 0 }) : '–');
-const pagamento = richText(i?.pagamento);
+// "Come pagare": un paragrafo per informazione. "Titolo: testo" diventa un
+// riquadro con l'etichetta in alto (grassetti e link del pannello restano)
+const pagamento = (i?.pagamento ?? []).map((b: any) => {
+  const html = richText([b]);
+  const m = html.match(/^<p>([^<:]{2,40}):\s*/);
+  // Dopo l'etichetta il testo parte con la maiuscola (anche se nel pannello è scritto minuscolo)
+  const maiuscola = (h: string) => h.replace(/^(<strong>)?([a-zàèéìòù])/, (_x, t, c) => (t ?? '') + c.toUpperCase());
+  return m ? { titolo: m[1], html: maiuscola(html.slice(m[0].length).replace(/<\/p>$/, '')) } : { titolo: null, html: html.replace(/^<p>|<\/p>$/g, '') };
+}).filter((x: any) => x.html);
 // "Periodo di validità": una riga per informazione. "Titolo: testo" diventa un
 // riquadro con l'etichetta in evidenza; le righe senza titolo restano note
 const info = String(i?.periodi ?? '').split('\n').map((r) => r.trim()).filter(Boolean).map((r) => {
@@ -38,11 +49,11 @@ const telefoni: any[] = settings?.telefoni ?? [];
 const documenti = (i?.documenti ?? []).filter((d: any) => d?.url);
 ---
 <Layout title="Settore giovanile" description="Corsi di atletica leggera a Carate Brianza per ragazze e ragazzi dai 4 anni: orari, quote, moduli e come iscriversi.">
-  <PageHero eyebrow={i?.stagione ? `Stagione ${i.stagione}` : 'Scuola di atletica'} title="Settore giovanile"
+  <PageHero foto={fotoTesta} eyebrow={i?.stagione ? `Stagione ${i.stagione}` : 'Scuola di atletica'} title="Settore giovanile"
     lead="Corsi di atletica leggera dai 4 anni in su, fino al gruppo agonistico, con istruttori federali e laureati in scienze motorie.">
     <div class="azioni hero-azioni">
       <a class="btn cta" href="#iscrizioni">{aperte ? 'Iscriviti' : 'Come iscriversi'}</a>
-      {corsi.length > 0 && <a class="btn chiaro" href="#corsi">Corsi e orari</a>}
+      {corsi.length > 0 && <a class="btn chiaro vai" href="#corsi">Corsi e orari</a>}
     </div>
   </PageHero>
 
@@ -66,7 +77,7 @@ const documenti = (i?.documenti ?? []).filter((d: any) => d?.url);
           <h2>{od.titolo || "Vieni a provare l'atletica"}</h2>
           {od.testo && <p>{od.testo}</p>}
         </div>
-        <a class="btn cta grande" href="/open-days/">Scopri gli open days</a>
+        <a class="btn cta grande vai" href="/open-days/">Scopri gli open days</a>
       </div>
     </section>
   )}
@@ -99,7 +110,19 @@ const documenti = (i?.documenti ?? []).filter((d: any) => d?.url);
           ))}
         </ul>
         {i?.noteQuote && <p class="nota-quote">{i.noteQuote}</p>}
-        {pagamento && <div class="prose pagamento"><h3>Come pagare</h3><div set:html={pagamento} /></div>}
+        {pagamento.length > 0 && (
+          <div class="pagamento">
+            <h3>Come pagare</h3>
+            <ul class="pag-righe">
+              {pagamento.map((x: any) => (
+                <li class:list={{ nota: !x.titolo }}>
+                  {x.titolo && <span class="pag-tit">{x.titolo}</span>}
+                  <span class="pag-testo" set:html={x.html} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </section>
   )}
@@ -146,7 +169,9 @@ const documenti = (i?.documenti ?? []).filter((d: any) => d?.url);
                 <li>
                   <a href={`${d.url}?dl=`} download>
                     <span class="doc-ico" aria-hidden="true">{(d.est ?? 'pdf').toUpperCase()}</span>
-                    <span><span class="doc-titolo">{d.titolo}</span>{d.descrizione && <span class="doc-desc">{d.descrizione}</span>}</span>
+                    <span class="doc-testo"><span class="doc-titolo">{d.titolo}</span>{d.descrizione && <span class="doc-desc">{d.descrizione}</span>}</span>
+                    {/* Freccia di download: fa capire che tutta la riga scarica il file */}
+                    <svg class="doc-scarica" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14" /></svg>
                   </a>
                 </li>
               ))}
@@ -159,10 +184,10 @@ const documenti = (i?.documenti ?? []).filter((d: any) => d?.url);
             <ul class="referenti">
               {telefoni.map((t) => (
                 <li>{t.principale
-                  ? <a class="btn primary" href={whatsappHref(t.numero)} target="_blank" rel="noopener"><span class="tabnums">{formatTel(t.numero)}</span><span class="tel-nome"><span class="solo-largo">Scrivici su </span>WhatsApp</span><IconaWhatsApp /></a>
-                  : <a class="btn" href={telHref(t.numero)}><span class="tabnums">{formatTel(t.numero)}</span>{t.nome && <span class="tel-nome">{nomeRuolo(t)}</span>}</a>}</li>
+                  ? <a class="btn primary" href={whatsappHref(t.numero)} target="_blank" rel="noopener"><IconaWhatsApp size={20} /><span class="tabnums">{formatTel(t.numero)}</span><span class="tel-nome"><span class="solo-largo">Scrivici su </span>WhatsApp</span></a>
+                  : <a class="btn" href={telHref(t.numero)}><Icona nome="tel" size={20} /><span class="tabnums">{formatTel(t.numero)}</span>{t.nome && <span class="tel-nome">{nomeRuolo(t)}</span>}</a>}</li>
               ))}
-              {settings?.email && <li><a class="btn cta" href={`mailto:${settings.email}`}>{settings.email}</a></li>}
+              {settings?.email && <li><a class="btn cta email" href={`mailto:${settings.email}`}><Icona nome="mail" size={20} /><span>{settings.email}</span></a></li>}
             </ul>
           </div>
         )}
@@ -209,8 +234,18 @@ const documenti = (i?.documenti ?? []).filter((d: any) => d?.url);
   .p-nuovi { font-size: var(--fs-numero); }
   .p-rinnovi { font-size: var(--fs-numero-piccolo); }
   .nota-quote { margin-top: 14px; font-weight: 600; color: var(--verde); }
-  .pagamento { margin-top: 26px; max-width: 70ch; }
-  .pagamento h3 { font-size: var(--fs-titolo-scheda); }
+  /* Come pagare: riquadri bianchi affiancati, etichetta piccola sopra e testo sotto */
+  .pagamento { margin-top: 30px; }
+  .pagamento h3 { font-size: var(--fs-titolo-scheda); margin-bottom: 12px; }
+  .pag-righe { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  /* Da tablet in su due per riga: i riquadri restano larghi abbastanza da non andare a capo ogni due parole */
+  @media (min-width: 640px) { .pag-righe { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .pag-righe li { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; background: var(--ground); border-left: 4px solid var(--verde); border-radius: 0 10px 10px 0; }
+  .pag-righe li.nota { grid-column: 1 / -1; background: none; border: 0; padding: 0; }
+  .pag-tit { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .05em; font-weight: 700; font-size: var(--fs-piccolo); color: var(--verde); }
+  .pag-testo { color: var(--ink); line-height: 1.45; }
+  .pag-testo :global(strong) { color: var(--verde-scuro); }
+  .pag-testo :global(a) { color: var(--verde); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
 
   .iscr { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 48px); align-items: start; }
   @media (max-width: 1023px) { .iscr { grid-template-columns: minmax(0, 1fr); } }
@@ -238,10 +273,18 @@ const documenti = (i?.documenti ?? []).filter((d: any) => d?.url);
   .documenti a:hover { border-color: var(--verde); }
   .doc-ico { flex: none; width: 40px; height: 40px; border-radius: 8px; background: var(--verde); color: var(--giallo-chiaro);
     display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; font-size: .9rem; }
+  .doc-testo { flex: 1; min-width: 0; }
+  .doc-scarica { flex: none; width: 36px; height: 36px; padding: 8px; border-radius: 50%; background: var(--tinta);
+    fill: none; stroke: var(--verde); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transition: background .12s ease; }
+  .documenti a:hover .doc-scarica { background: var(--giallo); }
   .doc-titolo { display: block; font-weight: 600; color: var(--ink); line-height: 1.3; }
   .doc-desc { display: block; font-size: var(--fs-piccolo); color: var(--ink-faint); }
-  .tel-nome { margin-left: .6em; color: var(--ink-faint); font-weight: 500; }
-  .referenti .btn { width: 100%; justify-content: flex-start; text-transform: none; font-family: var(--font-body); font-weight: 600; font-size: var(--fs-testo-secondario); letter-spacing: 0; }
+  /* Il numero non va mai a capo; se manca spazio va a capo il nome */
+  .referenti .tabnums { flex: none; white-space: nowrap; }
+  .referenti .tel-nome { min-width: 0; line-height: 1.25; }
+  .tel-nome { margin-left: .2em; color: var(--ink-faint); font-weight: 500; }
+  /* Icona sempre a sinistra e della stessa misura: numeri, email e nomi partono tutti dalla stessa colonna */
+  .referenti .btn { width: 100%; justify-content: flex-start; gap: 12px; text-transform: none; font-family: var(--font-body); font-weight: 600; font-size: var(--fs-testo-secondario); letter-spacing: 0; }
   /* Pulsante del numero della società: numero chiaro, leggibile sul verde */
   /* Numero a sinistra come negli altri pulsanti; l'icona chiude la riga a destra */
   /* Stessa spaziatura delle altre righe: numeri e nomi restano in colonna */

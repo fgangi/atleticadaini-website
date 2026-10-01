@@ -2,7 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import PageHero from '../../components/PageHero.astro';
 import { sfetch } from '../../lib/sanity';
-import { recordQuery, titoliQuery } from '../../lib/queries';
+import { recordQuery, titoliQuery, intestazioniQuery } from '../../lib/queries';
 import { CATEGORIE_RECORD, SEZIONI_RECORD } from '../../sanity/schemaTypes/record';
 import { TIPI_TITOLO } from '../../sanity/schemaTypes/titolo';
 
@@ -16,6 +16,8 @@ const [record, titoli] = await Promise.all([
   sfetch<any[]>(recordQuery, {}, []),
   sfetch<any[]>(titoliQuery, {}, []),
 ]);
+// Foto dietro al titolo, scelta nel pannello (Impostazioni → Foto delle intestazioni)
+const fotoTesta = (await sfetch<any>(intestazioniQuery, {}, null))?.record;
 const annoCorrente = new Date().getFullYear();
 const categorie = CATEGORIE_RECORD.map((c) => ({
   ...c,
@@ -45,7 +47,7 @@ const perDecennio = (voci: any[]) => {
 };
 ---
 <Layout title="Record" description="Record sociali dell'Atletica Daini per categoria, campioni italiani e maglie azzurre.">
-  <PageHero eyebrow="Albo della società" title="Record" lead="I migliori risultati di sempre ottenuti da atlete e atleti dei Daini." />
+  <PageHero foto={fotoTesta} eyebrow="Albo della società" title="Record" lead="I migliori risultati di sempre ottenuti da atlete e atleti dei Daini." />
 
   {categorie.length > 0 && (
     <section class="section">

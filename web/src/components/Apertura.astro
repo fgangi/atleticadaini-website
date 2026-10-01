@@ -61,7 +61,7 @@ const stile = sfondo ? `--foto:url('${sfondo}');--foto-piccola:url('${sfondoPicc
       {i?.testo && <p class="lead">{i.testo}</p>}
       <div class="azioni">
         <a class="btn cta grande" href="/settore-giovanile/#iscrizioni">Iscriviti</a>
-        <a class="btn chiaro grande" href="/settore-giovanile/#corsi">Scopri i corsi</a>
+        <a class="btn chiaro grande vai" href="/settore-giovanile/#corsi">Scopri i corsi</a>
       </div>
       {openDay
         ? <p class="prova"><a href="/open-days/"><span class="pill">Open days</span> Vieni a provare prima di iscriverti →</a></p>
@@ -74,8 +74,8 @@ const stile = sfondo ? `--foto:url('${sfondo}');--foto-piccola:url('${sfondoPicc
       <h1>{nome}</h1>
       <p class="lead">Atletica leggera dai 4 anni in su: corsi per bambini e ragazzi e gruppo agonistico.</p>
       <div class="azioni">
-        <a class="btn cta grande" href="/settore-giovanile/">Scopri i corsi</a>
-        <a class="btn chiaro grande" href="/societa/">Chi siamo</a>
+        <a class="btn cta grande vai" href="/settore-giovanile/">Scopri i corsi</a>
+        <a class="btn chiaro grande vai" href="/societa/">Chi siamo</a>
       </div>
       {openDay && <p class="prova"><a href="/open-days/"><span class="pill">Open days</span> Vieni a provare l'atletica →</a></p>}
     </div>
