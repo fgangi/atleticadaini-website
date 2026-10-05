@@ -54,20 +54,28 @@ const foto = (a.foto ?? []).map((f: any) => ({
   .foto img { width: 100%; height: 100%; object-fit: cover; transition: transform .2s ease; }
   .foto a:hover img { transform: scale(1.04); }
 
-  .visore { width: 100vw; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0;
+  /* Visore a tutto schermo. Con inset 0 e non 100vw: 100vw comprende la barra di
+     scorrimento (visibile sul Mac con il mouse collegato) e i pulsanti a destra
+     finivano sotto di lei */
+  .visore { position: fixed; inset: 0; width: auto; height: auto; max-width: none; max-height: none; margin: 0; padding: 0; border: 0;
     background: rgba(12, 18, 14, .96); color: #fff; }
+  /* Mentre si guardano le foto la pagina dietro non scorre (e la barra sparisce) */
+  :global(html:has(.visore[open])) { overflow: hidden; }
   .visore[open] { display: grid; place-items: center; }
   .visore::backdrop { background: rgba(0, 0, 0, .6); }
-  .visore img { max-width: 94vw; max-height: 84dvh; object-fit: contain; }
-  .v-didascalia { position: absolute; bottom: 16px; left: 70px; right: 130px; color: #E3EAE1; font-size: var(--fs-piccolo); }
-  .v-numero { position: absolute; bottom: 16px; right: 70px; color: #E3EAE1; font-size: var(--fs-piccolo); margin: 0; }
+  /* La foto lascia spazio alle frecce ai lati, così non ci finiscono sopra */
+  .visore img { max-width: calc(100% - 32px); max-height: 84dvh; object-fit: contain; }
+  @media (min-width: 640px) { .visore img { max-width: calc(100% - 2 * (52px + 2 * var(--v-margine))); } }
+  .v-didascalia { position: absolute; bottom: 16px; left: calc(52px + 2 * var(--v-margine)); right: calc(52px + 2 * var(--v-margine) + 70px); color: #E3EAE1; font-size: var(--fs-piccolo); }
+  .v-numero { position: absolute; bottom: 16px; right: calc(52px + 2 * var(--v-margine)); color: #E3EAE1; font-size: var(--fs-piccolo); margin: 0; }
   @media (max-width: 639px) { .v-didascalia { left: 16px; right: 16px; bottom: 70px; } .v-numero { right: auto; left: 50%; transform: translateX(-50%); bottom: 26px; } }
-  .v-btn { position: absolute; width: 48px; height: 48px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .3);
+  .visore { --v-margine: clamp(12px, 2.5vw, 32px); }
+  .v-btn { position: absolute; width: 52px; height: 52px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .3);
     background: rgba(0, 0, 0, .35); color: #fff; font-size: 1.6rem; line-height: 1; cursor: pointer; display: grid; place-items: center; }
   .v-btn:hover { background: rgba(255, 255, 255, .15); }
-  .v-chiudi { top: 14px; right: 14px; font-size: 1.2rem; }
-  .v-prec { left: 12px; top: 50%; transform: translateY(-50%); }
-  .v-succ { right: 12px; top: 50%; transform: translateY(-50%); }
+  .v-chiudi { top: var(--v-margine); right: var(--v-margine); font-size: 1.2rem; }
+  .v-prec { left: var(--v-margine); top: 50%; transform: translateY(-50%); }
+  .v-succ { right: var(--v-margine); top: 50%; transform: translateY(-50%); }
   @media (max-width: 639px) { .v-prec, .v-succ { top: auto; bottom: 12px; transform: none; } }
 </style>
 <script>
