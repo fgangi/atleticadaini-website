@@ -1,4 +1,5 @@
 ---
+import ElencoDocumenti from '../components/ElencoDocumenti.astro';
 import Icona from '../components/Icona.astro';
 import Layout from '../layouts/Layout.astro';
 import PageHero from '../components/PageHero.astro';
@@ -164,18 +165,7 @@ const documenti = (i?.documenti ?? []).filter((d: any) => d?.url);
         {documenti.length > 0 && (
           <div class="card blocco" id="moduli">
             <h3>Moduli da scaricare</h3>
-            <ul class="documenti">
-              {documenti.map((d: any) => (
-                <li>
-                  <a href={`${d.url}?dl=`} download>
-                    <span class="doc-ico" aria-hidden="true">{(d.est ?? 'pdf').toUpperCase()}</span>
-                    <span class="doc-testo"><span class="doc-titolo">{d.titolo}</span>{d.descrizione && <span class="doc-desc">{d.descrizione}</span>}</span>
-                    {/* Freccia di download: fa capire che tutta la riga scarica il file */}
-                    <svg class="doc-scarica" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14" /></svg>
-                  </a>
-                </li>
-              ))}
-            </ul>
+            <ElencoDocumenti documenti={documenti} />
           </div>
         )}
         {(telefoni.length > 0 || settings?.email) && (
@@ -267,18 +257,7 @@ const documenti = (i?.documenti ?? []).filter((d: any) => d?.url);
   .iscr-lato { display: flex; flex-direction: column; gap: 16px; }
   .blocco { padding: 20px; }
   .blocco h3 { margin-bottom: 12px; }
-  .documenti, .referenti { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-  .documenti a { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px;
-    transition: border-color .12s ease; }
-  .documenti a:hover { border-color: var(--verde); }
-  .doc-ico { flex: none; width: 40px; height: 40px; border-radius: 8px; background: var(--verde); color: var(--giallo-chiaro);
-    display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; font-size: .9rem; }
-  .doc-testo { flex: 1; min-width: 0; }
-  .doc-scarica { flex: none; width: 36px; height: 36px; padding: 8px; border-radius: 50%; background: var(--tinta);
-    fill: none; stroke: var(--verde); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transition: background .12s ease; }
-  .documenti a:hover .doc-scarica { background: var(--giallo); }
-  .doc-titolo { display: block; font-weight: 600; color: var(--ink); line-height: 1.3; }
-  .doc-desc { display: block; font-size: var(--fs-piccolo); color: var(--ink-faint); }
+  .referenti { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
   /* Il numero non va mai a capo; se manca spazio va a capo il nome */
   .referenti .tabnums { flex: none; white-space: nowrap; }
   .referenti .tel-nome { min-width: 0; line-height: 1.25; }

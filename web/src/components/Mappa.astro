@@ -4,8 +4,8 @@ import { mapEmbedSrc } from '../lib/sanity';
 /**
  * Mappa di Google incorporata, visibile subito (si carica quando arriva
  * vicino allo schermo). Le indicazioni stradali sono un pulsante a parte,
- * nel testo accanto. Nota: la mappa di Google usa i suoi cookie; prima del
- * lancio va valutato il consenso nell'informativa privacy e cookie.
+ * nel testo accanto. La mappa usa i cookie di Google senza banner di consenso:
+ * scelta della società (2026-10-07), spiegata nell'informativa privacy.
  */
 interface Props { posizione?: string | null; indirizzo?: string | null; titolo: string }
 const { posizione, indirizzo, titolo } = Astro.props;

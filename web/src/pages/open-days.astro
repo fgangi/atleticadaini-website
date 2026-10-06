@@ -1,4 +1,5 @@
 ---
+import ElencoDocumenti from '../components/ElencoDocumenti.astro';
 import IconaWhatsApp from '../components/IconaWhatsApp.astro';
 import Icona from '../components/Icona.astro';
 import Layout from '../layouts/Layout.astro';
@@ -137,11 +138,11 @@ const rispostaConLink = (f: any): { testo: string; link?: string }[] => {
             </>
           )}
           {documenti.length > 0 && (
-            <ul class="documenti">
-              {documenti.map((d: any) => (
-                <li><a href={`${d.url}?dl=`} download><span class="doc-ico" aria-hidden="true">{(d.est ?? 'pdf').toUpperCase()}</span><span>{d.titolo}</span></a></li>
-              ))}
-            </ul>
+            <>
+              <h3 class="portare-titolo">Il modulo per la prova</h3>
+              <p class="doc-spiega">Scaricalo, stampalo e portalo compilato e firmato il giorno della prima prova.</p>
+              <ElencoDocumenti documenti={documenti} />
+            </>
           )}
         </div>
       )}
@@ -217,9 +218,7 @@ const rispostaConLink = (f: any): { testo: string; link?: string }[] => {
   .blocco-titolo { font-size: var(--fs-titolo-blocco); margin-bottom: 6px; }
   .portare-titolo { font-size: var(--fs-etichetta); margin-top: 8px; color: var(--verde); }
   .portare { margin: 0; padding-left: 1.2rem; display: flex; flex-direction: column; gap: 6px; color: var(--ink-soft); }
-  .documenti { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-  .documenti a { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; font-weight: 600; }
-  .doc-ico { flex: none; width: 40px; height: 40px; border-radius: 8px; background: var(--verde); color: var(--giallo-chiaro); display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; font-size: .9rem; }
+  .doc-spiega { margin: 0 0 10px; color: var(--ink); }
   .ingresso { padding: 8px 12px; border-left: 4px solid var(--giallo); background: var(--tinta); color: var(--verde-scuro); }
   .blocco .azioni { margin-top: 6px; }
 

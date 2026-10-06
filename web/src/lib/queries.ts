@@ -6,7 +6,7 @@ export const intestazioniQuery = groq`*[_id == "siteSettings"][0].intestazioni`;
 
 export const settingsQuery = groq`*[_id == "siteSettings"][0]{
   nome, denominazione, descrizione, fraseFooter, annoFondazione, tesserati, logo, codiceFiscale, partitaIva, codiceFidal,
-  enti, email, telefoni, sede, social, linkUtili, puntiForza, cinquePerMille, slider, reclutamento,
+  enti, email, pec, telefoni, sede, social, linkUtili, puntiForza, cinquePerMille, slider, reclutamento,
   "haPrivacy": count(privacy) > 0, "haSafeguarding": count(safeguarding) > 0
 }`;
 

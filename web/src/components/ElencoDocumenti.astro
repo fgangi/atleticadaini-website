@@ -1,0 +1,33 @@
+---
+/**
+ * Moduli da scaricare, uguali in Settore giovanile e Open days: tutta la riga
+ * scarica il file, la freccia a destra lo fa capire a colpo d'occhio.
+ */
+interface Props { documenti: any[] }
+const { documenti } = Astro.props;
+---
+<ul class="documenti">
+  {documenti.map((d: any) => (
+    <li>
+      <a href={`${d.url}?dl=`} download>
+        <span class="doc-ico" aria-hidden="true">{(d.est ?? 'pdf').toUpperCase()}</span>
+        <span class="doc-testo"><span class="doc-titolo">{d.titolo}</span>{d.descrizione && <span class="doc-desc">{d.descrizione}</span>}</span>
+        <svg class="doc-scarica" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14" /></svg>
+      </a>
+    </li>
+  ))}
+</ul>
+<style>
+  .documenti { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .documenti a { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px;
+    background: var(--ground); transition: border-color .12s ease; }
+  .documenti a:hover { border-color: var(--verde); }
+  .doc-ico { flex: none; width: 40px; height: 40px; border-radius: 8px; background: var(--verde); color: var(--giallo-chiaro);
+    display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; font-size: .9rem; }
+  .doc-testo { flex: 1; min-width: 0; }
+  .doc-titolo { display: block; font-weight: 600; color: var(--ink); line-height: 1.3; }
+  .doc-desc { display: block; font-size: var(--fs-piccolo); color: var(--ink-faint); }
+  .doc-scarica { flex: none; width: 36px; height: 36px; padding: 8px; border-radius: 50%; background: var(--tinta);
+    fill: none; stroke: var(--verde); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transition: background .12s ease; }
+  .documenti a:hover .doc-scarica { background: var(--giallo); }
+</style>

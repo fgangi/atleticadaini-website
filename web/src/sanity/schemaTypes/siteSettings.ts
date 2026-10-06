@@ -71,6 +71,7 @@ export const siteSettings = defineType({
     }),
 
     defineField({ name: 'email', title: 'Email', type: 'string', group: 'contatti' }),
+    defineField({ name: 'pec', title: 'PEC', type: 'string', group: 'contatti', description: 'Posta certificata per le comunicazioni ufficiali.' }),
     defineField({
       name: 'telefoni',
       title: 'Telefoni dei referenti',

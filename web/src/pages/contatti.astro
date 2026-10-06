@@ -65,6 +65,13 @@ const dati = [
                 <span><span class="c-tipo">Scrivi un'email</span><span class="c-valore">{s.email}</span></span>
               </a>
             )}
+            {/* PEC: solo per comunicazioni ufficiali, quindi dopo l'email normale */}
+            {s?.pec && (
+              <a class="contatto" href={`mailto:${s.pec}`}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6z"/><polyline points="9 12 11 14 15 10"/></svg>
+                <span><span class="c-tipo">PEC (comunicazioni ufficiali)</span><span class="c-valore">{s.pec}</span></span>
+              </a>
+            )}
           </div>
         </div>
       )}
