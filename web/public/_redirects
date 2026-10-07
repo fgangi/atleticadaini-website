@@ -45,6 +45,22 @@
 /portfolio-articoli/10-000/ /gallery/10000-di-carate/  301
 /portfolio-articoli/squadre/ /gallery/squadre/  301
 /portfolio-articoli/anno-2021/ /gallery/gare-2021/  301
+/portfolio_voci/10000-di-carate /gallery/10000-di-carate/  301
+/portfolio_voci/10000-di-carate/ /gallery/10000-di-carate/  301
+/portfolio_voci/anni-40 /gallery/anni-40/  301
+/portfolio_voci/anni-40/ /gallery/anni-40/  301
+/portfolio_voci/anni-50 /gallery/anni-50/  301
+/portfolio_voci/anni-50/ /gallery/anni-50/  301
+/portfolio_voci/anni-60 /gallery/anni-60/  301
+/portfolio_voci/anni-60/ /gallery/anni-60/  301
+/portfolio_voci/anni-70 /gallery/anni-70/  301
+/portfolio_voci/anni-70/ /gallery/anni-70/  301
+/portfolio_voci/anni-80 /gallery/anni-80/  301
+/portfolio_voci/anni-80/ /gallery/anni-80/  301
+/portfolio_voci/gare-2021 /gallery/gare-2021/  301
+/portfolio_voci/gare-2021/ /gallery/gare-2021/  301
+/portfolio_voci/squadre /gallery/squadre/  301
+/portfolio_voci/squadre/ /gallery/squadre/  301
 /portfolio-articoli/* /gallery/  301
 /portfolio_voci/* /gallery/  301
 
@@ -60,6 +76,13 @@
 /wp-content/uploads/2019/06/* /societa/record/  301
 
 # Archivi di WordPress senza equivalente: all'elenco delle news
+/eventi/ /news/  301
+/evento/9-giugno-festa-dello-sport /news/9-giugno-2019-notte-bianca-a-carate-brianza/  301
+/evento/9-giugno-festa-dello-sport/ /news/9-giugno-2019-notte-bianca-a-carate-brianza/  301
+/category/5x1000 /news/5x1000-2026/  301
+/category/5x1000/ /news/5x1000-2026/  301
+/tag/gare-atletica-daini-2021 /gallery/gare-2021/  301
+/tag/gare-atletica-daini-2021/ /gallery/gare-2021/  301
 /eventi/* /news/  301
 /evento/* /news/  301
 /category/* /news/  301
@@ -86,26 +109,3 @@
 
 # Altri indirizzi del vecchio sito trovati nella sua sitemap (ottobre 2026)
 /eventi /news/  301
-/eventi/ /news/  301
-/evento/9-giugno-festa-dello-sport /news/9-giugno-2019-notte-bianca-a-carate-brianza/  301
-/evento/9-giugno-festa-dello-sport/ /news/9-giugno-2019-notte-bianca-a-carate-brianza/  301
-/category/5x1000 /news/5x1000-2026/  301
-/category/5x1000/ /news/5x1000-2026/  301
-/tag/gare-atletica-daini-2021 /gallery/gare-2021/  301
-/tag/gare-atletica-daini-2021/ /gallery/gare-2021/  301
-/portfolio_voci/10000-di-carate /gallery/10000-di-carate/  301
-/portfolio_voci/10000-di-carate/ /gallery/10000-di-carate/  301
-/portfolio_voci/anni-40 /gallery/anni-40/  301
-/portfolio_voci/anni-40/ /gallery/anni-40/  301
-/portfolio_voci/anni-50 /gallery/anni-50/  301
-/portfolio_voci/anni-50/ /gallery/anni-50/  301
-/portfolio_voci/anni-60 /gallery/anni-60/  301
-/portfolio_voci/anni-60/ /gallery/anni-60/  301
-/portfolio_voci/anni-70 /gallery/anni-70/  301
-/portfolio_voci/anni-70/ /gallery/anni-70/  301
-/portfolio_voci/anni-80 /gallery/anni-80/  301
-/portfolio_voci/anni-80/ /gallery/anni-80/  301
-/portfolio_voci/gare-2021 /gallery/gare-2021/  301
-/portfolio_voci/gare-2021/ /gallery/gare-2021/  301
-/portfolio_voci/squadre /gallery/squadre/  301
-/portfolio_voci/squadre/ /gallery/squadre/  301
