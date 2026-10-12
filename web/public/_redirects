@@ -109,3 +109,11 @@
 
 # Altri indirizzi del vecchio sito trovati nella sua sitemap (ottobre 2026)
 /eventi /news/  301
+
+# Trovati in Search Console dopo il lancio (ottobre 2026)
+/corsi-del-asd-daini-stagione-2021-2022 /settore-giovanile/#corsi  301
+/corsi-del-asd-daini-stagione-2021-2022/ /settore-giovanile/#corsi  301
+/link-utili/* /contatti/#link-utili  301
+/3-maggio-2019-villasanta-corri-in-centro/* /news/3-maggio-2019-villasanta-corri-in-centro/  301
+/19-maggio-2019-happy-mile-gara-su-pista-campo-xxv-aprile-milano/* /news/19-maggio-2019-happy-mile-gara-su-pista-campo-xxv-aprile-milano/  301
+/9-giugno-2019-notte-bianca-a-carate-brianza/* /news/9-giugno-2019-notte-bianca-a-carate-brianza/  301

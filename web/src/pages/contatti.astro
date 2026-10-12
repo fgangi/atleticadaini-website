@@ -11,7 +11,7 @@ import { settingsQuery, impiantiQuery, intestazioniQuery } from '../lib/queries'
 
 /**
  * Contatti a blocchi, dal più usato al meno usato:
- *  1. Chiamaci o scrivici: pulsanti grandi, comodi da toccare
+ *  1. Contattaci: pulsanti grandi, comodi da toccare
  *  2. Dove siamo: campo (allenamenti) e sede sociale
  *  3. Link utili e social
  *  4. Dati societari, in piccolo
@@ -41,7 +41,7 @@ const dati = [
     <div class="container contatti">
       {(principali.length > 0 || telefoni.length > 0 || s?.email) && (
         <div class="card blocco">
-          <h2 class="blocco-titolo">Chiamaci o scrivici</h2>
+          <h2 class="blocco-titolo">Contattaci</h2>
           {principali.map((t) => (
             <div class="principale">
               <p class="pr-nome">{t.nome || 'Atletica Daini'}{t.ruolo && <span>{t.ruolo}</span>}</p>
@@ -94,7 +94,7 @@ const dati = [
             {!campo && sede && <div><dt>Sede sociale</dt><dd><Indirizzo testo={sede} /></dd></div>}
           </dl>
           {/* Mappa del campo: riempie lo spazio che resta, così il riquadro è alto
-              quanto "Chiamaci o scrivici" accanto */}
+              quanto "Contattaci" accanto */}
           {campo && (campo.mappa || campo.indirizzo) && (
             <div class="dove-mappa"><Mappa posizione={campo.mappa} indirizzo={campo.indirizzo} titolo={campo.nome} /></div>
           )}
