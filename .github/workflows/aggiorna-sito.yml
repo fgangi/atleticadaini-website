@@ -1,0 +1,34 @@
+# Ogni notte confronta il numero di tesserati mostrato sul sito con quello
+# della pagina FIDAL della società e rigenera il sito solo se è cambiato:
+# niente generazioni inutili (Cloudflare ne concede 500 al mese).
+# L'indirizzo del deploy hook di Cloudflare sta nei segreti del repository
+# (Settings → Secrets and variables → Actions → CLOUDFLARE_DEPLOY_HOOK), non qui.
+name: Aggiorna tesserati
+
+on:
+  schedule:
+    - cron: '0 3 * * *'   # ogni giorno alle 3 (ora UTC)
+  workflow_dispatch:       # pulsante "Run workflow" per lanciarlo a mano
+
+jobs:
+  controlla:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confronta sito e FIDAL, rigenera se diversi
+        env:
+          HOOK: ${{ secrets.CLOUDFLARE_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$HOOK" ]; then echo "Segreto CLOUDFLARE_DEPLOY_HOOK mancante"; exit 1; fi
+          sito=$(curl -fsS https://atleticadaini.it/tesserati.json)
+          echo "Sul sito: $sito"
+          # Numero scritto a mano nel pannello: FIDAL non conta
+          if [ "$(echo "$sito" | jq -r .daFidal)" != "true" ]; then echo "Numero dal pannello, niente da fare"; exit 0; fi
+          codice=$(echo "$sito" | jq -r .codiceFidal)
+          pubblicato=$(echo "$sito" | jq -r .numero)
+          # Se FIDAL non risponde o cambia la pagina non si rigenera: ci si riprova domani
+          fidal=$(curl -fsS -m 20 -A 'Mozilla/5.0 (compatible; sito Atletica Daini)' "https://www.fidal.it/societa/x/$codice" \
+            | tr '\n' ' ' | sed -E 's/<[^>]+>/ /g' | grep -oE 'N° *atleti: *[0-9]+' | grep -oE '[0-9]+$' || true)
+          echo "Su FIDAL: ${fidal:-non letto}"
+          if [ -z "$fidal" ] || [ "$fidal" = "$pubblicato" ]; then echo "Niente da aggiornare"; exit 0; fi
+          curl -fsS -X POST "$HOOK" > /dev/null
+          echo "Numero cambiato: sito in rigenerazione"
